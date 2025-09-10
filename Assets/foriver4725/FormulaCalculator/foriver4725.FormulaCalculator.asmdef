@@ -1,0 +1,14 @@
+{
+    "name": "foriver4725.FormulaCalculator",
+    "rootNamespace": "foriver4725.FormulaCalculator",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
