@@ -1,0 +1,16 @@
+{
+    "name": "foriver4725.FormulaCalculator.Profiling",
+    "rootNamespace": "foriver4725.FormulaCalculator.Profiling",
+    "references": [
+        "GUID:a4cb212d1f51149a3ab023f4971b7e0a"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -371,39 +371,4 @@ namespace foriver4725.FormulaCalculator
             }
         }
     }
-
-#if UNITY_EDITOR && false
-internal static class Profile
-{
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    private static async UniTaskVoid Run()
-    {
-        await UniTask.WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
-
-        // 1+2*3/(4-5).
-        // = -5
-        Formula formula = new(stackalloc Element[]
-        {
-            Symbol.N1, Symbol.OA, Symbol.N2, Symbol.OM, Symbol.N3, Symbol.OD,
-            Symbol.PL, Symbol.N4, Symbol.OS, Symbol.N5, Symbol.PR, Symbol.NONE
-        });
-
-        double result = double.NaN;
-        const ulong LoopAmount = 1_000_000;
-
-        // Warmup
-        for (int i = 0; i < 8; i++)
-            result = formula.Calcurate();
-
-        UnityEngine.Profiling.Profiler.BeginSample("Custom_Formula");
-
-        for (ulong i = 0; i < LoopAmount; i++)
-            result = formula.Calcurate();
-
-        UnityEngine.Profiling.Profiler.EndSample();
-
-        (result == -5).Log();
-    }
-}
-#endif
 }
