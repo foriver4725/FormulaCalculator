@@ -52,6 +52,14 @@ double result = "1+2*3/(4-5)".Calculate(doSkipValidation: true);
 
 For details on how much the performance can be improved, please refer to the [Performance](https://github.com/foriver4725/FormulaCalculator#performance) section below.
 
+## Details of Parsing Rules
+- An operator is required between numbers and parentheses; omission is not allowed.
+- In no case are consecutive operators allowed. For example, the following formula is invalid: `12 * -3`.
+- Just like `-5`, you can also add a positive sign, such as `+7`.
+- Division by zero is not allowed.
+
+For detailed rules not described here, please refer directly to the source code in [FormulaCalculator.cs](https://github.com/foriver4725/FormulaCalculator/blob/main/Assets/foriver4725/FormulaCalculator/FormulaCalculator.cs), or check the calculation procedure explained in the [Calculation Procedure](https://github.com/foriver4725/FormulaCalculator#calculation-procedure) section below.
+
 ## Calculation Procedure
 1. Removes and trims the whitespace from the given formula.
 2. Performs the following validations in order to ensure that the formula syntax is in the correct format. If the `doSkipValidation` flag is set to `true`, this process will be skipped.
