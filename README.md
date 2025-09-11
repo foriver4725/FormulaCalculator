@@ -86,4 +86,13 @@ private static bool IsParagraphOK(ReadOnlySpan<char> formula);
 6. To prevent results from becoming abnormally large, such as when dividing by values close to zero, the calculation results are clamped to an appropriate range. The upper and lower limits of this range can also be explicitly specified through the method’s arguments.
 
 ## Performance
-Now Creating!
+Almost all internal methods are marked with the inline attribute, and all calculations are performed using `Span` without any heap allocations.<br/>
+The following shows the performance results measured in the editor by executing **one million** runs with the `doSkipValidation` flag turned on and off, respectively.<br/>
+The script used for this performance measurement can be found [here](https://github.com/foriver4725/FormulaCalculator/blob/main/Assets/foriver4725/Profiling/GameManager.cs).
+
+| `doSkipValidation` flag | GC Alloc | Time ms | Self ms |
+| :---: | :---: | :---: | :---: |
+| `false` (default) | 0 B | 674.12 | 674.12 |
+| `true` | 0 B | 465.79 | 465.79 |
+
+In this case, skipping formula validation reduces the execution time by **31%**.
