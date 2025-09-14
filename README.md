@@ -25,7 +25,7 @@ The following shows the complete signature of the calculation method.
 /// <param name="maxNumberDigit"> Valid when doSkipValidation is false.<br/>The maximum number of digits allowed when concatenating numbers (as long as it remains within the range of int). </param>
 /// <returns> The result of the calculation as a double. If the formula is invalid or an error occurs during calculation (such as division by zero), returns double.NaN. </returns>
 public static double Calculate(
-    this string formula,
+    this ReadOnlySpan<char> formula,
     double clampMin = short.MinValue,
     double clampMax = short.MaxValue,
     bool doSkipValidation = false,
@@ -37,7 +37,7 @@ public static double Calculate(
 
 The functionality is provided as extension methods, and in the simplest example, you can use it as follows:
 ```cs
-double result = "1+2*3/(4-5)".Calculate();
+double result = "1+2*3/(4-5)".AsSpan().Calculate();
 ```
 
 <br/>
@@ -45,7 +45,7 @@ double result = "1+2*3/(4-5)".Calculate();
 If you can guarantee that the formula is in the correct format,<br/>
 setting the `doSkipValidation` flag to `true` can significantly improve performance.
 ```cs
-double result = "1+2*3/(4-5)".Calculate(doSkipValidation: true);
+double result = "1+2*3/(4-5)".AsSpan().Calculate(doSkipValidation: true);
 ```
 
 <br/>
