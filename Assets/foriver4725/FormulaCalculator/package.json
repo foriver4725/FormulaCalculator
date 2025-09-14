@@ -5,7 +5,7 @@
         "name": "foriver4725",
         "url": "https://github.com/foriver4725"
     },
-    "version": "1.0.0",
+    "version": "1.0.1",
     "unity": "6000.0",
     "description": "An algorithm that parses and evaluates mathematical expressions given as strings.",
     "keywords": [
