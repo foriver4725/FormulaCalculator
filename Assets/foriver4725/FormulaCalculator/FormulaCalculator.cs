@@ -18,16 +18,14 @@ namespace foriver4725.FormulaCalculator
         /// <param name="maxNumberDigit"> Valid when doSkipValidation is false.<br/>The maximum number of digits allowed when concatenating numbers (as long as it remains within the range of int). </param>
         /// <returns> The result of the calculation as a double. If the formula is invalid or an error occurs during calculation (such as division by zero), returns double.NaN. </returns>
         public static double Calculate(
-            this string formula,
+            this ReadOnlySpan<char> formula,
             double clampMin = short.MinValue,
             double clampMax = short.MaxValue,
             bool doSkipValidation = false,
             byte maxNumberDigit = 8
         )
         {
-            ReadOnlySpan<char> formulaSpan = formula.AsSpan();
-
-            Span<char> RemoveNone_result = stackalloc char[formulaSpan.Length];
+            Span<char> RemoveNone_result = stackalloc char[formula.Length];
             int RemoveNone_resultLength = RemoveNone(formula, RemoveNone_result);
             if (RemoveNone_resultLength <= 0) return double.NaN; // Empty formula
             RemoveNone_result = RemoveNone_result[..RemoveNone_resultLength];
