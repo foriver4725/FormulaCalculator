@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEditor;
 
@@ -17,12 +18,12 @@ namespace foriver4725.FormulaCalculator.Profiling
             {
                 // Warmup
                 for (int i = 0; i < 8; i++)
-                    _ = Formula.Calculate(doSkipValidation: doSkipValidation);
+                    _ = Formula.AsSpan().Calculate(doSkipValidation: doSkipValidation);
 
                 UnityEngine.Profiling.Profiler.BeginSample(ProfilerName);
 
                 for (ulong i = 0; i < LoopAmount; i++)
-                    _ = Formula.Calculate(doSkipValidation: doSkipValidation);
+                    _ = Formula.AsSpan().Calculate(doSkipValidation: doSkipValidation);
 
                 UnityEngine.Profiling.Profiler.EndSample();
 
