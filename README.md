@@ -83,7 +83,7 @@ private static bool IsParagraphOK(ReadOnlySpan<char> formula);
 3. Adjacent digits are combined and evaluated as multi-digit integer values. To ensure the result does not exceed the range representable by `int`, the maximum number of digits that can be combined is limited to 8. This limit can also be explicitly specified through the method’s arguments.<br/>In addition, for symbols, integer values that are unlikely to appear in the calculation are assigned as identifier IDs. For details on this mapping, please refer to [Symbol.cs](https://github.com/foriver4725/FormulaCalculator/blob/main/Assets/foriver4725/FormulaCalculator/Symbol.cs).
 4. Casts integer values of type `int` to type `double`. From this point on, calculation errors may occur.
 5. Executes the core calculation logic. It recursively evaluates the contents of parentheses until none remain.<br/>In the arithmetic stage, it first processes unary signs (positive/negative), then performs multiplication and division, and finally addition and subtraction.
-6. To prevent results from becoming abnormally large or small, such as when dividing by values close to zero, the calculation results are clamped to an appropriate range. The upper and lower limits of this range can also be explicitly specified through the method’s arguments.
+6. To prevent the absolute value of results from becoming abnormally large, such as when dividing by values close to zero, the calculation results are clamped to an appropriate range. The upper and lower limits of this range can also be explicitly specified through the method’s arguments.
 
 ## Performance
 Almost all internal methods are marked with the inline attribute, and all calculations are performed using `Span` without any heap allocations.<br/>
