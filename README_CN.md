@@ -52,7 +52,7 @@ double result = "1+2*3/(4-5)".AsSpan().Calculate();
 double result = "1+2*3/(4-5)".AsSpan().Calculate(doSkipValidation: true);
 ```
 
-有关性能差异的详细说明，请参考下方 [性能](https://github.com/foriver4725/FormulaCalculator#performance) 部分。
+有关性能差异的详细说明，请参考下方 [性能](https://github.com/foriver4725/FormulaCalculator/blob/main/README_CN.md#%E6%80%A7%E8%83%BD) 部分。
 
 ---
 
@@ -64,7 +64,7 @@ double result = "1+2*3/(4-5)".AsSpan().Calculate(doSkipValidation: true);
 - 不允许出现除以零的情况。  
 
 更详细的规则可参考源码 [FormulaCalculator.cs](https://github.com/foriver4725/FormulaCalculator/blob/main/Assets/foriver4725/FormulaCalculator/FormulaCalculator.cs)，  
-或参阅后文 [计算流程](https://github.com/foriver4725/FormulaCalculator#calculation-procedure) 章节。
+或参阅后文 [计算流程](https://github.com/foriver4725/FormulaCalculator/blob/main/README_CN.md#%E8%AE%A1%E7%AE%97%E6%B5%81%E7%A8%8B) 章节。
 
 ---
 
