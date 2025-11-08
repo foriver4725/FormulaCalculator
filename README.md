@@ -1,5 +1,8 @@
 # FormulaCalculator
 
+Available in other languages:  
+[中文版本](./README_CN.md) ｜ [日本語版](./README_JP.md)
+
 ## Description
 Provides formula parsing and calculation functionality in Unity.<br/>
 It runs fast without heap allocations and keeps overhead to a minimum.<br/>
