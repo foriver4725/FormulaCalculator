@@ -53,7 +53,7 @@ double result = "1+2*3/(4-5)".AsSpan().Calculate(doSkipValidation: true);
 ```
 
 詳細なパフォーマンス結果については、  
-後述の [パフォーマンス](https://github.com/foriver4725/FormulaCalculator#performance) セクションを参照してください。
+後述の [パフォーマンス](https://github.com/foriver4725/FormulaCalculator/blob/main/README_JP.md#%E3%83%91%E3%83%95%E3%82%A9%E3%83%BC%E3%83%9E%E3%83%B3%E3%82%B9) セクションを参照してください。
 
 ---
 
@@ -65,7 +65,7 @@ double result = "1+2*3/(4-5)".AsSpan().Calculate(doSkipValidation: true);
 - 0による除算は禁止されています。  
 
 詳細なルールは [FormulaCalculator.cs](https://github.com/foriver4725/FormulaCalculator/blob/main/Assets/foriver4725/FormulaCalculator/FormulaCalculator.cs) を参照、  
-または後述の [計算手順](https://github.com/foriver4725/FormulaCalculator#calculation-procedure) を確認してください。
+または後述の [計算手順](https://github.com/foriver4725/FormulaCalculator/blob/main/README_JP.md#%E8%A8%88%E7%AE%97%E6%89%8B%E9%A0%86) を確認してください。
 
 ---
 
