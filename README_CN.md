@@ -108,3 +108,7 @@ private static bool IsParagraphOK(ReadOnlySpan<char> formula);
 | `true` | 0 B | 465.79 | 465.79 |
 
 结果显示，跳过验证可使执行时间缩短约 **31%**。
+
+## Pure C# 版本
+本库也已移植为 Pure C# 版本。<br/>
+如果你希望在非 Unity 环境中使用, 可以从[此仓库](https://github.com/foriver4725/Formuler)下载已编译好的 DLL 文件。<br/>
