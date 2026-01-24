@@ -111,4 +111,4 @@ private static bool IsParagraphOK(ReadOnlySpan<char> formula);
 
 ## Pure C# 版本
 本库也已移植为 Pure C# 版本。<br/>
-如果你希望在非 Unity 环境中使用, 可以从[此仓库](https://github.com/foriver4725/Formuler)下载已编译好的 DLL 文件。<br/>
+如果你希望在非 Unity 环境中使用，可以从[此仓库](https://github.com/foriver4725/Formuler)下载已编译好的 DLL 文件。<br/>
