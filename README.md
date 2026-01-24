@@ -99,3 +99,7 @@ The script used for this performance measurement can be found [here](https://git
 | `true` | 0 B | 465.79 | 465.79 |
 
 In this case, skipping formula validation reduces the execution time by **31%**.
+
+## Pure C# Version
+This library has also been ported to pure C#.<br/>
+If you want to use it outside of Unity, you can download a precompiled DLL from [this repository](https://github.com/foriver4725/Formuler).<br/>
