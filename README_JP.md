@@ -109,3 +109,7 @@ private static bool IsParagraphOK(ReadOnlySpan<char> formula);
 | `true` | 0 B | 465.79 | 465.79 |
 
 構文チェックをスキップすることで、**約31%の高速化** が確認されています。
+
+## Pure C# 版
+本ライブラリは Pure C# にも移植されています。<br/>
+Unity を使用しない環境で利用したい場合は、[こちらのリポジトリ](https://github.com/foriver4725/Formuler) からコンパイル済みの DLL をダウンロードできます。<br/>
