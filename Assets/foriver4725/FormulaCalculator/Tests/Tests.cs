@@ -1,4 +1,3 @@
-// @formatter:off
 using System;
 using System.Runtime.CompilerServices;
 using NUnit.Framework;
@@ -50,6 +49,19 @@ namespace foriver4725.FormulaCalculator.Tests
             [Test] public static void Case16() => "1/2".V();
             [Test] public static void Case17() => "1++2".Nv();
             [Test] public static void Case18() => "1+*2".Nv();
+            [Test] public static void Case19() => "^".Nv();
+            [Test] public static void Case20() => "1^".Nv();
+            [Test] public static void Case21() => "^1".Nv();
+            [Test] public static void Case22() => "1^2".V();
+            [Test] public static void Case23() => "1^(2)".V();
+            [Test] public static void Case24() => "(1)^2".V();
+            [Test] public static void Case25() => "1^)".Nv();
+            [Test] public static void Case26() => "1^+".Nv();
+            [Test] public static void Case27() => "1^-2".Nv();
+            [Test] public static void Case28() => "1^+2".Nv();
+            [Test] public static void Case29() => "(^1)".Nv();
+            [Test] public static void Case30() => "+1^2".V();
+            [Test] public static void Case31() => "-1^2".V();
         }
 
         public static class Tests_IsValid_IsParagraphOK
@@ -93,18 +105,38 @@ namespace foriver4725.FormulaCalculator.Tests
             [Test] public static void Case10() => "-9999*9999*9999".Eq(-9999.0 * 9999.0 * 9999.0);
             [Test] public static void Case11() => "((((((((((1+2))))))))))".Eq(3.0);
             [Test] public static void Case12() => "((((((((((1+2)*3-4/5+(6-7*8+9)/10)))))))))".Eq(4.1);
+            [Test] public static void Case13() => "2^3".Eq(8.0);
+            [Test] public static void Case14() => "2^3^2".Eq(512.0);
+            [Test] public static void Case15() => "(2^3)^2".Eq(64.0);
+            [Test] public static void Case16() => "2^(3^2)".Eq(512.0);
+            [Test] public static void Case17() => "2*3^2".Eq(18.0);
+            [Test] public static void Case18() => "2^3*2".Eq(16.0);
+            [Test] public static void Case19() => "-2^2".Eq(-4.0);
+            [Test] public static void Case20() => "(-2)^2".Eq(4.0);
+            [Test] public static void Case21() => "3^(-2)".Eq(1.0 / 9.0);
+            [Test] public static void Case22() => "0^0".Eq(double.NaN);
+            [Test] public static void Case23() => "(0)^0".Eq(double.NaN);
+            [Test] public static void Case24() => "0^(0)".Eq(double.NaN);
+            [Test] public static void Case25() => "(3-3)^0".Eq(double.NaN);
+            [Test] public static void Case26() => "(4-2*2)^(3-3)".Eq(double.NaN);
+            [Test] public static void Case27() => "0^1".Eq(0.0);
+            [Test] public static void Case28() => "0^2".Eq(0.0);
+            [Test] public static void Case29() => "0^(-1)".Eq(double.NaN);
+            [Test] public static void Case30() => "(0)^(1-2)".Eq(double.NaN);
+            [Test] public static void Case31() => "1/(0^0)".Eq(double.NaN);
+            [Test] public static void Case32() => "1/(0^1)".Eq(double.NaN);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void V(this string formula)
             => Assert.IsTrue(formula.AsSpan().IsValidFormula());
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Nv(this string formula)
             => Assert.IsFalse(formula.AsSpan().IsValidFormula());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Eq(this string formula, double expected)
-            => Assert.AreEqual(formula.AsSpan().Calculate(), expected, 1.0e-8);
+            => Assert.AreEqual(expected, formula.AsSpan().Calculate(), 1.0e-8);
     }
 }
-// @formatter:on

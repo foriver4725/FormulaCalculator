@@ -19,6 +19,7 @@ namespace foriver4725.FormulaCalculator
         internal const char OS = '-';
         internal const char OM = '*';
         internal const char OD = '/';
+        internal const char OP = '^';
         internal const char PL = '(';
         internal const char PR = ')';
         internal const char NONE = ' ';
@@ -28,9 +29,10 @@ namespace foriver4725.FormulaCalculator
         internal const int ID_OS = 0x7ffffffe;
         internal const int ID_OM = 0x7ffffffd;
         internal const int ID_OD = 0x7ffffffc;
-        internal const int ID_PL = 0x7ffffffb;
-        internal const int ID_PR = 0x7ffffffa;
-        internal const int ID_NONE = 0x7ffffff9;
+        internal const int ID_OP = 0x7ffffffb;
+        internal const int ID_PL = 0x7ffffffa;
+        internal const int ID_PR = 0x7ffffff9;
+        internal const int ID_NONE = 0x7ffffff8;
 
         internal enum Type : byte
         {
@@ -43,7 +45,7 @@ namespace foriver4725.FormulaCalculator
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool IsValidChar(this char c) => c is
             (>= N0 and <= N9)
-            or OA or OS or OM or OD
+            or OA or OS or OM or OD or OP
             or PL or PR
             or NONE;
 
@@ -51,7 +53,7 @@ namespace foriver4725.FormulaCalculator
         internal static Type ToType(this char c) => c switch
         {
             N0 or N1 or N2 or N3 or N4 or N5 or N6 or N7 or N8 or N9 => Type.Number,
-            OA or OS or OM or OD => Type.Operator,
+            OA or OS or OM or OD or OP => Type.Operator,
             PL or PR => Type.Paragraph,
             NONE => Type.None,
             _ => throw new ArgumentOutOfRangeException(nameof(c), $"Invalid character: {c}"),
@@ -74,15 +76,11 @@ namespace foriver4725.FormulaCalculator
             OS   => ID_OS,
             OM   => ID_OM,
             OD   => ID_OD,
+            OP   => ID_OP,
             PL   => ID_PL,
             PR   => ID_PR,
             NONE => ID_NONE,
             _    => throw new ArgumentOutOfRangeException(nameof(c), $"Invalid character: {c}"),
         };
-
-        // Used in the calculation
-        // The comparison is rough, but it is guaranteed that it will not cause errors in calculations.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool IsNumber(this double value) => value is (< ID_PR or > ID_OA);
     }
 }

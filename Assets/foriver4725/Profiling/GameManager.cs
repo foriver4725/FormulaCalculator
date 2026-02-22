@@ -26,7 +26,7 @@ namespace foriver4725.FormulaCalculator.Profiling
                 loopAmountText.text = $"Loop Amount : 1e{value:N1}";
             });
 
-            formulaInputField.text = "1+2*3/(4-5)";
+            formulaInputField.text = "1+2^(7-3)*3/(4-5)";
             loopAmountSlider.onValueChanged.Invoke(loopAmountSlider.value = 70); // 1e7.0
             profilerLabelInputField.text = "### FormulaCalculator.Calculate() ###";
         }

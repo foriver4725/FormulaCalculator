@@ -16,6 +16,7 @@ namespace foriver4725.FormulaCalculator
         /// If the formula is invalid or an error occurs during calculation (such as division by zero), returns double.NaN.<br/>
         /// The result can be abnormally large or small (such as when division by a very small number occurs),<br/>
         ///   so it is recommended to clamp the result if necessary.<br/></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double Calculate(this ReadOnlySpan<char> formula)
         {
             // Stacks for values and operators
@@ -121,8 +122,8 @@ namespace foriver4725.FormulaCalculator
                     continue;
                 }
 
-                // Process operator (+ - * /)
-                while (oTop > 0 && Precedence(ops[oTop - 1]) >= Precedence(token))
+                // Process operator (+ - * / ^)
+                while (oTop > 0 && ShouldReduce(ops[oTop - 1], token))
                 {
                     if (!ApplyTop(values, vTop, ops, oTop))
                         return double.NaN;
@@ -139,7 +140,7 @@ namespace foriver4725.FormulaCalculator
             if (connectedNumber != -1)
             {
                 values[vTop++] = connectedNumber;
-                connectedNumber = -1;
+                // connectedNumber = -1;
             }
 
             // Final evaluation
@@ -335,8 +336,28 @@ namespace foriver4725.FormulaCalculator
                 result = a * b;
             else if (op is Element.ID_OD)
             {
-                if (b == 0) return false;
+                if (b == 0)
+                    return false;
                 result = a / b;
+            }
+            else if (op is Element.ID_OP)
+            {
+                // 0^b : only allowed if b > 0
+                if (a == 0)
+                {
+                    if (b <= 0)
+                        return false;
+
+                    result = 0;
+                    values[vTop - 2] = result;
+                    return true;
+                }
+
+                // If exponent is not an integer, base must be >= 0
+                if (!IsInteger(b) && a < 0)
+                    return false;
+
+                result = Math.Pow(a, b);
             }
             else
                 return false;
@@ -351,7 +372,33 @@ namespace foriver4725.FormulaCalculator
         {
             Element.ID_OA or Element.ID_OS => 1,
             Element.ID_OM or Element.ID_OD => 2,
+            Element.ID_OP                  => 3,
             _                              => 0,
         };
+
+        // Return true if the operator on the stack should be reduced before pushing the incoming operator.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool ShouldReduce(double stackOp, double incomingOp)
+        {
+            int sp = Precedence(stackOp);
+            int ip = Precedence(incomingOp);
+
+            if (sp > ip) return true;
+            if (sp < ip) return false;
+
+            // Same precedence: reduce only if the incoming operator is left-associative.
+            // '^' is right-associative.
+            return !IsRightAssociative(incomingOp);
+        }
+
+        // Return true if the operator is right-associative (such as '^'), otherwise false (such as '+', '-', '*', '/').
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsRightAssociative(double op)
+            => op is Element.ID_OP; // '^'
+
+        // Return true if the double is an integer (within a small tolerance), otherwise false.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsInteger(double x)
+            => Math.Abs(x - Math.Round(x)) < 1e-12;
     }
 }
