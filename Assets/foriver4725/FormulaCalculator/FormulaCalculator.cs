@@ -319,7 +319,6 @@ namespace foriver4725.FormulaCalculator
         }
 
         // Calculate the expression assuming there are no parentheses
-        //TODO: There are similar code blocks below, so consider refactoring them into a method.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static double CalculateRaw(ReadOnlySpan<double> source)
         {
