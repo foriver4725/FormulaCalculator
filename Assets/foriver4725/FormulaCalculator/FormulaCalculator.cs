@@ -57,8 +57,7 @@ namespace foriver4725.FormulaCalculator
         private static bool IsWholeOK(ReadOnlySpan<char> formula)
         {
             foreach (char e in formula)
-                if (!e.IsValidChar())
-                    return false;
+                if (!e.IsValidChar()) return false;
 
             return true;
         }
@@ -83,7 +82,6 @@ namespace foriver4725.FormulaCalculator
                     continuousCount = 0;
                     continue;
                 }
-
                 if (++continuousCount > maxNumberDigit) return false;
             }
 
@@ -106,8 +104,7 @@ namespace foriver4725.FormulaCalculator
                     if (i > 0)
                     {
                         char left = formula[i - 1];
-                        if (left.ToType() != Element.Type.Number && left != Element.PL && left != Element.PR)
-                            return false;
+                        if (left.ToType() != Element.Type.Number && left != Element.PL && left != Element.PR) return false;
                     }
 
                     if (i < formula.Length - 1)
@@ -152,7 +149,6 @@ namespace foriver4725.FormulaCalculator
 
                 if (n < 0) return false;
             }
-
             if (n != 0) return false;
 
             for (int i = 0; i < formula.Length; i++)
@@ -176,7 +172,6 @@ namespace foriver4725.FormulaCalculator
                             break;
                         }
                     }
-
                     if (!hasNumber) return false;
                 }
             }
@@ -225,7 +220,6 @@ namespace foriver4725.FormulaCalculator
                         result[length++] = connectedNumber;
                         connectedNumber = -1;
                     }
-
                     result[length++] = eAsInt;
                     continue;
                 }
@@ -233,7 +227,6 @@ namespace foriver4725.FormulaCalculator
                 if (connectedNumber == -1) connectedNumber = eAsInt;
                 else connectedNumber = connectedNumber * 10 + eAsInt;
             }
-
             if (connectedNumber != -1)
                 result[length++] = connectedNumber;
 
@@ -273,28 +266,15 @@ namespace foriver4725.FormulaCalculator
             int i = 0;
             while (i < _source.Length)
             {
-                if (_source[i] != Element.ID_PL)
-                {
-                    i++;
-                    continue;
-                }
+                if (_source[i] != Element.ID_PL) { i++; continue; }
 
                 // Search to the right and find the corresponding ")"
                 int n = 0;
                 for (int j = i + 1; j < _source.Length; j++)
                 {
                     double e = _source[j];
-                    if (e != Element.ID_PR)
-                    {
-                        if (e == Element.ID_PL) n++;
-                        continue;
-                    }
-
-                    if (n >= 1)
-                    {
-                        n--;
-                        continue;
-                    }
+                    if (e != Element.ID_PR) { if (e == Element.ID_PL) n++; continue; }
+                    if (n >= 1) { n--; continue; }
 
                     // Recursively calculate the content inside "()" and update _source
                     {
@@ -343,8 +323,10 @@ namespace foriver4725.FormulaCalculator
                     if (_source[i] == Element.ID_OM)
                     {
                         double value = _source[i - 1] * _source[i + 1];
-                        ReduceBinaryOperation(_source, i, value);
-                        _source = _source[..^2];
+                        Span<double> newSpan = stackalloc double[_source.Length - 2];
+                        _source.DeleteIndicesUnsafely(stackalloc[] { i, i + 1 }, newSpan);
+                        newSpan[i - 1] = value;
+                        _source = newSpan;
                         i--;
                     }
                     else if (_source[i] == Element.ID_OD)
@@ -352,8 +334,10 @@ namespace foriver4725.FormulaCalculator
                         if (_source[i + 1] == 0) return double.NaN;
 
                         double value = _source[i - 1] / _source[i + 1];
-                        ReduceBinaryOperation(_source, i, value);
-                        _source = _source[..^2];
+                        Span<double> newSpan = stackalloc double[_source.Length - 2];
+                        _source.DeleteIndicesUnsafely(stackalloc[] { i, i + 1 }, newSpan);
+                        newSpan[i - 1] = value;
+                        _source = newSpan;
                         i--;
                     }
                 }
@@ -364,29 +348,24 @@ namespace foriver4725.FormulaCalculator
                     if (_source[i] == Element.ID_OA)
                     {
                         double value = _source[i - 1] + _source[i + 1];
-                        ReduceBinaryOperation(_source, i, value);
-                        _source = _source[..^2];
+                        Span<double> newSpan = stackalloc double[_source.Length - 2];
+                        _source.DeleteIndicesUnsafely(stackalloc[] { i, i + 1 }, newSpan);
+                        newSpan[i - 1] = value;
+                        _source = newSpan;
                         i--;
                     }
                     else if (_source[i] == Element.ID_OS)
                     {
                         double value = _source[i - 1] - _source[i + 1];
-                        ReduceBinaryOperation(_source, i, value);
-                        _source = _source[..^2];
+                        Span<double> newSpan = stackalloc double[_source.Length - 2];
+                        _source.DeleteIndicesUnsafely(stackalloc[] { i, i + 1 }, newSpan);
+                        newSpan[i - 1] = value;
+                        _source = newSpan;
                         i--;
                     }
                 }
 
                 return _source[0];
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static void ReduceBinaryOperation(Span<double> source, int operatorIndex, double operationResult)
-            {
-                Span<double> newSpan = stackalloc double[source.Length - 2];
-                source.DeleteIndicesUnsafely(stackalloc[] { operatorIndex, operatorIndex + 1 }, newSpan);
-                newSpan[operatorIndex - 1] = operationResult;
-                newSpan.CopyTo(source);
             }
         }
     }
