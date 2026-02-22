@@ -89,8 +89,8 @@ namespace foriver4725.FormulaCalculator.Tests
             [Test] public static void Case6() => "1/0".Eq(double.NaN);
             [Test] public static void Case7() => "1/(2-2)".Eq(double.NaN);
             [Test] public static void Case8() => "1+2*3-4/5+(6-7*8+9)/0".Eq(double.NaN);
-            [Test] public static void Case9() => "9999*9999*9999".Eq(short.MaxValue);
-            [Test] public static void Case10() => "-9999*9999*9999".Eq(short.MinValue);
+            [Test] public static void Case9() => "9999*9999*9999".Eq(9999.0 * 9999.0 * 9999.0);
+            [Test] public static void Case10() => "-9999*9999*9999".Eq(-9999.0 * 9999.0 * 9999.0);
             [Test] public static void Case11() => "((((((((((1+2))))))))))".Eq(3.0);
             [Test] public static void Case12() => "((((((((((1+2)*3-4/5+(6-7*8+9)/10)))))))))".Eq(4.1);
         }

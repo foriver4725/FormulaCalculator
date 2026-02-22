@@ -11,33 +11,153 @@ namespace foriver4725.FormulaCalculator
         /// Calculate the formula given as a string and return the result as a double.<br/>
         /// - Supported characters: 0-9, +, -, *, /, (, ), and space (used for ignoring).<br/>
         /// </summary>
-        /// <param name="formula"> The formula to be calculated. </param>
-        /// <param name="clampMin"> The minimum value to clamp the result to. </param>
-        /// <param name="clampMax"> The maximum value to clamp the result to. </param>
-        /// <returns> The result of the calculation as a double. If the formula is invalid or an error occurs during calculation (such as division by zero), returns double.NaN. </returns>
-        public static double Calculate(
-            this ReadOnlySpan<char> formula,
-            double clampMin = short.MinValue,
-            double clampMax = short.MaxValue
-        )
+        /// <param name="formula"> The formula to be calculated.<br/></param>
+        /// <returns> The result of the calculation as a double.<br/>
+        /// If the formula is invalid or an error occurs during calculation (such as division by zero), returns double.NaN.<br/>
+        /// The result can be abnormally large or small (such as when division by a very small number occurs),<br/>
+        ///   so it is recommended to clamp the result if necessary.<br/></returns>
+        public static double Calculate(this ReadOnlySpan<char> formula)
         {
-            Span<char> RemoveNone_result = stackalloc char[formula.Length];
-            int RemoveNone_resultLength = RemoveNone(formula, RemoveNone_result);
-            if (RemoveNone_resultLength <= 0) return double.NaN; // Empty formula
-            RemoveNone_result = RemoveNone_result[..RemoveNone_resultLength];
+            // Stacks for values and operators
+            Span<double> values = stackalloc double[formula.Length];
+            Span<double> ops = stackalloc double[formula.Length];
 
-            Span<int> ConnectNumbers_result = stackalloc int[RemoveNone_result.Length];
-            int ConnectNumbers_resultLength = ConnectNumbers(RemoveNone_result, ConnectNumbers_result);
-            ConnectNumbers_result = ConnectNumbers_result[..ConnectNumbers_resultLength];
+            // Tops of the stacks (the index of the next free slot = the length of the stack)
+            int vTop = 0;
+            int oTop = 0;
 
-            double result = CalculateImpl(ConnectNumbers_result);
-            if (double.IsNaN(result)) return double.NaN;
-            result = Math.Clamp(result, clampMin, clampMax);
+            // Build an integer while reading consecutive digits.
+            // -1 means "not building a number now".
+            int connectedNumber = -1;
 
-            return result;
+            // Track the previous meaningful token to detect unary operators (+ and -)
+            // 0: start, 1: number, 2: '(', 3: ')', 4: operator
+            byte prevType = 0;
+
+            for (int i = 0; i < formula.Length; i++)
+            {
+                char c = formula[i];
+
+                // Ignore spaces
+                if (c == Element.NONE)
+                    continue;
+
+                // If the token is a number, build it
+                if (c.ToType() == Element.Type.Number)
+                {
+                    int digit = c.ToInt(); // 0..9
+                    connectedNumber = (connectedNumber == -1) ? digit : (connectedNumber * 10 + digit);
+                    prevType = 1;
+                    continue;
+                }
+
+                // If we were building a number, push it to the value stack now
+                if (connectedNumber != -1)
+                {
+                    values[vTop++] = connectedNumber;
+                    connectedNumber = -1;
+                }
+
+                // If the token is "("
+                if (c == Element.PL)
+                {
+                    ops[oTop++] = Element.ID_PL;
+                    prevType = 2;
+                    continue;
+                }
+
+                // If the token is ")"
+                if (c == Element.PR)
+                {
+                    while (oTop > 0 && ops[oTop - 1] is not Element.ID_PL)
+                    {
+                        if (!ApplyTop(values, vTop, ops, oTop))
+                            return double.NaN;
+
+                        vTop--;
+                        oTop--;
+                    }
+
+                    if (oTop == 0)
+                        return double.NaN; // unmatched
+
+                    oTop--; // remove '('
+                    prevType = 3;
+                    continue;
+                }
+
+                // Now the token must be an operator (+ - * /)
+                int token = c.ToInt();
+
+                // Check for unary operators (+ and -)
+                // Unary is valid at the beginning or right after '('
+                bool isUnary =
+                    (token is Element.ID_OA or Element.ID_OS) &&
+                    (prevType == 0 || prevType == 2);
+
+                if (isUnary)
+                {
+                    // Look ahead ignoring spaces
+                    int j = i + 1;
+                    while (j < formula.Length && formula[j] == Element.NONE) j++;
+                    if (j >= formula.Length) return double.NaN;
+
+                    // If the next token is "(",
+                    // treat unary as multiplying by ±1
+                    if (formula[j] == Element.PL)
+                    {
+                        values[vTop++] = (token is Element.ID_OS) ? -1 : 1;
+                        ops[oTop++] = Element.ID_OM; // implicit multiplication
+                        prevType = 4;
+                        continue;
+                    }
+
+                    // Otherwise the next token must be a number; push signed number
+                    // We do not consume the digits here; we let the main loop build them.
+                    // Push 0 and use binary op to simulate unary: 0 ± number
+                    values[vTop++] = 0;
+                    ops[oTop++] = token; // + or -
+                    prevType = 4;
+                    continue;
+                }
+
+                // Process operator (+ - * /)
+                while (oTop > 0 && Precedence(ops[oTop - 1]) >= Precedence(token))
+                {
+                    if (!ApplyTop(values, vTop, ops, oTop))
+                        return double.NaN;
+
+                    vTop--;
+                    oTop--;
+                }
+
+                ops[oTop++] = token;
+                prevType = 4;
+            }
+
+            // Push the last connected number if exists
+            if (connectedNumber != -1)
+            {
+                values[vTop++] = connectedNumber;
+                connectedNumber = -1;
+            }
+
+            // Final evaluation
+            while (oTop > 0)
+            {
+                if (!ApplyTop(values, vTop, ops, oTop))
+                    return double.NaN;
+
+                vTop--;
+                oTop--;
+            }
+
+            return (vTop == 1) ? values[0] : double.NaN;
         }
 
         // Check if the formula does not contain any invalid characters
+        // You can use this method to validate the formula before calling Calculate()
+        // to avoid unnecessary calculations on invalid formulas.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsValidFormula(this ReadOnlySpan<char> formulaArg, byte maxNumberDigit = 8)
         {
@@ -192,170 +312,14 @@ namespace foriver4725.FormulaCalculator
             return true;
         }
 
-        // Remove 'None' and compress
-        // Write the result to 'result' and return its length
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int RemoveNone(ReadOnlySpan<char> source, Span<char> result)
-        {
-            int length = 0;
-            foreach (char e in source)
-            {
-                if (e == Element.NONE) continue;
-                result[length++] = e;
-            }
-
-            return length;
-        }
-
-        // Connect numbers to form a collection of integers
-        // Write the result to 'result' and return its length
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int ConnectNumbers(ReadOnlySpan<char> source, Span<int> result)
-        {
-            int connectedNumber = -1;
-
-            int length = 0;
-            for (int i = 0; i < source.Length; i++)
-            {
-                char e = source[i];
-                int eAsInt = e.ToInt();
-
-                if (e.ToType() != Element.Type.Number)
-                {
-                    if (connectedNumber != -1)
-                    {
-                        result[length++] = connectedNumber;
-                        connectedNumber = -1;
-                    }
-
-                    result[length++] = eAsInt;
-                    continue;
-                }
-
-                if (connectedNumber == -1) connectedNumber = eAsInt;
-                else connectedNumber = connectedNumber * 10 + eAsInt;
-            }
-
-            if (connectedNumber != -1)
-                result[length++] = connectedNumber;
-
-            return length;
-        }
-
-        // Finally calculate
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static double CalculateImpl(ReadOnlySpan<int> source)
-        {
-            // Stacks for values and operators
-            Span<double> values = stackalloc double[source.Length];
-            Span<double> ops = stackalloc double[source.Length];
-
-            // Tops of the stacks (the index of the next free slot = the length of the stack)
-            int vTop = 0;
-            int oTop = 0;
-
-            int i = 0;
-
-            while (i < source.Length)
-            {
-                double token = source[i];
-
-                // Check for unary operators (+ and -)
-                bool isUnary =
-                    (token is (Element.ID_OA or Element.ID_OS)) &&
-                    (i == 0 || source[i - 1] is Element.ID_PL);
-                if (isUnary)
-                {
-                    i++;
-
-                    // If the next token is "(",
-                    // treat unary as multiplying by ±1
-                    if (source[i] is Element.ID_PL)
-                    {
-                        values[vTop++] = (token is Element.ID_OS) ? -1 : 1;
-                        ops[oTop++] = Element.ID_OM; // implicit multiplication
-                        continue;
-                    }
-
-                    double value = source[i++];
-
-                    if (token is Element.ID_OS)
-                        value = -value;
-
-                    values[vTop++] = value;
-                    continue;
-                }
-
-                // If the token is a number, push it to the value stack
-                if (token.IsNumber())
-                {
-                    values[vTop++] = token;
-                    i++;
-                    continue;
-                }
-
-                // If the token is "("
-                if (token is Element.ID_PL)
-                {
-                    ops[oTop++] = token;
-                    i++;
-                    continue;
-                }
-
-                // If the token is ")"
-                if (token is Element.ID_PR)
-                {
-                    while (oTop > 0 && ops[oTop - 1] is not Element.ID_PL)
-                    {
-                        if (!ApplyTop(values, vTop, ops, oTop))
-                            return double.NaN;
-
-                        vTop--;
-                        oTop--;
-                    }
-
-                    if (oTop == 0)
-                        return double.NaN; // unmatched
-
-                    oTop--; // remove '('
-                    i++;
-                    continue;
-                }
-
-                // Process operator (+ - * /)
-                while (oTop > 0 && Precedence(ops[oTop - 1]) >= Precedence(token))
-                {
-                    if (!ApplyTop(values, vTop, ops, oTop))
-                        return double.NaN;
-
-                    vTop--;
-                    oTop--;
-                }
-
-                ops[oTop++] = token;
-                i++;
-            }
-
-            // Final evaluation
-            while (oTop > 0)
-            {
-                if (!ApplyTop(values, vTop, ops, oTop))
-                    return double.NaN;
-
-                vTop--;
-                oTop--;
-            }
-
-            return values[0];
-        }
-
         // Apply the operator at the top of the operator stack to the top two values on the value stack
         // Pop the operator and the two values, compute the result, and push it back to the value stack
         // Returns false if an error occurs (such as division by zero), otherwise true.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool ApplyTop(
             Span<double> values, int vTop,
-            Span<double> ops, int oTop)
+            Span<double> ops, int oTop
+        )
         {
             double op = ops[oTop - 1];
             double b = values[vTop - 1];
