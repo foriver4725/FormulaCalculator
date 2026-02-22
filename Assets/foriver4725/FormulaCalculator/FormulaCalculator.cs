@@ -320,64 +320,64 @@ namespace foriver4725.FormulaCalculator
 
         // Calculate the expression assuming there are no parentheses
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static double CalculateRaw(ReadOnlySpan<double> source)
+        private static double CalculateRaw(Span<double> source)
         {
-            Span<double> _source = stackalloc double[source.Length];
-            source.CopyTo(_source);
+            // source[begin..end] is the part to be calculated in this call
+            int begin = 0;
+            int end = source.Length;
 
             // Sign (positive/negative) of the first number
-            double first = _source[0];
+            double first = source[begin];
             if (first == Element.ID_OA)
             {
-                _source = _source[1..];
+                begin++;
             }
             else if (first == Element.ID_OS)
             {
-                _source[1] = -_source[1];
-                _source = _source[1..];
+                begin++;
+                source[begin] = -source[begin];
             }
 
             // Multiplication and division
-            for (int i = 0; i < _source.Length; i++)
+            for (int i = begin; i < end; i++)
             {
-                if (_source[i] == Element.ID_OM)
+                if (source[i] == Element.ID_OM)
                 {
-                    double value = _source[i - 1] * _source[i + 1];
-                    ReduceBinaryOperation(_source, i, value);
-                    _source = _source[..^2];
+                    source[i - 1] *= source[i + 1];
+                    ReduceBinaryOperation(source, i, source[i - 1]);
+                    end -= 2;
                     i--;
                 }
-                else if (_source[i] == Element.ID_OD)
+                else if (source[i] == Element.ID_OD)
                 {
-                    if (_source[i + 1] == 0) return double.NaN;
+                    if (source[i + 1] == 0) return double.NaN;
 
-                    double value = _source[i - 1] / _source[i + 1];
-                    ReduceBinaryOperation(_source, i, value);
-                    _source = _source[..^2];
+                    source[i - 1] /= source[i + 1];
+                    ReduceBinaryOperation(source, i, source[i - 1]);
+                    end -= 2;
                     i--;
                 }
             }
 
-            // Addition and subtraction
-            for (int i = 0; i < _source.Length; i++)
+            for (int i = begin; i < end; i++)
             {
-                if (_source[i] == Element.ID_OA)
+                if (source[i] == Element.ID_OA)
                 {
-                    double value = _source[i - 1] + _source[i + 1];
-                    ReduceBinaryOperation(_source, i, value);
-                    _source = _source[..^2];
+                    source[i - 1] += source[i + 1];
+                    ReduceBinaryOperation(source, i, source[i - 1]);
+                    end -= 2;
                     i--;
                 }
-                else if (_source[i] == Element.ID_OS)
+                else if (source[i] == Element.ID_OS)
                 {
-                    double value = _source[i - 1] - _source[i + 1];
-                    ReduceBinaryOperation(_source, i, value);
-                    _source = _source[..^2];
+                    source[i - 1] -= source[i + 1];
+                    ReduceBinaryOperation(source, i, source[i - 1]);
+                    end -= 2;
                     i--;
                 }
             }
 
-            return _source[0];
+            return source[begin];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
