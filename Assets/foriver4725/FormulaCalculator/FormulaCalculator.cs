@@ -32,7 +32,7 @@ namespace foriver4725.FormulaCalculator
 
             if (!doSkipValidation)
             {
-                if (!IsWholeOk(RemoveNone_result, maxNumberDigit))
+                if (!IsValidFormula(RemoveNone_result, maxNumberDigit))
                     return double.NaN;
             }
 
@@ -49,7 +49,7 @@ namespace foriver4725.FormulaCalculator
 
         // Check if the formula does not contain any invalid characters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsWholeOk(ReadOnlySpan<char> formula, byte maxNumberDigit)
+        private static bool IsValidFormula(ReadOnlySpan<char> formula, byte maxNumberDigit)
         {
             // [Is Whole OK?]
             // Check if the formula does not contain any invalid characters
