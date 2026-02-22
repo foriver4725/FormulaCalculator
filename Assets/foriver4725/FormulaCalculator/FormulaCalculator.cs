@@ -40,7 +40,7 @@ namespace foriver4725.FormulaCalculator
                 char c = formula[i];
 
                 // Ignore spaces
-                if (c == Element.NONE)
+                if (c is Element.NONE)
                     continue;
 
                 // If the token is a number, build it
@@ -60,7 +60,7 @@ namespace foriver4725.FormulaCalculator
                 }
 
                 // If the token is "("
-                if (c == Element.PL)
+                if (c is Element.PL)
                 {
                     ops[oTop++] = Element.PL;
                     prevType = 2;
@@ -68,7 +68,7 @@ namespace foriver4725.FormulaCalculator
                 }
 
                 // If the token is ")"
-                if (c == Element.PR)
+                if (c is Element.PR)
                 {
                     while (oTop > 0 && ops[oTop - 1] is not Element.PL)
                     {
