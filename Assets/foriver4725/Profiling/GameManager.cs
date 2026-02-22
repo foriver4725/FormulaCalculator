@@ -16,12 +16,17 @@ namespace foriver4725.FormulaCalculator.Profiling
         [SerializeField] private Toggle doSkipValidationToggle;
         [SerializeField] private TMP_InputField profilerLabelInputField;
 
+        private ulong _loopAmount = 1;
+
         private void Awake()
         {
             formulaInputField.text = "1+2*3/(4-5)";
             loopAmountSlider.onValueChanged.AddListener(value =>
-                loopAmountText.text = "Loop Amount : " + value.ToString("#,0"));
-            loopAmountSlider.value = 1_000_000;
+            {
+                _loopAmount = (ulong)Math.Pow(10, value);
+                loopAmountText.text = $"Loop Amount : 1e{value}";
+            });
+            loopAmountSlider.value = 6;
             doSkipValidationToggle.isOn = false;
             profilerLabelInputField.text = "### FormulaCalculator.Calculate() ###";
         }
@@ -34,7 +39,7 @@ namespace foriver4725.FormulaCalculator.Profiling
                 {
                     Run(
                         formulaInputField.text.AsSpan(),
-                        (ulong)loopAmountSlider.value,
+                        _loopAmount,
                         doSkipValidationToggle.isOn,
                         profilerLabelInputField.text
                     );
