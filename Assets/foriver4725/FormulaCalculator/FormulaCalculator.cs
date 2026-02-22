@@ -32,10 +32,10 @@ namespace foriver4725.FormulaCalculator
 
             if (!doSkipValidation)
             {
-                if (!IsWholeOK(RemoveNone_result)) return double.NaN;
-                if (!IsNumberOK(RemoveNone_result, maxNumberDigit)) return double.NaN;
-                if (!IsOperatorOK(RemoveNone_result)) return double.NaN;
-                if (!IsParagraphOK(RemoveNone_result)) return double.NaN;
+                if (!IsWholeOk(RemoveNone_result)) return double.NaN;
+                if (!IsNumberOk(RemoveNone_result, maxNumberDigit)) return double.NaN;
+                if (!IsOperatorOk(RemoveNone_result)) return double.NaN;
+                if (!IsParagraphOk(RemoveNone_result)) return double.NaN;
             }
 
             Span<int> ConnectNumbers_result = stackalloc int[RemoveNone_result.Length];
@@ -51,7 +51,7 @@ namespace foriver4725.FormulaCalculator
 
         // Check if the formula does not contain any invalid characters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsWholeOK(ReadOnlySpan<char> formula)
+        private static bool IsWholeOk(ReadOnlySpan<char> formula)
         {
             foreach (char e in formula)
                 if (!e.IsValidChar())
@@ -63,7 +63,7 @@ namespace foriver4725.FormulaCalculator
         // Check if a number does not come immediately outside the parentheses
         // Check if there is no consecutive numbers exceeding a certain length
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsNumberOK(ReadOnlySpan<char> formula, byte maxNumberDigit)
+        private static bool IsNumberOk(ReadOnlySpan<char> formula, byte maxNumberDigit)
         {
             for (int i = 0; i < formula.Length - 1; i++)
             {
@@ -90,7 +90,7 @@ namespace foriver4725.FormulaCalculator
         // Check for operators "+", "-" that "the previous element exists and is either a number, '(', or ')', or the previous element does not exist" and "the next element exists and is either a number or '('"
         // Check for operators other than "+", "-" that "the previous element exists and is either a number or ')'" and "the next element exists and is either a number or '('"
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsOperatorOK(ReadOnlySpan<char> formula)
+        private static bool IsOperatorOk(ReadOnlySpan<char> formula)
         {
             for (int i = 0; i < formula.Length; i++)
             {
@@ -139,7 +139,7 @@ namespace foriver4725.FormulaCalculator
         // Check if there is at least one number inside the parentheses
         // Check if the arrangement of ")(" does not exist
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsParagraphOK(ReadOnlySpan<char> formula)
+        private static bool IsParagraphOk(ReadOnlySpan<char> formula)
         {
             int n = 0;
             foreach (char e in formula)
