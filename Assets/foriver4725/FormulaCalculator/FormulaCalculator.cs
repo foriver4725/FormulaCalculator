@@ -93,7 +93,7 @@ namespace foriver4725.FormulaCalculator
                 // Unary is valid at the beginning or right after '('
                 bool isUnary =
                     (token is Element.ID_OA or Element.ID_OS) &&
-                    (prevType == 0 || prevType == 2);
+                    (prevType is (0 or 2));
 
                 if (isUnary)
                 {
