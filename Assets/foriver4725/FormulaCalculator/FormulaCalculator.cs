@@ -46,7 +46,7 @@ namespace foriver4725.FormulaCalculator
                 // If the token is a number, build it
                 if (c.ToType() == Element.Type.Number)
                 {
-                    int digit = c.ToInt(); // 0..9
+                    int digit = c - Element.N0;
                     connectedNumber = (connectedNumber == -1) ? digit : (connectedNumber * 10 + digit);
                     prevType = 1;
                     continue;
