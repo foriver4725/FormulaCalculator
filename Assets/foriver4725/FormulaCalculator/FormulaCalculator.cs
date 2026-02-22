@@ -322,71 +322,70 @@ namespace foriver4725.FormulaCalculator
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static double CalculateRaw(Span<double> source)
         {
-            // source[begin..end] is the part to be calculated in this call
-            int begin = 0;
-            int end = source.Length;
+            // Enumerate the expression once
+            // Repeat incrementing the index until the end
+            int i = 0;
+            int length = source.Length;
 
-            // Sign (positive/negative) of the first number
-            double first = source[begin];
-            if (first == Element.ID_OA)
+            // The sign of the current chunk,
+            // which will be applied when adding it to the final result. It is +1 for addition and -1 for subtraction.
+            double sign = 1;
+            // The result of the current chunk of multiplication/division,
+            // which will be added to the final result when an addition/subtraction operator is encountered.
+            double chunk;
+            // The final result of the calculation.
+            double result = 0;
+
+            // Process the first chunk (the part before the first addition/subtraction operator)
+            // Similar to multiplication/division
+            if (source[i] == Element.ID_OA)
             {
-                begin++;
+                i++;
+                chunk = source[i++];
             }
-            else if (first == Element.ID_OS)
+            else if (source[i] == Element.ID_OS)
             {
-                begin++;
-                source[begin] = -source[begin];
+                i++;
+                chunk = -source[i++];
             }
-
-            // Multiplication and division
-            for (int i = begin; i < end; i++)
+            else
             {
-                if (source[i] == Element.ID_OM)
-                {
-                    source[i - 1] *= source[i + 1];
-                    ReduceBinaryOperation(source, i, source[i - 1]);
-                    end -= 2;
-                    i--;
-                }
-                else if (source[i] == Element.ID_OD)
-                {
-                    if (source[i + 1] == 0) return double.NaN;
-
-                    source[i - 1] /= source[i + 1];
-                    ReduceBinaryOperation(source, i, source[i - 1]);
-                    end -= 2;
-                    i--;
-                }
+                chunk = source[i++];
             }
 
-            for (int i = begin; i < end; i++)
+            while (i < length)
             {
-                if (source[i] == Element.ID_OA)
+                double op = source[i++];
+
+                // Process the next chunk until the next addition/subtraction operator is encountered
+                if (op == Element.ID_OM)
                 {
-                    source[i - 1] += source[i + 1];
-                    ReduceBinaryOperation(source, i, source[i - 1]);
-                    end -= 2;
-                    i--;
+                    chunk *= source[i++];
                 }
-                else if (source[i] == Element.ID_OS)
+                else if (op == Element.ID_OD)
                 {
-                    source[i - 1] -= source[i + 1];
-                    ReduceBinaryOperation(source, i, source[i - 1]);
-                    end -= 2;
-                    i--;
+                    double rhs = source[i++];
+                    if (rhs == 0) return double.NaN;
+                    chunk /= rhs;
+                }
+                // When an addition/subtraction operator is encountered, add the current chunk to the final result and start a new chunk
+                else if (op == Element.ID_OA)
+                {
+                    result += sign * chunk;
+                    sign = 1;
+                    chunk = source[i++];
+                }
+                else if (op == Element.ID_OS)
+                {
+                    result += sign * chunk;
+                    sign = -1;
+                    chunk = source[i++];
                 }
             }
 
-            return source[begin];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void ReduceBinaryOperation(Span<double> source, int operatorIndex, double operationResult)
-        {
-            Span<double> newSpan = stackalloc double[source.Length - 2];
-            source.DeleteIndicesUnsafely(stackalloc[] { operatorIndex, operatorIndex + 1 }, newSpan);
-            newSpan[operatorIndex - 1] = operationResult;
-            newSpan.CopyTo(source);
+            // Add the last chunk to the final result
+            result += sign * chunk;
+            return result;
         }
     }
 }
