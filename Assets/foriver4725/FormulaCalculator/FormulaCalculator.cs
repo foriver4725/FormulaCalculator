@@ -188,23 +188,59 @@ namespace foriver4725.FormulaCalculator
                 {
                     if (b <= 0)
                         return false;
-
                     result = 0;
-                    values[vTop - 2] = result;
-                    return true;
                 }
+                else
+                {
+                    if (IsInteger(b))
+                    {
+                        int e = (int)Math.Round(b);
 
-                // If exponent is not an integer, base must be >= 0
-                if (!IsInteger(b) && a < 0)
-                    return false;
-
-                result = Math.Pow(a, b);
+                        if (e < 0)
+                        {
+                            // a != 0, so we can safely compute a^(-e) and take reciprocal
+                            result = 1.0 / PowInt(a, -e);
+                        }
+                        else
+                        {
+                            result = PowInt(a, e);
+                        }
+                    }
+                    else
+                    {
+                        // If the exponent is not an integer, we can directly use Math.Pow,
+                        // but we need to check for negative base with non-integer exponent, which is not allowed in real numbers.
+                        if (a < 0) return false;
+                        result = Math.Pow(a, b);
+                    }
+                }
             }
             else
                 return false;
 
             values[vTop - 2] = result;
             return true;
+        }
+
+        // Fast integer power function using exponentiation by squaring.
+        // This is used to optimize cases like x^3, x^4, etc., which are common in formulas.
+        // The exponent must be a non-negative integer.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static double PowInt(double a, int e)
+        {
+            double result = 1.0;
+            double baseVal = a;
+
+            while (e > 0)
+            {
+                if ((e & 1) != 0)
+                    result *= baseVal;
+
+                baseVal *= baseVal;
+                e >>= 1;
+            }
+
+            return result;
         }
 
         // Return the precedence of the operator. Higher value means higher precedence.
