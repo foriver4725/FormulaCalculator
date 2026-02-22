@@ -21,7 +21,7 @@ namespace foriver4725.FormulaCalculator
         {
             // Stacks for values and operators
             Span<double> values = stackalloc double[formula.Length];
-            Span<double> ops = stackalloc double[formula.Length];
+            Span<char> ops = stackalloc char[formula.Length];
 
             // Tops of the stacks (the index of the next free slot = the length of the stack)
             int vTop = 0;
@@ -62,7 +62,7 @@ namespace foriver4725.FormulaCalculator
                 // If the token is "("
                 if (c == Element.PL)
                 {
-                    ops[oTop++] = Element.ID_PL;
+                    ops[oTop++] = Element.PL;
                     prevType = 2;
                     continue;
                 }
@@ -70,7 +70,7 @@ namespace foriver4725.FormulaCalculator
                 // If the token is ")"
                 if (c == Element.PR)
                 {
-                    while (oTop > 0 && ops[oTop - 1] is not Element.ID_PL)
+                    while (oTop > 0 && ops[oTop - 1] is not Element.PL)
                     {
                         if (!ApplyTop(values, vTop, ops, oTop))
                             return double.NaN;
@@ -88,12 +88,11 @@ namespace foriver4725.FormulaCalculator
                 }
 
                 // Now the token must be an operator (+ - * /)
-                int token = c.ToInt();
 
                 // Check for unary operators (+ and -)
                 // Unary is valid at the beginning or right after '('
                 bool isUnary =
-                    (token is Element.ID_OA or Element.ID_OS) &&
+                    (c is Element.OA or Element.OS) &&
                     (prevType is (0 or 2));
 
                 if (isUnary)
@@ -107,8 +106,8 @@ namespace foriver4725.FormulaCalculator
                     // treat unary as multiplying by ±1
                     if (formula[j] == Element.PL)
                     {
-                        values[vTop++] = (token is Element.ID_OS) ? -1 : 1;
-                        ops[oTop++] = Element.ID_OM; // implicit multiplication
+                        values[vTop++] = (c is Element.OS) ? -1 : 1;
+                        ops[oTop++] = Element.OM; // implicit multiplication
                         prevType = 4;
                         continue;
                     }
@@ -117,13 +116,13 @@ namespace foriver4725.FormulaCalculator
                     // We do not consume the digits here; we let the main loop build them.
                     // Push 0 and use binary op to simulate unary: 0 ± number
                     values[vTop++] = 0;
-                    ops[oTop++] = token; // + or -
+                    ops[oTop++] = c; // + or -
                     prevType = 4;
                     continue;
                 }
 
                 // Process operator (+ - * / ^)
-                while (oTop > 0 && ShouldReduce(ops[oTop - 1], token))
+                while (oTop > 0 && ShouldReduce(ops[oTop - 1], c))
                 {
                     if (!ApplyTop(values, vTop, ops, oTop))
                         return double.NaN;
@@ -132,7 +131,7 @@ namespace foriver4725.FormulaCalculator
                     oTop--;
                 }
 
-                ops[oTop++] = token;
+                ops[oTop++] = c;
                 prevType = 4;
             }
 
@@ -140,7 +139,6 @@ namespace foriver4725.FormulaCalculator
             if (connectedNumber != -1)
             {
                 values[vTop++] = connectedNumber;
-                // connectedNumber = -1;
             }
 
             // Final evaluation
@@ -319,28 +317,28 @@ namespace foriver4725.FormulaCalculator
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool ApplyTop(
             Span<double> values, int vTop,
-            Span<double> ops, int oTop
+            Span<char> ops, int oTop
         )
         {
-            double op = ops[oTop - 1];
+            char op = ops[oTop - 1];
             double b = values[vTop - 1];
             double a = values[vTop - 2];
 
             double result;
 
-            if (op is Element.ID_OA)
+            if (op is Element.OA)
                 result = a + b;
-            else if (op is Element.ID_OS)
+            else if (op is Element.OS)
                 result = a - b;
-            else if (op is Element.ID_OM)
+            else if (op is Element.OM)
                 result = a * b;
-            else if (op is Element.ID_OD)
+            else if (op is Element.OD)
             {
                 if (b == 0)
                     return false;
                 result = a / b;
             }
-            else if (op is Element.ID_OP)
+            else if (op is Element.OP)
             {
                 // 0^b : only allowed if b > 0
                 if (a == 0)
@@ -368,17 +366,17 @@ namespace foriver4725.FormulaCalculator
 
         // Return the precedence of the operator. Higher value means higher precedence.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Precedence(double op) => op switch
+        private static int Precedence(char op) => op switch
         {
-            Element.ID_OA or Element.ID_OS => 1,
-            Element.ID_OM or Element.ID_OD => 2,
-            Element.ID_OP                  => 3,
-            _                              => 0,
+            Element.OA or Element.OS => 1,
+            Element.OM or Element.OD => 2,
+            Element.OP               => 3,
+            _                        => 0,
         };
 
         // Return true if the operator on the stack should be reduced before pushing the incoming operator.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool ShouldReduce(double stackOp, double incomingOp)
+        private static bool ShouldReduce(char stackOp, char incomingOp)
         {
             int sp = Precedence(stackOp);
             int ip = Precedence(incomingOp);
@@ -393,8 +391,8 @@ namespace foriver4725.FormulaCalculator
 
         // Return true if the operator is right-associative (such as '^'), otherwise false (such as '+', '-', '*', '/').
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsRightAssociative(double op)
-            => op is Element.ID_OP; // '^'
+        private static bool IsRightAssociative(char op)
+            => op is Element.OP; // '^'
 
         // Return true if the double is an integer (within a small tolerance), otherwise false.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

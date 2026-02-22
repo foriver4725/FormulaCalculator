@@ -24,16 +24,6 @@ namespace foriver4725.FormulaCalculator
         internal const char PR = ')';
         internal const char NONE = ' ';
 
-        // Assign values that are unlikely to appear in calculations as IDs for symbols.
-        internal const int ID_OA = 0x7fffffff;
-        internal const int ID_OS = 0x7ffffffe;
-        internal const int ID_OM = 0x7ffffffd;
-        internal const int ID_OD = 0x7ffffffc;
-        internal const int ID_OP = 0x7ffffffb;
-        internal const int ID_PL = 0x7ffffffa;
-        internal const int ID_PR = 0x7ffffff9;
-        internal const int ID_NONE = 0x7ffffff8;
-
         internal enum Type : byte
         {
             Number = 0,
@@ -72,14 +62,6 @@ namespace foriver4725.FormulaCalculator
             N7   => 7,
             N8   => 8,
             N9   => 9,
-            OA   => ID_OA,
-            OS   => ID_OS,
-            OM   => ID_OM,
-            OD   => ID_OD,
-            OP   => ID_OP,
-            PL   => ID_PL,
-            PR   => ID_PR,
-            NONE => ID_NONE,
             _    => throw new ArgumentOutOfRangeException(nameof(c), $"Invalid character: {c}"),
         };
     }
