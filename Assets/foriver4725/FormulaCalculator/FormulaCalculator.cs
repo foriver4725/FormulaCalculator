@@ -32,10 +32,8 @@ namespace foriver4725.FormulaCalculator
 
             if (!doSkipValidation)
             {
-                if (!IsWholeOk(RemoveNone_result)) return double.NaN;
-                if (!IsNumberOk(RemoveNone_result, maxNumberDigit)) return double.NaN;
-                if (!IsOperatorOk(RemoveNone_result)) return double.NaN;
-                if (!IsParagraphOk(RemoveNone_result)) return double.NaN;
+                if (!IsWholeOk(RemoveNone_result, maxNumberDigit))
+                    return double.NaN;
             }
 
             Span<int> ConnectNumbers_result = stackalloc int[RemoveNone_result.Length];
@@ -51,137 +49,136 @@ namespace foriver4725.FormulaCalculator
 
         // Check if the formula does not contain any invalid characters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsWholeOk(ReadOnlySpan<char> formula)
+        private static bool IsWholeOk(ReadOnlySpan<char> formula, byte maxNumberDigit)
         {
-            foreach (char e in formula)
-                if (!e.IsValidChar())
-                    return false;
-
-            return true;
-        }
-
-        // Check if a number does not come immediately outside the parentheses
-        // Check if there is no consecutive numbers exceeding a certain length
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsNumberOk(ReadOnlySpan<char> formula, byte maxNumberDigit)
-        {
-            for (int i = 0; i < formula.Length - 1; i++)
+            // [Is Whole OK?]
+            // Check if the formula does not contain any invalid characters
             {
-                char e = formula[i], f = formula[i + 1];
-                if (e.ToType() == Element.Type.Number && f == Element.PL) return false;
-                if (e == Element.PR && f.ToType() == Element.Type.Number) return false;
+                foreach (char e in formula)
+                    if (!e.IsValidChar())
+                        return false;
             }
 
-            byte continuousCount = 0;
-            foreach (char e in formula)
+            // [Is Number OK?]
+            // Check if a number does not come immediately outside the parentheses
+            // Check if there is no consecutive numbers exceeding a certain length
             {
-                if (e.ToType() != Element.Type.Number)
+                for (int i = 0; i < formula.Length - 1; i++)
                 {
-                    continuousCount = 0;
-                    continue;
+                    char e = formula[i], f = formula[i + 1];
+                    if (e.ToType() == Element.Type.Number && f == Element.PL) return false;
+                    if (e == Element.PR && f.ToType() == Element.Type.Number) return false;
                 }
 
-                if (++continuousCount > maxNumberDigit) return false;
-            }
-
-            return true;
-        }
-
-        // Check for operators "+", "-" that "the previous element exists and is either a number, '(', or ')', or the previous element does not exist" and "the next element exists and is either a number or '('"
-        // Check for operators other than "+", "-" that "the previous element exists and is either a number or ')'" and "the next element exists and is either a number or '('"
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsOperatorOk(ReadOnlySpan<char> formula)
-        {
-            for (int i = 0; i < formula.Length; i++)
-            {
-                char e = formula[i];
-
-                if (e.ToType() != Element.Type.Operator) continue;
-
-                if (e == Element.OA || e == Element.OS)
+                byte continuousCount = 0;
+                foreach (char e in formula)
                 {
-                    if (i > 0)
+                    if (e.ToType() != Element.Type.Number)
                     {
-                        char left = formula[i - 1];
-                        if (left.ToType() != Element.Type.Number && left != Element.PL && left != Element.PR)
-                            return false;
+                        continuousCount = 0;
+                        continue;
                     }
 
-                    if (i < formula.Length - 1)
-                    {
-                        char right = formula[i + 1];
-                        if (right.ToType() != Element.Type.Number && right != Element.PL) return false;
-                    }
-                    else return false;
-                }
-                else
-                {
-                    if (i > 0)
-                    {
-                        char left = formula[i - 1];
-                        if (left.ToType() != Element.Type.Number && left != Element.PR) return false;
-                    }
-                    else return false;
-
-                    if (i < formula.Length - 1)
-                    {
-                        char right = formula[i + 1];
-                        if (right.ToType() != Element.Type.Number && right != Element.PL) return false;
-                    }
-                    else return false;
+                    if (++continuousCount > maxNumberDigit) return false;
                 }
             }
 
-            return true;
-        }
-
-        // Check if all parentheses match and are in the correct order
-        // Check if there is at least one number inside the parentheses
-        // Check if the arrangement of ")(" does not exist
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsParagraphOk(ReadOnlySpan<char> formula)
-        {
-            int n = 0;
-            foreach (char e in formula)
+            // [Is Operator OK?]
+            // Check for operators "+", "-" that
+            //   "the previous element exists and is either a number, '(', or ')', or the previous element does not exist" and
+            //   "the next element exists and is either a number or '('"
+            // Check for operators other than "+", "-" that
+            //   "the previous element exists and is either a number or ')'" and
+            //   "the next element exists and is either a number or '('"
             {
-                if (e == Element.PL) n++;
-                else if (e == Element.PR) n--;
-
-                if (n < 0) return false;
-            }
-
-            if (n != 0) return false;
-
-            for (int i = 0; i < formula.Length; i++)
-            {
-                if (formula[i] == Element.PL)
+                for (int i = 0; i < formula.Length; i++)
                 {
-                    int j = i + 1;
-                    while (j < formula.Length)
-                    {
-                        if (formula[j] == Element.PR) break;
-                        j++;
-                    }
+                    char e = formula[i];
 
-                    bool hasNumber = false;
-                    for (int k = i, _n = 0; _n < j - i + 1; k++, _n++)
+                    if (e.ToType() != Element.Type.Operator) continue;
+
+                    if (e == Element.OA || e == Element.OS)
                     {
-                        char e = formula[k];
-                        if (e.ToType() == Element.Type.Number)
+                        if (i > 0)
                         {
-                            hasNumber = true;
-                            break;
+                            char left = formula[i - 1];
+                            if (left.ToType() != Element.Type.Number && left != Element.PL && left != Element.PR)
+                                return false;
                         }
-                    }
 
-                    if (!hasNumber) return false;
+                        if (i < formula.Length - 1)
+                        {
+                            char right = formula[i + 1];
+                            if (right.ToType() != Element.Type.Number && right != Element.PL) return false;
+                        }
+                        else return false;
+                    }
+                    else
+                    {
+                        if (i > 0)
+                        {
+                            char left = formula[i - 1];
+                            if (left.ToType() != Element.Type.Number && left != Element.PR) return false;
+                        }
+                        else return false;
+
+                        if (i < formula.Length - 1)
+                        {
+                            char right = formula[i + 1];
+                            if (right.ToType() != Element.Type.Number && right != Element.PL) return false;
+                        }
+                        else return false;
+                    }
                 }
             }
 
-            for (int i = 0; i < formula.Length - 1; i++)
+            // [Is Paragraph OK?]
+            // Check if all parentheses match and are in the correct order
+            // Check if there is at least one number inside the parentheses
+            // Check if the arrangement of ")(" does not exist
             {
-                char e = formula[i], f = formula[i + 1];
-                if (e == Element.PR && f == Element.PL) return false;
+                int n = 0;
+                foreach (char e in formula)
+                {
+                    if (e == Element.PL) n++;
+                    else if (e == Element.PR) n--;
+
+                    if (n < 0) return false;
+                }
+
+                if (n != 0) return false;
+
+                for (int i = 0; i < formula.Length; i++)
+                {
+                    if (formula[i] == Element.PL)
+                    {
+                        int j = i + 1;
+                        while (j < formula.Length)
+                        {
+                            if (formula[j] == Element.PR) break;
+                            j++;
+                        }
+
+                        bool hasNumber = false;
+                        for (int k = i, _n = 0; _n < j - i + 1; k++, _n++)
+                        {
+                            char e = formula[k];
+                            if (e.ToType() == Element.Type.Number)
+                            {
+                                hasNumber = true;
+                                break;
+                            }
+                        }
+
+                        if (!hasNumber) return false;
+                    }
+                }
+
+                for (int i = 0; i < formula.Length - 1; i++)
+                {
+                    char e = formula[i], f = formula[i + 1];
+                    if (e == Element.PR && f == Element.PL) return false;
+                }
             }
 
             return true;
