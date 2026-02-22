@@ -26,7 +26,7 @@ namespace foriver4725.FormulaCalculator.Profiling
                 _loopAmount = (ulong)Math.Pow(10, value);
                 loopAmountText.text = $"Loop Amount : 1e{value}";
             });
-            loopAmountSlider.value = 6;
+            loopAmountSlider.value = 7;
             doSkipValidationToggle.isOn = false;
             profilerLabelInputField.text = "### FormulaCalculator.Calculate() ###";
         }
