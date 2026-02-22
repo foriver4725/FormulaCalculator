@@ -316,78 +316,78 @@ namespace foriver4725.FormulaCalculator
 
             // There are no parentheses (or there were none to begin with), so perform arithmetic operations
             return CalculateRaw(_source);
+        }
 
-            // Calculate the expression assuming there are no parentheses
-            //TODO: There are similar code blocks below, so consider refactoring them into a method.
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static double CalculateRaw(ReadOnlySpan<double> source)
+        // Calculate the expression assuming there are no parentheses
+        //TODO: There are similar code blocks below, so consider refactoring them into a method.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static double CalculateRaw(ReadOnlySpan<double> source)
+        {
+            Span<double> _source = stackalloc double[source.Length];
+            source.CopyTo(_source);
+
+            // Sign (positive/negative) of the first number
+            double first = _source[0];
+            if (first == Element.ID_OA)
             {
-                Span<double> _source = stackalloc double[source.Length];
-                source.CopyTo(_source);
-
-                // Sign (positive/negative) of the first number
-                double first = _source[0];
-                if (first == Element.ID_OA)
-                {
-                    _source = _source[1..];
-                }
-                else if (first == Element.ID_OS)
-                {
-                    _source[1] = -_source[1];
-                    _source = _source[1..];
-                }
-
-                // Multiplication and division
-                for (int i = 0; i < _source.Length; i++)
-                {
-                    if (_source[i] == Element.ID_OM)
-                    {
-                        double value = _source[i - 1] * _source[i + 1];
-                        ReduceBinaryOperation(_source, i, value);
-                        _source = _source[..^2];
-                        i--;
-                    }
-                    else if (_source[i] == Element.ID_OD)
-                    {
-                        if (_source[i + 1] == 0) return double.NaN;
-
-                        double value = _source[i - 1] / _source[i + 1];
-                        ReduceBinaryOperation(_source, i, value);
-                        _source = _source[..^2];
-                        i--;
-                    }
-                }
-
-                // Addition and subtraction
-                for (int i = 0; i < _source.Length; i++)
-                {
-                    if (_source[i] == Element.ID_OA)
-                    {
-                        double value = _source[i - 1] + _source[i + 1];
-                        ReduceBinaryOperation(_source, i, value);
-                        _source = _source[..^2];
-                        i--;
-                    }
-                    else if (_source[i] == Element.ID_OS)
-                    {
-                        double value = _source[i - 1] - _source[i + 1];
-                        ReduceBinaryOperation(_source, i, value);
-                        _source = _source[..^2];
-                        i--;
-                    }
-                }
-
-                return _source[0];
+                _source = _source[1..];
+            }
+            else if (first == Element.ID_OS)
+            {
+                _source[1] = -_source[1];
+                _source = _source[1..];
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static void ReduceBinaryOperation(Span<double> source, int operatorIndex, double operationResult)
+            // Multiplication and division
+            for (int i = 0; i < _source.Length; i++)
             {
-                Span<double> newSpan = stackalloc double[source.Length - 2];
-                source.DeleteIndicesUnsafely(stackalloc[] { operatorIndex, operatorIndex + 1 }, newSpan);
-                newSpan[operatorIndex - 1] = operationResult;
-                newSpan.CopyTo(source);
+                if (_source[i] == Element.ID_OM)
+                {
+                    double value = _source[i - 1] * _source[i + 1];
+                    ReduceBinaryOperation(_source, i, value);
+                    _source = _source[..^2];
+                    i--;
+                }
+                else if (_source[i] == Element.ID_OD)
+                {
+                    if (_source[i + 1] == 0) return double.NaN;
+
+                    double value = _source[i - 1] / _source[i + 1];
+                    ReduceBinaryOperation(_source, i, value);
+                    _source = _source[..^2];
+                    i--;
+                }
             }
+
+            // Addition and subtraction
+            for (int i = 0; i < _source.Length; i++)
+            {
+                if (_source[i] == Element.ID_OA)
+                {
+                    double value = _source[i - 1] + _source[i + 1];
+                    ReduceBinaryOperation(_source, i, value);
+                    _source = _source[..^2];
+                    i--;
+                }
+                else if (_source[i] == Element.ID_OS)
+                {
+                    double value = _source[i - 1] - _source[i + 1];
+                    ReduceBinaryOperation(_source, i, value);
+                    _source = _source[..^2];
+                    i--;
+                }
+            }
+
+            return _source[0];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void ReduceBinaryOperation(Span<double> source, int operatorIndex, double operationResult)
+        {
+            Span<double> newSpan = stackalloc double[source.Length - 2];
+            source.DeleteIndicesUnsafely(stackalloc[] { operatorIndex, operatorIndex + 1 }, newSpan);
+            newSpan[operatorIndex - 1] = operationResult;
+            newSpan.CopyTo(source);
         }
     }
 }
