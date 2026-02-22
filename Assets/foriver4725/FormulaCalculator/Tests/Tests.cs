@@ -125,6 +125,9 @@ namespace foriver4725.FormulaCalculator.Tests
             [Test] public static void Case30() => "(0)^(1-2)".Eq(double.NaN);
             [Test] public static void Case31() => "1/(0^0)".Eq(double.NaN);
             [Test] public static void Case32() => "1/(0^1)".Eq(double.NaN);
+            [Test] public static void Case33() => "4^(1/2)".Eq(2.0);
+            [Test] public static void Case34() => "2^(3/10)".Eq(Math.Pow(2.0, 0.3));
+            [Test] public static void Case35() => "(73/23)^(11/3)".Eq(Math.Pow(73.0 / 23.0, 11.0 / 3.0));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
