@@ -1,6 +1,7 @@
 using System;
-using UnityEngine;
 using UnityEditor;
+using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace foriver4725.FormulaCalculator.Profiling
 {
@@ -14,7 +15,7 @@ namespace foriver4725.FormulaCalculator.Profiling
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (Keyboard.current.spaceKey.wasPressedThisFrame)
             {
                 // Warmup
                 for (int i = 0; i < 8; i++)

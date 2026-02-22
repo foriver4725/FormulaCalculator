@@ -1,0 +1,5 @@
+﻿<Solution>
+  <Project Path="foriver4725.FormulaCalculator.csproj" />
+  <Project Path="foriver4725.FormulaCalculator.Profiling.csproj" />
+  <Project Path="foriver4725.FormulaCalculator.Tests.csproj" />
+</Solution>
