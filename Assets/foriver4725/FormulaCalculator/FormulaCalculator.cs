@@ -42,10 +42,7 @@ namespace foriver4725.FormulaCalculator
             int ConnectNumbers_resultLength = ConnectNumbers(RemoveNone_result, ConnectNumbers_result);
             ConnectNumbers_result = ConnectNumbers_result[..ConnectNumbers_resultLength];
 
-            Span<double> ConvertToDouble_result = stackalloc double[ConnectNumbers_result.Length];
-            ConvertToDouble(ConnectNumbers_result, ConvertToDouble_result);
-
-            double result = CalculateFinally(ConvertToDouble_result);
+            double result = CalculateImpl(ConnectNumbers_result);
             if (double.IsNaN(result)) return double.NaN;
             result = Math.Clamp(result, clampMin, clampMax);
 
@@ -240,29 +237,9 @@ namespace foriver4725.FormulaCalculator
             return length;
         }
 
-        // Convert to a collection of real numbers
-        // Also convert the IDs of symbols as they are
-        // Write the result to 'result' (its length is assumed to be the same as source)
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void ConvertToDouble(ReadOnlySpan<int> source, Span<double> result)
-        {
-            for (int i = 0; i < source.Length; i++)
-                result[i] = source[i];
-        }
-
         // Finally calculate
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static double CalculateFinally(ReadOnlySpan<double> source)
-        {
-            Span<double> sourceSpan = stackalloc double[source.Length];
-            source.CopyTo(sourceSpan);
-
-            return CalculateImpl(sourceSpan);
-        }
-
-        // Core logic of calculation
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static double CalculateImpl(ReadOnlySpan<double> source)
+        private static double CalculateImpl(ReadOnlySpan<int> source)
         {
             // Stacks for values and operators
             Span<double> values = stackalloc double[source.Length];
