@@ -264,128 +264,148 @@ namespace foriver4725.FormulaCalculator
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static double CalculateImpl(ReadOnlySpan<double> source)
         {
-            Span<double> _source = stackalloc double[source.Length];
-            source.CopyTo(_source);
+            // Stacks for values and operators
+            Span<double> values = stackalloc double[source.Length];
+            Span<double> ops = stackalloc double[source.Length];
 
-            // Remove parentheses
+            // Tops of the stacks (the index of the next free slot = the length of the stack)
+            int vTop = 0;
+            int oTop = 0;
 
-            // Search for "(" from the left
             int i = 0;
-            while (i < _source.Length)
+
+            while (i < source.Length)
             {
-                if (_source[i] != Element.ID_PL)
+                double token = source[i];
+
+                // Check for unary operators (+ and -)
+                bool isUnary =
+                    (token is (Element.ID_OA or Element.ID_OS)) &&
+                    (i == 0 || source[i - 1] is Element.ID_PL);
+                if (isUnary)
                 {
+                    i++;
+
+                    // If the next token is "(",
+                    // treat unary as multiplying by ±1
+                    if (source[i] is Element.ID_PL)
+                    {
+                        values[vTop++] = (token is Element.ID_OS) ? -1 : 1;
+                        ops[oTop++] = Element.ID_OM; // implicit multiplication
+                        continue;
+                    }
+
+                    double value = source[i++];
+
+                    if (token is Element.ID_OS)
+                        value = -value;
+
+                    values[vTop++] = value;
+                    continue;
+                }
+
+                // If the token is a number, push it to the value stack
+                if (token.IsNumber())
+                {
+                    values[vTop++] = token;
                     i++;
                     continue;
                 }
 
-                // Search to the right and find the corresponding ")"
-                int n = 0;
-                for (int j = i + 1; j < _source.Length; j++)
+                // If the token is "("
+                if (token is Element.ID_PL)
                 {
-                    double e = _source[j];
-                    if (e != Element.ID_PR)
-                    {
-                        if (e == Element.ID_PL) n++;
-                        continue;
-                    }
-
-                    if (n >= 1)
-                    {
-                        n--;
-                        continue;
-                    }
-
-                    // Recursively calculate the content inside "()" and update _source
-                    {
-                        // Calculate the content inside "()"
-                        double value = CalculateImpl(_source[(i + 1)..j]);
-                        if (double.IsNaN(value)) return double.NaN;
-
-                        // Remove "()" and insert the calculation result into _source
-                        int shrinkSize = j - i;
-                        Span<double> newSpan = stackalloc double[_source.Length - shrinkSize];
-                        _source.DeleteIndicesUnsafely(i + 1, shrinkSize, newSpan);
-                        newSpan[i] = value;
-                        _source = newSpan;
-                    }
-
-                    break;
+                    ops[oTop++] = token;
+                    i++;
+                    continue;
                 }
+
+                // If the token is ")"
+                if (token is Element.ID_PR)
+                {
+                    while (oTop > 0 && ops[oTop - 1] is not Element.ID_PL)
+                    {
+                        if (!ApplyTop(values, vTop, ops, oTop))
+                            return double.NaN;
+
+                        vTop--;
+                        oTop--;
+                    }
+
+                    if (oTop == 0)
+                        return double.NaN; // unmatched
+
+                    oTop--; // remove '('
+                    i++;
+                    continue;
+                }
+
+                // Process operator (+ - * /)
+                while (oTop > 0 && Precedence(ops[oTop - 1]) >= Precedence(token))
+                {
+                    if (!ApplyTop(values, vTop, ops, oTop))
+                        return double.NaN;
+
+                    vTop--;
+                    oTop--;
+                }
+
+                ops[oTop++] = token;
+                i++;
             }
 
-            // There are no parentheses (or there were none to begin with), so perform arithmetic operations
-            return CalculateRaw(_source);
+            // Final evaluation
+            while (oTop > 0)
+            {
+                if (!ApplyTop(values, vTop, ops, oTop))
+                    return double.NaN;
+
+                vTop--;
+                oTop--;
+            }
+
+            return values[0];
         }
 
-        // Calculate the expression assuming there are no parentheses
+        // Apply the operator at the top of the operator stack to the top two values on the value stack
+        // Pop the operator and the two values, compute the result, and push it back to the value stack
+        // Returns false if an error occurs (such as division by zero), otherwise true.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static double CalculateRaw(Span<double> source)
+        private static bool ApplyTop(
+            Span<double> values, int vTop,
+            Span<double> ops, int oTop)
         {
-            // Enumerate the expression once
-            // Repeat incrementing the index until the end
-            int i = 0;
-            int length = source.Length;
+            double op = ops[oTop - 1];
+            double b = values[vTop - 1];
+            double a = values[vTop - 2];
 
-            // The sign of the current chunk,
-            // which will be applied when adding it to the final result. It is +1 for addition and -1 for subtraction.
-            double sign = 1;
-            // The result of the current chunk of multiplication/division,
-            // which will be added to the final result when an addition/subtraction operator is encountered.
-            double chunk;
-            // The final result of the calculation.
-            double result = 0;
+            double result;
 
-            // Process the first chunk (the part before the first addition/subtraction operator)
-            // Similar to multiplication/division
-            if (source[i] == Element.ID_OA)
+            if (op is Element.ID_OA)
+                result = a + b;
+            else if (op is Element.ID_OS)
+                result = a - b;
+            else if (op is Element.ID_OM)
+                result = a * b;
+            else if (op is Element.ID_OD)
             {
-                i++;
-                chunk = source[i++];
-            }
-            else if (source[i] == Element.ID_OS)
-            {
-                i++;
-                chunk = -source[i++];
+                if (b == 0) return false;
+                result = a / b;
             }
             else
-            {
-                chunk = source[i++];
-            }
+                return false;
 
-            while (i < length)
-            {
-                double op = source[i++];
-
-                // Process the next chunk until the next addition/subtraction operator is encountered
-                if (op == Element.ID_OM)
-                {
-                    chunk *= source[i++];
-                }
-                else if (op == Element.ID_OD)
-                {
-                    double rhs = source[i++];
-                    if (rhs == 0) return double.NaN;
-                    chunk /= rhs;
-                }
-                // When an addition/subtraction operator is encountered, add the current chunk to the final result and start a new chunk
-                else if (op == Element.ID_OA)
-                {
-                    result += sign * chunk;
-                    sign = 1;
-                    chunk = source[i++];
-                }
-                else if (op == Element.ID_OS)
-                {
-                    result += sign * chunk;
-                    sign = -1;
-                    chunk = source[i++];
-                }
-            }
-
-            // Add the last chunk to the final result
-            result += sign * chunk;
-            return result;
+            values[vTop - 2] = result;
+            return true;
         }
+
+        // Return the precedence of the operator. Higher value means higher precedence.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Precedence(double op) => op switch
+        {
+            Element.ID_OA or Element.ID_OS => 1,
+            Element.ID_OM or Element.ID_OD => 2,
+            _                              => 0,
+        };
     }
 }

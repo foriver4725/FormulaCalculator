@@ -60,24 +60,29 @@ namespace foriver4725.FormulaCalculator
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int ToInt(this char c) => c switch
         {
-            N0 => 0,
-            N1 => 1,
-            N2 => 2,
-            N3 => 3,
-            N4 => 4,
-            N5 => 5,
-            N6 => 6,
-            N7 => 7,
-            N8 => 8,
-            N9 => 9,
-            OA => ID_OA,
-            OS => ID_OS,
-            OM => ID_OM,
-            OD => ID_OD,
-            PL => ID_PL,
-            PR => ID_PR,
+            N0   => 0,
+            N1   => 1,
+            N2   => 2,
+            N3   => 3,
+            N4   => 4,
+            N5   => 5,
+            N6   => 6,
+            N7   => 7,
+            N8   => 8,
+            N9   => 9,
+            OA   => ID_OA,
+            OS   => ID_OS,
+            OM   => ID_OM,
+            OD   => ID_OD,
+            PL   => ID_PL,
+            PR   => ID_PR,
             NONE => ID_NONE,
-            _ => throw new ArgumentOutOfRangeException(nameof(c), $"Invalid character: {c}"),
+            _    => throw new ArgumentOutOfRangeException(nameof(c), $"Invalid character: {c}"),
         };
+
+        // Used in the calculation
+        // The comparison is rough, but it is guaranteed that it will not cause errors in calculations.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool IsNumber(this double value) => value is (< ID_PR or > ID_OA);
     }
 }
