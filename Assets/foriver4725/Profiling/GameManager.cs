@@ -20,14 +20,16 @@ namespace foriver4725.FormulaCalculator.Profiling
 
         private void Awake()
         {
-            formulaInputField.text = "1+2*3/(4-5)";
             loopAmountSlider.onValueChanged.AddListener(value =>
             {
-                _loopAmount = (ulong)Math.Pow(10, value);
-                loopAmountText.text = $"Loop Amount : 1e{value}";
+                value *= 0.1f;
+                _loopAmount = (ulong)Mathf.Pow(10, value);
+                loopAmountText.text = $"Loop Amount : 1e{value:N1}";
             });
-            loopAmountSlider.value = 7;
-            doSkipValidationToggle.isOn = false;
+
+            formulaInputField.text = "1+2*3/(4-5)";
+            loopAmountSlider.onValueChanged.Invoke(loopAmountSlider.value = 70); // 1e7.0
+            doSkipValidationToggle.isOn = true;
             profilerLabelInputField.text = "### FormulaCalculator.Calculate() ###";
         }
 
