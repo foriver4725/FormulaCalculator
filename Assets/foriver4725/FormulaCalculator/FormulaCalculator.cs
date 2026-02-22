@@ -97,7 +97,7 @@ namespace foriver4725.FormulaCalculator
 
                     if (e.ToType() != Element.Type.Operator) continue;
 
-                    if (e == Element.OA || e == Element.OS)
+                    if (e is (Element.OA or Element.OS))
                     {
                         if (i > 0)
                         {
