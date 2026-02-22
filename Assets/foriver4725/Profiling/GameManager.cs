@@ -13,7 +13,6 @@ namespace foriver4725.FormulaCalculator.Profiling
         [SerializeField] private TMP_InputField formulaInputField;
         [SerializeField] private Slider loopAmountSlider;
         [SerializeField] private TextMeshProUGUI loopAmountText;
-        [SerializeField] private Toggle doSkipValidationToggle;
         [SerializeField] private TMP_InputField profilerLabelInputField;
 
         private ulong _loopAmount = 1;
@@ -29,7 +28,6 @@ namespace foriver4725.FormulaCalculator.Profiling
 
             formulaInputField.text = "1+2*3/(4-5)";
             loopAmountSlider.onValueChanged.Invoke(loopAmountSlider.value = 70); // 1e7.0
-            doSkipValidationToggle.isOn = true;
             profilerLabelInputField.text = "### FormulaCalculator.Calculate() ###";
         }
 
@@ -42,7 +40,6 @@ namespace foriver4725.FormulaCalculator.Profiling
                     Run(
                         formulaInputField.text.AsSpan(),
                         _loopAmount,
-                        doSkipValidationToggle.isOn,
                         profilerLabelInputField.text
                     );
                 }
@@ -58,17 +55,16 @@ namespace foriver4725.FormulaCalculator.Profiling
             }
         }
 
-        private static void Run(ReadOnlySpan<char> formula, ulong loopAmount, bool doSkipValidation,
-            string profilerLabel)
+        private static void Run(ReadOnlySpan<char> formula, ulong loopAmount, string profilerLabel)
         {
             // Warmup
             for (int i = 0; i < 8; i++)
-                _ = formula.Calculate(doSkipValidation: doSkipValidation);
+                _ = formula.Calculate();
 
             Profiler.BeginSample(profilerLabel);
 
             for (ulong i = 0; i < loopAmount; i++)
-                _ = formula.Calculate(doSkipValidation: doSkipValidation);
+                _ = formula.Calculate();
 
             Profiler.EndSample();
         }

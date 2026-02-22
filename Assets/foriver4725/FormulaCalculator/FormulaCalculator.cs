@@ -14,27 +14,17 @@ namespace foriver4725.FormulaCalculator
         /// <param name="formula"> The formula to be calculated. </param>
         /// <param name="clampMin"> The minimum value to clamp the result to. </param>
         /// <param name="clampMax"> The maximum value to clamp the result to. </param>
-        /// <param name="doSkipValidation"> If true, skips validation checks. (Be careful!) </param>
-        /// <param name="maxNumberDigit"> Valid when doSkipValidation is false.<br/>The maximum number of digits allowed when concatenating numbers (as long as it remains within the range of int). </param>
         /// <returns> The result of the calculation as a double. If the formula is invalid or an error occurs during calculation (such as division by zero), returns double.NaN. </returns>
         public static double Calculate(
             this ReadOnlySpan<char> formula,
             double clampMin = short.MinValue,
-            double clampMax = short.MaxValue,
-            bool doSkipValidation = false,
-            byte maxNumberDigit = 8
+            double clampMax = short.MaxValue
         )
         {
             Span<char> RemoveNone_result = stackalloc char[formula.Length];
             int RemoveNone_resultLength = RemoveNone(formula, RemoveNone_result);
             if (RemoveNone_resultLength <= 0) return double.NaN; // Empty formula
             RemoveNone_result = RemoveNone_result[..RemoveNone_resultLength];
-
-            if (!doSkipValidation)
-            {
-                if (!IsValidFormula(RemoveNone_result, maxNumberDigit))
-                    return double.NaN;
-            }
 
             Span<int> ConnectNumbers_result = stackalloc int[RemoveNone_result.Length];
             int ConnectNumbers_resultLength = ConnectNumbers(RemoveNone_result, ConnectNumbers_result);
@@ -49,11 +39,29 @@ namespace foriver4725.FormulaCalculator
 
         // Check if the formula does not contain any invalid characters
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsValidFormula(ReadOnlySpan<char> formula, byte maxNumberDigit)
+        public static bool IsValidFormula(this ReadOnlySpan<char> formulaArg, byte maxNumberDigit = 8)
         {
-            // [Is Whole OK?]
-            // Check if the formula does not contain any invalid characters
+            // Remove 'None' and compress
+            Span<char> formula = stackalloc char[formulaArg.Length];
             {
+                int length = 0;
+                foreach (char e in formulaArg)
+                {
+                    if (e == Element.NONE)
+                        continue;
+                    formula[length++] = e;
+                }
+
+                formula = formula[..length];
+            }
+
+            // [Is Whole OK?]
+            // Check if the formula does not contain any invalid characters,
+            // but contains at least one valid character (to prevent empty formula)
+            {
+                if (formula.IsEmpty)
+                    return false;
+
                 foreach (char e in formula)
                     if (!e.IsValidChar())
                         return false;
