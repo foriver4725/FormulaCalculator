@@ -1,115 +1,167 @@
 # FormulaCalculator
 
+他の言語版:  
+[中文版本](./README_CN.md) ｜ [English](./README.md)
+
 ## 概要
 
-Unity上で数式を解析し、計算を行う機能を提供します。  
-ヒープアロケーションを発生させず、高速に動作し、オーバーヘッドを最小限に抑えています。  
+C# および Unity 向けの、高速・ゼロアロケーション・シングルパス式評価ライブラリです。
+
+- **速度重視設計**: デフォルトでは式の検証を行いません。
+- ホットパスでの **ヒープアロケーションなし**（Spanベース）。
+- **.NET（NuGet）** および **Unity（UPM）** に対応。
+
+> ⚠️ 本ライブラリはパフォーマンスを最優先に設計されています。  
+> `Calculate()` を呼び出す前に、式が正しい形式であることを保証してください。  
+> 検証が必要な場合は `IsValidFormula()` を使用してください。
 
 ---
 
-## 導入方法
+## インストール
 
-UPM経由でインストールします：  
+### NuGet (.NET / C#)
+
+NuGet からインストール:
+
+```
+dotnet add package foriver4725.FormulaCalculator
+```
+
+### Unity (UPM)
+
+UPM（Git URL）からインストール:
+
 ```
 https://github.com/foriver4725/FormulaCalculator.git?path=Assets/foriver4725/FormulaCalculator
 ```
 
-アセンブリ名と名前空間はいずれも `foriver4725.FormulaCalculator` です。
+アセンブリ名および名前空間は以下の通りです:
+
+- Assembly: `foriver4725.FormulaCalculator`
+- Namespace: `foriver4725.FormulaCalculator`
 
 ---
 
-## 使用例
+## クイックスタート
 
-以下は計算メソッドの完全なシグネチャです：  
-```cs
-/// <summary>
-/// 数式文字列を計算し、結果を double 型で返します。<br/>
-/// - 使用可能な文字：0〜9, +, -, *, /, (, ), スペース（無視されます）<br/>
-/// </summary>
-/// <param name="formula"> 計算対象の数式文字列。 </param>
-/// <param name="clampMin"> 結果の下限値。 </param>
-/// <param name="clampMax"> 結果の上限値。 </param>
-/// <param name="doSkipValidation"> true の場合、構文チェックをスキップします（使用注意）。 </param>
-/// <param name="maxNumberDigit"> doSkipValidation が false の場合に有効。<br/>連続した数字として扱う桁数の上限（int範囲内）。 </param>
-/// <returns> 結果を double で返します。式が無効または計算エラー（例：0除算）が発生した場合は double.NaN を返します。 </returns>
-public static double Calculate(
-    this ReadOnlySpan<char> formula,
-    double clampMin = short.MinValue,
-    double clampMax = short.MaxValue,
-    bool doSkipValidation = false,
-    byte maxNumberDigit = 8
-);
-```
+### 計算
 
-この機能は拡張メソッドとして提供されており、もっとも簡単な例は以下の通りです：  
 ```cs
+using foriver4725.FormulaCalculator;
+
 double result = "1+2*3/(4-5)".AsSpan().Calculate();
+
+// 出力: -5
 ```
 
-構文の正しさが保証されている場合、  
-`doSkipValidation` フラグを `true` に設定するとパフォーマンスが大幅に向上します：  
+### 検証（ユーザー入力を扱う場合に推奨）
+
 ```cs
-double result = "1+2*3/(4-5)".AsSpan().Calculate(doSkipValidation: true);
-```
+using foriver4725.FormulaCalculator;
 
-詳細なパフォーマンス結果については、  
-後述の [パフォーマンス](https://github.com/foriver4725/FormulaCalculator/blob/main/README_JP.md#%E3%83%91%E3%83%95%E3%82%A9%E3%83%BC%E3%83%9E%E3%83%B3%E3%82%B9) セクションを参照してください。
+ReadOnlySpan<char> formula = "1+2*3/(4-5)".AsSpan();
+
+if (!formula.IsValidFormula())
+{
+return;
+}
+
+double result = formula.Calculate();
+```
 
 ---
 
-## 構文ルールの詳細
+## API
 
-- 数字と括弧の間には必ず演算子が必要です（省略不可）。  
-- 連続する演算子は使用できません（例：`12 * -3` は無効）。  
-- `-5` のように負号だけでなく、`+7` のような正号も許可されます。  
-- 0による除算は禁止されています。  
+### Calculate
 
-詳細なルールは [FormulaCalculator.cs](https://github.com/foriver4725/FormulaCalculator/blob/main/Assets/foriver4725/FormulaCalculator/FormulaCalculator.cs) を参照、  
-または後述の [計算手順](https://github.com/foriver4725/FormulaCalculator/blob/main/README_JP.md#%E8%A8%88%E7%AE%97%E6%89%8B%E9%A0%86) を確認してください。
+```cs
+public static double Calculate(this ReadOnlySpan<char> formula)
+```
+
+### IsValidFormula
+
+```cs
+public static bool IsValidFormula(this ReadOnlySpan<char> formula, byte maxNumberDigit = 8)
+```
 
 ---
 
-## 計算手順
+## 構文
 
-1. 受け取った数式文字列から空白を削除します。  
-2. 以下のチェックを行い、構文が正しいか検証します。`doSkipValidation` が true の場合、この検証はスキップされます。  
-```cs
-// 不正な文字が含まれていないかチェック
-private static bool IsWholeOK(ReadOnlySpan<char> formula);
+本ライブラリは一般的な数学表記ルールに従います。
 
-// 括弧の直外に数字がないか、桁数制限を超えていないかをチェック
-private static bool IsNumberOK(ReadOnlySpan<char> formula, byte maxNumberDigit);
+- 四則演算および括弧をサポート
+- 演算子の優先順位・結合規則は標準的な数学規則に準拠
+- 空白は無視されます
 
-// 各演算子の前後関係をチェック
-private static bool IsOperatorOK(ReadOnlySpan<char> formula);
+厳密な挙動やエッジケースについては、以下のテストスクリプトをご参照ください:
 
-// 括弧の対応関係・配置・内部要素をチェック
-private static bool IsParagraphOK(ReadOnlySpan<char> formula);
-```
-3. 隣接する数字をまとめて多桁の整数値として評価します。  
-   桁数上限（デフォルト8桁）を超えると `int` 範囲を逸脱するため、制限を設けています。  
-   記号については [Symbol.cs](https://github.com/foriver4725/FormulaCalculator/blob/main/Assets/foriver4725/FormulaCalculator/Symbol.cs) で定義されたIDにマッピングされます。  
-4. 整数値を `double` にキャストし、以降は浮動小数演算を行います。  
-5. 括弧内を再帰的に評価し、残らなくなるまで展開します。演算順序は、符号処理 → 乗除 → 加減 の順です。  
-6. 計算結果が極端な値にならないよう、上限・下限を指定範囲でクランプします。
+- [Test Scripts](./dotnet/FormulaCalculator.Tests/Tests.cs)
 
 ---
 
 ## パフォーマンス
 
-内部メソッドのほぼすべてに `inline` 属性が付与されており、  
-計算はすべて `Span` を使用してヒープアロケーションなしで実行されます。  
+本ライブラリは高パフォーマンスおよび **ゼロヒープアロケーション** を目的として設計されています。
 
-以下は、`doSkipValidation` の有無で**100万回**の計算を行った際のエディタ上での計測結果です。  
-計測スクリプトは [こちら](https://github.com/foriver4725/FormulaCalculator/blob/main/Assets/foriver4725/Profiling/GameManager.cs) にあります。  
+すべての計算は `Span` ベースで行われ、評価中に GC アロケーションは発生しません。
 
-| `doSkipValidation` | GC Alloc | Time ms | Self ms |
-| :---: | :---: | :---: | :---: |
-| `false` (デフォルト) | 0 B | 674.12 | 674.12 |
-| `true` | 0 B | 465.79 | 465.79 |
+### ベンチマーク (.NET / BenchmarkDotNet)
 
-構文チェックをスキップすることで、**約31%の高速化** が確認されています。
+BenchmarkDotNet を用いて以下の条件で測定しています:
 
-## Pure C# 版
-本ライブラリは Pure C# にも移植されています。<br/>
-Unity を使用しない環境で利用したい場合は、[こちらのリポジトリ](https://github.com/foriver4725/Formuler) からコンパイル済みの DLL をダウンロードできます。<br/>
+- 異なる式の複雑度
+- 複数のループ回数
+- アロケーション追跡（`[MemoryDiagnoser]`）
+
+ベンチマークスクリプトはこちら:
+
+- [Benchmark Script](./dotnet/FormulaCalculator.Benchmarks/Benchmarks.cs)
+
+| Formula                                                 | LoopAmount |       Mean |       Error |    StdDev | Allocated |
+|---------------------------------------------------------|-----------:|-----------:|------------:|----------:|----------:|
+| 2*4-12/3                                                |     10,000 |   0.272 ms |     2.14 us |   1.90 us |         - |
+| 2*4-12/3                                                |    100,000 |   2.699 ms |    14.20 us |  13.28 us |         - |
+| 2*4-12/3                                                |  1,000,000 |  26.994 ms |    81.99 us |  68.47 us |         - |
+| 1+2^(7-3)*3/(4-5)                                       |     10,000 |   0.617 ms |     7.83 us |   7.32 us |         - |
+| 1+2^(7-3)*3/(4-5)                                       |    100,000 |   6.134 ms |    37.50 us |  29.27 us |         - |
+| 1+2^(7-3)*3/(4-5)                                       |  1,000,000 |  62.369 ms |   667.25 us | 624.14 us |         - |
+| ((125-35)*2^3+(80/4-125)*6-7)*(3-2^2)+(5*(90-3/15)^2-4) |     10,000 |   1.986 ms |    18.52 us |  15.47 us |         - |
+| ((125-35)*2^3+(80/4-125)*6-7)*(3-2^2)+(5*(90-3/15)^2-4) |    100,000 |  19.947 ms |   114.18 us | 101.22 us |         - |
+| ((125-35)*2^3+(80/4-125)*6-7)*(3-2^2)+(5*(90-3/15)^2-4) |  1,000,000 | 199.573 ms | 1,233.04 us | 962.68 us |         - |
+
+主な特性:
+
+- ✅ 0 B GC Alloc
+- ✅ 入力長に比例する線形時間評価
+- ✅ ループ回数に対して安定した性能
+
+---
+
+## 技術的背景
+
+本実装は以下の古典的アルゴリズムに着想を得ています:
+
+- Dijkstra の **Shunting Yard algorithm**
+- 二つのスタックによる演算子優先順位評価
+
+多くの従来実装ではトークン化を行い、その後逆ポーランド記法へ変換するなど二段階処理を行います。
+
+本ライブラリではより直接的な方式を採用しています:
+
+- シングルパス走査
+- 値スタック／演算子スタックによる即時簡約
+- 中間トークン配列なし
+- AST 構築なし
+- ヒープアロケーションなし
+
+これにより、入力式の長さに比例した計算コストを実現しています。
+
+安全性が必要な場合は、`IsValidFormula()` を事前に使用してください。
+
+---
+
+## ライセンス
+
+[MIT](./LICENSE)

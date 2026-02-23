@@ -138,7 +138,7 @@ Typical characteristics:
 - ✅ Linear-time evaluation
 - ✅ Stable performance across different loop scales
 
-## Notes
+## Design
 
 The implementation is inspired by classical expression evaluation techniques such as:
 
