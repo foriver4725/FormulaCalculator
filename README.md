@@ -32,7 +32,7 @@ dotnet add package foriver4725.FormulaCalculator
 Install via UPM (Git URL):
 
 ```
-https://github.com/foriver4725/FormulaCalculator.git?path=Assets/foriver4725/FormulaCalculator
+https://github.com/foriver4725/FormulaCalculator.git?path=Unity/Assets/foriver4725/FormulaCalculator
 ```
 
 The names of both the assembly and the namespace are:

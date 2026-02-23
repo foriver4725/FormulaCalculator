@@ -32,7 +32,7 @@ dotnet add package foriver4725.FormulaCalculator
 UPM（Git URL）からインストール:
 
 ```
-https://github.com/foriver4725/FormulaCalculator.git?path=Assets/foriver4725/FormulaCalculator
+https://github.com/foriver4725/FormulaCalculator.git?path=Unity/Assets/foriver4725/FormulaCalculator
 ```
 
 アセンブリ名および名前空間は以下の通りです:
