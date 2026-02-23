@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 using NUnit.Framework;
-using foriver4725.FormulaCalculator;
 
 namespace foriver4725.FormulaCalculator.Tests
 {
