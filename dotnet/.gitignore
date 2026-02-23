@@ -11,3 +11,8 @@
 TestResults/
 coverage/
 *.coverage
+
+# ================================
+# BenchmarkDotNet artifacts
+# ================================
+BenchmarkDotNet.Artifacts/
