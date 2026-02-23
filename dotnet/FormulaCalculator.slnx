@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="FormulaCalculator.Benchmarks/FormulaCalculator.Benchmarks.csproj" />
+  <Project Path="FormulaCalculator.Tests/FormulaCalculator.Tests.csproj" />
+  <Project Path="FormulaCalculator/FormulaCalculator.csproj" />
+</Solution>
