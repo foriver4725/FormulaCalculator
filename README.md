@@ -35,10 +35,18 @@ Install via UPM (Git URL):
 https://github.com/foriver4725/FormulaCalculator.git?path=Unity/Assets/foriver4725/FormulaCalculator
 ```
 
-The names of both the assembly and the namespace are:
+---
 
-- Assembly: `foriver4725.FormulaCalculator`
-- Namespace: `foriver4725.FormulaCalculator`
+## Usage Notes
+
+For both .NET and Unity, use the following namespace:
+
+```cs
+using foriver4725.FormulaCalculator;
+```
+
+If you are using Assembly Definition Files (`.asmdef`) in Unity,
+make sure to add a reference to the `foriver4725.FormulaCalculator` assembly.
 
 ---
 

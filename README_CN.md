@@ -35,10 +35,18 @@ dotnet add package foriver4725.FormulaCalculator
 https://github.com/foriver4725/FormulaCalculator.git?path=Unity/Assets/foriver4725/FormulaCalculator
 ```
 
-程序集名称与命名空间：
+---
 
-- Assembly: `foriver4725.FormulaCalculator`
-- Namespace: `foriver4725.FormulaCalculator`
+## 使用说明
+
+在 .NET 和 Unity 中，请使用以下命名空间：
+
+```cs
+using foriver4725.FormulaCalculator;
+```
+
+如果在 Unity 中使用 Assembly Definition Files（`.asmdef`），  
+请确保将 `foriver4725.FormulaCalculator` 程序集添加为引用。
 
 ---
 

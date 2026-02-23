@@ -35,10 +35,18 @@ UPM（Git URL）からインストール:
 https://github.com/foriver4725/FormulaCalculator.git?path=Unity/Assets/foriver4725/FormulaCalculator
 ```
 
-アセンブリ名および名前空間は以下の通りです:
+---
 
-- Assembly: `foriver4725.FormulaCalculator`
-- Namespace: `foriver4725.FormulaCalculator`
+## 使用上の注意
+
+.NET と Unity のどちらでも、以下の名前空間を使用してください。
+
+```cs
+using foriver4725.FormulaCalculator;
+```
+
+Unity で Assembly Definition Files（`.asmdef`）を使用している場合は、  
+`foriver4725.FormulaCalculator` アセンブリを参照に追加してください。
 
 ---
 
