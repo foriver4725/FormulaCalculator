@@ -5,7 +5,7 @@ Available in other languages:
 
 ## Overview
 
-A fast, allocation-free formula evaluator for C# and Unity.
+A fast, allocation-free, single-pass formula evaluator for C# and Unity.
 
 - **Focus on speed**: calculation does **not** validate the formula by default.
 - **No heap allocations** in the hot path (Span-based).
@@ -159,6 +159,8 @@ This library takes a more direct approach:
 The goal is to minimize overhead while preserving standard mathematical behavior.
 
 If safety is required, validate the expression first using `IsValidFormula()`.
+
+This design keeps the evaluation cost proportional to the length of the input expression.
 
 ---
 
