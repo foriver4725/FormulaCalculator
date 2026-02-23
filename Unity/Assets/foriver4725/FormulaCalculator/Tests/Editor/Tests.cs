@@ -290,11 +290,11 @@ namespace foriver4725.FormulaCalculator.Tests
         // =========================================================
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void V(this string formula)
-            => Assert.IsTrue(formula.AsSpan().IsValidFormula(), $"Should be VALID: {formula}");
+            => Assert.That(formula.AsSpan().IsValidFormula(), Is.True, $"Should be VALID: {formula}");
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Nv(this string formula)
-            => Assert.IsFalse(formula.AsSpan().IsValidFormula(), $"Should be INVALID: {formula}");
+            => Assert.That(formula.AsSpan().IsValidFormula(), Is.False, $"Should be INVALID: {formula}");
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Eq(this string formula, double expected)
@@ -303,11 +303,11 @@ namespace foriver4725.FormulaCalculator.Tests
 
             if (double.IsNaN(expected))
             {
-                Assert.IsTrue(double.IsNaN(actual), $"Expected NaN but was {actual}: {formula}");
+                Assert.That(actual, Is.NaN, $"Expected NaN but was {actual}: {formula}");
                 return;
             }
 
-            Assert.AreEqual(expected, actual, 1.0e-8, formula);
+            Assert.That(actual, Is.EqualTo(expected).Within(1.0e-8), formula);
         }
 
         private static TestCaseData Case(string f, bool expectedValid, string name)
