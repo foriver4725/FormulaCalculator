@@ -1,0 +1,91 @@
+# =================================
+# Unity generated folders
+# =================================
+.utmp/
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# =================================
+# Unity solution files (root only)
+# ※ 直下限定にするのが安全
+# =================================
+/*.csproj
+/*.unityproj
+/*.sln
+
+# =================================
+# Blender temporary files
+# =================================
+*.blend1
+*.blend1.meta
+
+# =================================
+# Memory / Recording
+# =================================
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# =================================
+# Rider / VS plugin
+# =================================
+/[Aa]ssets/Plugins/Editor/JetBrains*
+*.DotSettings.user
+.vs/
+.gradle/
+ExportedObj/
+.consulo/
+
+# =================================
+# Unity auto-generated DB / crash
+# =================================
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+mono_crash.*
+
+# =================================
+# Builds
+# =================================
+*.apk
+*.aab
+*.app
+*.unitypackage
+*.unitypackage.meta
+
+# =================================
+# Addressables
+# =================================
+/ServerData
+/[Aa]ssets/StreamingAssets/aa*
+/[Aa]ssets/AddressableAssetsData/link.xml*
+/[Aa]ssets/Addressables_Temp*
+/[Aa]ssets/AddressableAssetsData/*/*.bin*
+
+# =================================
+# Visual Scripting
+# =================================
+/[Aa]ssets/Unity.VisualScripting.Generated/
+
+# =================================
+# TestRunner
+# =================================
+/[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# =================================
+# Custom (TextMesh Pro auto-generated)
+# =================================
+/[Aa]ssets/TextMesh\ Pro/
+/[Aa]ssets/TextMesh\ Pro.meta
