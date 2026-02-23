@@ -18,7 +18,7 @@ make test
 make deploy-unity
 
 # Build, test, and deploy for Unity (all at once)
-make
+make all
 
 # Run performance benchmarks
 make benchmark
