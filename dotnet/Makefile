@@ -3,7 +3,7 @@ CONFIG := Release
 DLL_TFM := netstandard2.1
 OTHER_TFM := net8.0
 
-DLL_PATH := ./FormulaCalculator/bin/$(CONFIG)/$(TFM)/FormulaCalculator.dll
+DLL_PATH := ./FormulaCalculator/bin/$(CONFIG)/$(DLL_TFM)/FormulaCalculator.dll
 TEST_SCRIPT_PATH := ./FormulaCalculator.Tests/Tests.cs
 
 UNITY_DIR := ../Unity/Assets/foriver4725/FormulaCalculator
@@ -19,10 +19,12 @@ test: build
 	dotnet test ./FormulaCalculator.Tests/FormulaCalculator.Tests.csproj -c $(CONFIG) -f $(OTHER_TFM) -v detailed
 
 deploy-unity: build
-	test -f $(DLL_PATH) $(TEST_SCRIPT_PATH)
-	mkdir -p $(UNITY_DLL_DIR) $(UNITY_TEST_SCRIPT_DIR)
-	cp -f $(DLL_PATH) $(UNITY_DLL_DIR)/
-	cp -f $(TEST_SCRIPT_PATH) $(UNITY_TEST_SCRIPT_DIR)/
+	test -f $(DLL_PATH)
+	test -f $(TEST_SCRIPT_PATH)
+	mkdir -p $(UNITY_DLL_DIR)
+	mkdir -p $(UNITY_TEST_SCRIPT_DIR)
+	cp -f $(DLL_PATH) $(UNITY_DLL_DIR)
+	cp -f $(TEST_SCRIPT_PATH) $(UNITY_TEST_SCRIPT_DIR)
 
 all: build test deploy-unity
 
