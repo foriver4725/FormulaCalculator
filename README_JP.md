@@ -165,3 +165,20 @@ BenchmarkDotNet を用いて以下の条件で測定しています:
 ## ライセンス
 
 [MIT](./LICENSE)
+
+---
+
+## 開発者向け
+
+バージョンを更新する際は、以下のファイルの設定を必ず一致させてください。
+
+- [dotnet - FormulaCalculator.csproj](./dotnet/FormulaCalculator/FormulaCalculator.csproj)
+- [Unity - package.json](./Unity/Assets/foriver4725/FormulaCalculator/package.json)
+
+公開前にバージョン番号が一致していることを確認してください。
+
+環境ごとの詳細な説明は、以下を参照してください。
+
+- [.NET README](./dotnet/README.md)
+
+<!--- - [Unity README]() --->

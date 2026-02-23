@@ -1,19 +1,20 @@
 {
-    "name": "com.foriver4725.formula-calculator",
-    "displayName": "FormulaCalculator",
-    "author": {
-        "name": "foriver4725",
-        "url": "https://github.com/foriver4725"
-    },
-    "version": "1.0.2",
-    "unity": "6000.0",
-    "description": "An algorithm that parses and evaluates mathematical expressions given as strings.",
-    "keywords": [
-        "FormulaCalculator",
-        "Formula",
-        "Calculate",
-        "Calculator",
-        "Math"
-    ],
-    "license": "MIT"
+  "name": "com.foriver4725.formula-calculator",
+  "displayName": "FormulaCalculator",
+  "author": {
+    "name": "foriver4725",
+    "url": "https://github.com/foriver4725"
+  },
+  "version": "2.0.0",
+  "unity": "6000.0",
+  "description": "Fast, allocation-free, single-pass formula evaluator.",
+  "keywords": [
+    "FormulaCalculator",
+    "Formula",
+    "Calculate",
+    "Calculator",
+    "Parser",
+    "Math"
+  ],
+  "license": "MIT"
 }

@@ -165,3 +165,20 @@ public static bool IsValidFormula(this ReadOnlySpan<char> formula, byte maxNumbe
 ## 许可证
 
 [MIT](./LICENSE)
+
+---
+
+## 开发者说明
+
+更新版本时，请确保以下文件中的版本号保持一致：
+
+- [dotnet - FormulaCalculator.csproj](./dotnet/FormulaCalculator/FormulaCalculator.csproj)
+- [Unity - package.json](./Unity/Assets/foriver4725/FormulaCalculator/package.json)
+
+发布前请确认版本号已同步。
+
+各环境的详细说明请参阅：
+
+- [.NET README](./dotnet/README.md)
+
+<!--- - [Unity README]() --->

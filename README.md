@@ -167,3 +167,20 @@ This design keeps the evaluation cost proportional to the length of the input ex
 ## License
 
 [MIT](./LICENSE)
+
+---
+
+## For Developers
+
+When updating the version, make sure to update it consistently in:
+
+- [dotnet - FormulaCalculator.csproj](./dotnet/FormulaCalculator/FormulaCalculator.csproj)
+- [Unity - package.json](./Unity/Assets/foriver4725/FormulaCalculator/package.json)
+
+Keep the version numbers aligned before publishing.
+
+Additional documentation for each environment:
+
+- [.NET README](./dotnet/README.md)
+
+<!--- - [Unity README]() --->
