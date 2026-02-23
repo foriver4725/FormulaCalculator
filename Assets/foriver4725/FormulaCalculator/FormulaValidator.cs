@@ -3,8 +3,6 @@ using System.Runtime.CompilerServices;
 
 namespace foriver4725.FormulaCalculator
 {
-    using Element = FormulaElement;
-
     public static class FormulaValidator
     {
         private enum ElementType : byte
@@ -19,11 +17,11 @@ namespace foriver4725.FormulaCalculator
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ElementType GetElementType(this char c) => c switch
         {
-            >= Element.N0 and <= Element.N9                                    => ElementType.Number,
-            Element.OA or Element.OS or Element.OM or Element.OD or Element.OP => ElementType.Operator,
-            Element.PL or Element.PR                                           => ElementType.Paragraph,
-            Element.NONE                                                       => ElementType.None,
-            _                                                                  => ElementType.Invalid,
+            >= '0' and <= '9'               => ElementType.Number,
+            '+' or '-' or '*' or '/' or '^' => ElementType.Operator,
+            '(' or ')'                      => ElementType.Paragraph,
+            ' '                             => ElementType.None,
+            _                               => ElementType.Invalid,
         };
 
         // Check if the formula does not contain any invalid characters
@@ -38,7 +36,7 @@ namespace foriver4725.FormulaCalculator
                 int length = 0;
                 foreach (char e in formulaArg)
                 {
-                    if (e is Element.NONE)
+                    if (e is ' ')
                         continue;
                     formula[length++] = e;
                 }
@@ -66,9 +64,9 @@ namespace foriver4725.FormulaCalculator
                 {
                     char e = formula[i], f = formula[i + 1];
 
-                    if (e.GetElementType() is ElementType.Number && f is Element.PL)
+                    if (e.GetElementType() is ElementType.Number && f is '(')
                         return false;
-                    if (e is Element.PR && f.GetElementType() is ElementType.Number)
+                    if (e is ')' && f.GetElementType() is ElementType.Number)
                         return false;
                 }
 
@@ -101,13 +99,13 @@ namespace foriver4725.FormulaCalculator
                     if (e.GetElementType() is not ElementType.Operator)
                         continue;
 
-                    if (e is (Element.OA or Element.OS))
+                    if (e is ('+' or '-'))
                     {
                         if (i > 0)
                         {
                             char left = formula[i - 1];
                             if (left.GetElementType() is not ElementType.Number
-                                && left is not (Element.PL or Element.PR))
+                                && left is not ('(' or ')'))
                                 return false;
                         }
 
@@ -115,7 +113,7 @@ namespace foriver4725.FormulaCalculator
                         {
                             char right = formula[i + 1];
                             if (right.GetElementType() is not ElementType.Number
-                                && right is not Element.PL)
+                                && right is not '(')
                                 return false;
                         }
                         else return false;
@@ -126,7 +124,7 @@ namespace foriver4725.FormulaCalculator
                         {
                             char left = formula[i - 1];
                             if (left.GetElementType() is not ElementType.Number
-                                && left is not Element.PR)
+                                && left is not ')')
                                 return false;
                         }
                         else return false;
@@ -135,7 +133,7 @@ namespace foriver4725.FormulaCalculator
                         {
                             char right = formula[i + 1];
                             if (right.GetElementType() is not ElementType.Number
-                                && right is not Element.PL)
+                                && right is not '(')
                                 return false;
                         }
                         else return false;
@@ -151,8 +149,8 @@ namespace foriver4725.FormulaCalculator
                 int n = 0;
                 foreach (char e in formula)
                 {
-                    if (e is Element.PL) n++;
-                    else if (e is Element.PR) n--;
+                    if (e is '(') n++;
+                    else if (e is ')') n--;
 
                     if (n < 0) return false;
                 }
@@ -161,12 +159,12 @@ namespace foriver4725.FormulaCalculator
 
                 for (int i = 0; i < formula.Length; i++)
                 {
-                    if (formula[i] is Element.PL)
+                    if (formula[i] is '(')
                     {
                         int j = i + 1;
                         while (j < formula.Length)
                         {
-                            if (formula[j] is Element.PR) break;
+                            if (formula[j] is ')') break;
                             j++;
                         }
 
@@ -188,7 +186,7 @@ namespace foriver4725.FormulaCalculator
                 for (int i = 0; i < formula.Length - 1; i++)
                 {
                     char e = formula[i], f = formula[i + 1];
-                    if (e is Element.PR && f is Element.PL) return false;
+                    if (e is ')' && f is '(') return false;
                 }
             }
 

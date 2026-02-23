@@ -3,8 +3,6 @@ using System.Runtime.CompilerServices;
 
 namespace foriver4725.FormulaCalculator
 {
-    using Element = FormulaElement;
-
     public static class FormulaCalculator
     {
         /// <summary>
@@ -40,13 +38,13 @@ namespace foriver4725.FormulaCalculator
                 char c = formula[i];
 
                 // Ignore spaces
-                if (c is Element.NONE)
+                if (c is ' ')
                     continue;
 
                 // If the token is a number, build it
-                if (c is (>= Element.N0 and <= Element.N9))
+                if (c is (>= '0' and <= '9'))
                 {
-                    int digit = c - Element.N0;
+                    int digit = c - '0';
                     connectedNumber = (connectedNumber == -1) ? digit : (connectedNumber * 10 + digit);
                     prevType = 1;
                     continue;
@@ -60,17 +58,17 @@ namespace foriver4725.FormulaCalculator
                 }
 
                 // If the token is "("
-                if (c is Element.PL)
+                if (c is '(')
                 {
-                    ops[oTop++] = Element.PL;
+                    ops[oTop++] = '(';
                     prevType = 2;
                     continue;
                 }
 
                 // If the token is ")"
-                if (c is Element.PR)
+                if (c is ')')
                 {
-                    while (oTop > 0 && ops[oTop - 1] is not Element.PL)
+                    while (oTop > 0 && ops[oTop - 1] is not '(')
                     {
                         if (!ApplyTop(values, vTop, ops, oTop))
                             return double.NaN;
@@ -92,22 +90,22 @@ namespace foriver4725.FormulaCalculator
                 // Check for unary operators (+ and -)
                 // Unary is valid at the beginning or right after '('
                 bool isUnary =
-                    (c is Element.OA or Element.OS) &&
+                    (c is '+' or '-') &&
                     (prevType is (0 or 2));
 
                 if (isUnary)
                 {
                     // Look ahead ignoring spaces
                     int j = i + 1;
-                    while (j < formula.Length && formula[j] == Element.NONE) j++;
+                    while (j < formula.Length && formula[j] is ' ') j++;
                     if (j >= formula.Length) return double.NaN;
 
                     // If the next token is "(",
                     // treat unary as multiplying by ±1
-                    if (formula[j] == Element.PL)
+                    if (formula[j] == '(')
                     {
-                        values[vTop++] = (c is Element.OS) ? -1 : 1;
-                        ops[oTop++] = Element.OM; // implicit multiplication
+                        values[vTop++] = (c is '-') ? -1 : 1;
+                        ops[oTop++] = '*'; // implicit multiplication
                         prevType = 4;
                         continue;
                     }
@@ -169,19 +167,19 @@ namespace foriver4725.FormulaCalculator
 
             double result;
 
-            if (op is Element.OA)
+            if (op is '+')
                 result = a + b;
-            else if (op is Element.OS)
+            else if (op is '-')
                 result = a - b;
-            else if (op is Element.OM)
+            else if (op is '*')
                 result = a * b;
-            else if (op is Element.OD)
+            else if (op is '/')
             {
                 if (b == 0)
                     return false;
                 result = a / b;
             }
-            else if (op is Element.OP)
+            else if (op is '^')
             {
                 // 0^b : only allowed if b > 0
                 if (a == 0)
@@ -247,10 +245,10 @@ namespace foriver4725.FormulaCalculator
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int Precedence(char op) => op switch
         {
-            Element.OA or Element.OS => 1,
-            Element.OM or Element.OD => 2,
-            Element.OP               => 3,
-            _                        => 0,
+            '+' or '-' => 1,
+            '*' or '/' => 2,
+            '^'        => 3,
+            _          => 0,
         };
 
         // Return true if the operator on the stack should be reduced before pushing the incoming operator.
@@ -271,7 +269,7 @@ namespace foriver4725.FormulaCalculator
         // Return true if the operator is right-associative (such as '^'), otherwise false (such as '+', '-', '*', '/').
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsRightAssociative(char op)
-            => op is Element.OP; // '^'
+            => op is '^'; // '^'
 
         // Return true if the double is an integer (within a small tolerance), otherwise false.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
