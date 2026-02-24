@@ -115,33 +115,19 @@ All calculations are performed using `Span`-based processing, and no GC allocati
 
 ### Benchmark (.NET / BenchmarkDotNet)
 
-Performance is measured using BenchmarkDotNet with:
+Performance is evaluated using BenchmarkDotNet.
 
-- Different expression complexities
-- Multiple loop counts
-- Allocation tracking (`[MemoryDiagnoser]`)
-
-You can find the full benchmark script here:
+The benchmarks measure expression evaluation performance across
+different formula complexities while tracking memory allocations.
 
 - [Benchmark Script](./dotnet/FormulaCalculator.Benchmarks/Benchmarks.cs)
+- [Benchmark Results](./dotnet/BenchmarkResult.md)
 
-|                                                                   Formula | LoopAmount |       Mean |       Error |    StdDev | Allocated |
-|--------------------------------------------------------------------------:|-----------:|-----------:|------------:|----------:|----------:|
-|                                                 `2*4-12/3` (8 characters) |     10,000 |   0.272 ms |     2.14 us |   1.90 us |         - |
-|                                                 `2*4-12/3` (8 characters) |    100,000 |   2.699 ms |    14.20 us |  13.28 us |         - |
-|                                                 `2*4-12/3` (8 characters) |  1,000,000 |  26.994 ms |    81.99 us |  68.47 us |         - |
-|                                       `1+2^(7-3)*3/(4-5)` (17 characters) |     10,000 |   0.617 ms |     7.83 us |   7.32 us |         - |
-|                                       `1+2^(7-3)*3/(4-5)` (17 characters) |    100,000 |   6.134 ms |    37.50 us |  29.27 us |         - |
-|                                       `1+2^(7-3)*3/(4-5)` (17 characters) |  1,000,000 |  62.369 ms |   667.25 us | 624.14 us |         - |
-| `((125-35)*2^3+(80/4-125)*6-7)*(3-2^2)+(5*(90-3/15)^2-4)` (55 characters) |     10,000 |   1.986 ms |    18.52 us |  15.47 us |         - |
-| `((125-35)*2^3+(80/4-125)*6-7)*(3-2^2)+(5*(90-3/15)^2-4)` (55 characters) |    100,000 |  19.947 ms |   114.18 us | 101.22 us |         - |
-| `((125-35)*2^3+(80/4-125)*6-7)*(3-2^2)+(5*(90-3/15)^2-4)` (55 characters) |  1,000,000 | 199.573 ms | 1,233.04 us | 962.68 us |         - |
+Key characteristics:
 
-Typical characteristics:
-
-- ✅ 0 B GC Alloc
-- ✅ Linear-time evaluation
-- ✅ Stable performance across different loop scales
+- ✅ 0 B GC allocations
+- ✅ Allocation-free evaluation pipeline
+- ✅ Stable performance across varying expression complexity
 
 ## Design
 

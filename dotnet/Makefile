@@ -15,10 +15,12 @@ OTHER_TFM := net8.0
 
 DLL_PATH := ./FormulaCalculator/bin/$(CONFIG)/$(DLL_TFM)/FormulaCalculator.dll
 TEST_SCRIPT_PATH := ./FormulaCalculator.Tests/Tests.cs
+BENCHMARK_RESULT_MD_PATH := ./BenchmarkDotNet.Artifacts/results/foriver4725.FormulaCalculator.Benchmarks.Benchmarks-report-github.md
 
 UNITY_DIR := ../Unity/Assets/foriver4725/FormulaCalculator
 UNITY_DLL_DIR := $(UNITY_DIR)/Plugins
 UNITY_TEST_SCRIPT_DIR := $(UNITY_DIR)/Tests/Editor
+BENCHMARK_MD_PATH := ./BenchmarkResult.md
 # ===================
 
 .DEFAULT_GOAL := all
@@ -51,4 +53,6 @@ all: build test deploy-unity
 benchmark:
 	@$(LOG_INFO) "Benchmarking started..."
 	dotnet run -c $(CONFIG) -f $(OTHER_TFM) --project ./FormulaCalculator.Benchmarks/FormulaCalculator.Benchmarks.csproj
+	mkdir -p $(dir $(BENCHMARK_MD_PATH))
+	cp -f $(BENCHMARK_RESULT_MD_PATH) $(BENCHMARK_MD_PATH)
 	@$(LOG_SUCCESS) "Benchmarking completed"
