@@ -84,7 +84,6 @@ public sealed class FormulaLengthOrderer : IOrderer
 {
     public bool SeparateLogicalGroups => false;
 
-    // 実行順も同じにしたいなら Summary と同じ並びを返すのじゃ
     public IEnumerable<BenchmarkCase> GetExecutionOrder(
         ImmutableArray<BenchmarkCase> benchmarks,
         IEnumerable<BenchmarkLogicalGroupRule>? order = null)
