@@ -109,25 +109,31 @@ please refer to the test scripts in this repository:
 
 ## Performance
 
-This library is designed for high performance and **zero heap allocations** in the hot path.
+This library is designed for high performance and **zero heap allocations**
+in the hot path.
 
-All calculations are performed using `Span`-based processing, and no GC allocations occur during evaluation.
+All evaluations are performed using `Span`-based processing,
+and no GC allocations occur during calculation or validation.
 
 ### Benchmark (.NET / BenchmarkDotNet)
 
-Performance is evaluated using BenchmarkDotNet.
+Performance is measured using BenchmarkDotNet on .NET 8.
 
-The benchmarks measure expression evaluation performance across
-different formula complexities while tracking memory allocations.
+The benchmarks evaluate formulas with different expression lengths
+while tracking execution time and memory allocations.
 
 - [Benchmark Script](./dotnet/FormulaCalculator.Benchmarks/Benchmarks.cs)
 - [Benchmark Results](./dotnet/BenchmarkResult.md)
 
-Key characteristics:
+### Characteristics
 
-- ✅ 0 B GC allocations
+- ✅ **0 B GC allocations**
 - ✅ Allocation-free evaluation pipeline
-- ✅ Stable performance across varying expression complexity
+- ✅ Execution time scales roughly with expression length
+- ✅ Validation remains lightweight compared to evaluation
+
+`IsValidFormula()` can be used when safety is required,
+while `Calculate()` alone provides the fastest possible execution path.
 
 ## Supported Scope
 
