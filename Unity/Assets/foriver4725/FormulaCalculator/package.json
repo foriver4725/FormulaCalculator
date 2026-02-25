@@ -5,7 +5,7 @@
     "name": "foriver4725",
     "url": "https://github.com/foriver4725"
   },
-  "version": "2.0.0",
+  "version": "2.0.1",
   "unity": "6000.0",
   "description": "Fast, allocation-free, single-pass formula evaluator.",
   "keywords": [
