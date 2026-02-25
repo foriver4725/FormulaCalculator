@@ -5,188 +5,176 @@ namespace foriver4725.FormulaCalculator
 {
     public static class FormulaValidator
     {
-        private enum ElementType : byte
-        {
-            Number = 0,
-            Operator = 1,
-            Paragraph = 2,
-            None = 3,
-            Invalid = 255,
-        }
+        // NOTE:
+        // - This validator intentionally ignores spaces (it compresses the input).
+        // - It does NOT support decimals ('.' / ',') in the current spec.
+        // - Behavior is kept identical to the original implementation for the provided tests.
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static ElementType GetElementType(this char c) => c switch
-        {
-            >= '0' and <= '9'               => ElementType.Number,
-            '+' or '-' or '*' or '/' or '^' => ElementType.Operator,
-            '(' or ')'                      => ElementType.Paragraph,
-            ' '                             => ElementType.None,
-            _                               => ElementType.Invalid,
-        };
+        private static bool IsDigit(char c) => (uint)(c - '0') <= 9u;
 
-        // Check if the formula does not contain any invalid characters
-        // You can use this method to validate the formula before calling Calculate()
-        // to avoid unnecessary calculations on invalid formulas.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsOperator(char c)
+            => c is '+' or '-' or '*' or '/' or '^';
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsParen(char c)
+            => c is '(' or ')';
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsValidFormula(this ReadOnlySpan<char> formulaArg, byte maxNumberDigit = 8)
         {
-            // Remove 'None' and compress
-            Span<char> formula = stackalloc char[formulaArg.Length];
-            {
-                int length = 0;
-                foreach (char e in formulaArg)
-                {
-                    if (e is ' ')
-                        continue;
-                    formula[length++] = e;
-                }
+            // Compress: remove spaces into a stack buffer.
+            // During compression we also:
+            // - Validate charset
+            // - Check digit run length
+            // - Check adjacency rules around parentheses
+            // - Validate parentheses order + "contains at least one digit" rule in O(n) using a stack
+            int srcLen = formulaArg.Length;
+            if (srcLen == 0)
+                return false;
 
-                formula = formula[..length];
-            }
+            Span<char> buf = stackalloc char[srcLen];
 
-            // [Is Whole OK?]
-            // Check if the formula does not contain any invalid characters,
-            // but contains at least one valid character (to prevent empty formula)
+            // Stack for "this parenthesis group (and its descendants) contains at least one digit"
+            // Depth never exceeds compressed length, so srcLen is safe.
+            Span<byte> parenHasDigit = stackalloc byte[srcLen];
+
+            int len = 0;
+            int depth = 0;
+            int digitRun = 0;
+
+            // We track previous *compressed* char to validate adjacency in the compressed domain.
+            char prev = '\0';
+            bool hasPrev = false;
+
+            for (int i = 0; i < srcLen; i++)
             {
-                if (formula.IsEmpty)
+                char c = formulaArg[i];
+                if (c == ' ')
+                    continue;
+
+                // Charset validation (fast path branching)
+                bool isDigit = IsDigit(c);
+                bool isOp = !isDigit && IsOperator(c);
+                bool isParen = !isDigit && !isOp && IsParen(c);
+
+                if (!isDigit && !isOp && !isParen)
                     return false;
 
-                foreach (char e in formula)
-                    if (e.GetElementType() is ElementType.Invalid)
-                        return false;
-            }
-
-            // [Is Number OK?]
-            // Check if a number does not come immediately outside the parentheses
-            // Check if there is no consecutive numbers exceeding a certain length
-            {
-                for (int i = 0; i < formula.Length - 1; i++)
+                // Adjacency checks with parentheses (in compressed form)
+                // - "2(" is invalid
+                // - ")2" is invalid
+                // - ")(" is invalid
+                if (hasPrev)
                 {
-                    char e = formula[i], f = formula[i + 1];
-
-                    if (e.GetElementType() is ElementType.Number && f is '(')
-                        return false;
-                    if (e is ')' && f.GetElementType() is ElementType.Number)
-                        return false;
+                    if (IsDigit(prev) && c == '(') return false;
+                    if (prev == ')' && IsDigit(c)) return false;
+                    if (prev == ')' && c == '(') return false;
                 }
 
-                byte continuousCount = 0;
-                foreach (char e in formula)
+                // Digit run length (maxNumberDigit)
+                if (isDigit)
                 {
-                    if (e.GetElementType() is not ElementType.Number)
-                    {
-                        continuousCount = 0;
-                        continue;
-                    }
-
-                    if (++continuousCount > maxNumberDigit)
+                    digitRun++;
+                    if (digitRun > maxNumberDigit)
                         return false;
+
+                    // Mark digit existence for parentheses groups (O(1) amortized):
+                    // We mark the innermost group, and propagate "has digit" upward when closing.
+                    if (depth > 0)
+                        parenHasDigit[depth - 1] = 1;
                 }
-            }
-
-            // [Is Operator OK?]
-            // Check for operators "+", "-" that
-            //   "the previous element exists and is either a number, '(', or ')', or the previous element does not exist" and
-            //   "the next element exists and is either a number or '('"
-            // Check for operators other than "+", "-" that
-            //   "the previous element exists and is either a number or ')'" and
-            //   "the next element exists and is either a number or '('"
-            {
-                for (int i = 0; i < formula.Length; i++)
+                else
                 {
-                    char e = formula[i];
+                    digitRun = 0;
+                }
 
-                    if (e.GetElementType() is not ElementType.Operator)
-                        continue;
-
-                    if (e is ('+' or '-'))
+                // Parentheses validation + "must contain at least one digit" rule in O(n)
+                if (isParen)
+                {
+                    if (c == '(')
                     {
-                        if (i > 0)
-                        {
-                            char left = formula[i - 1];
-                            if (left.GetElementType() is not ElementType.Number
-                                && left is not ('(' or ')'))
-                                return false;
-                        }
-
-                        if (i < formula.Length - 1)
-                        {
-                            char right = formula[i + 1];
-                            if (right.GetElementType() is not ElementType.Number
-                                && right is not '(')
-                                return false;
-                        }
-                        else return false;
+                        // push
+                        parenHasDigit[depth] = 0;
+                        depth++;
                     }
                     else
                     {
-                        if (i > 0)
-                        {
-                            char left = formula[i - 1];
-                            if (left.GetElementType() is not ElementType.Number
-                                && left is not ')')
-                                return false;
-                        }
-                        else return false;
+                        // ')': must have a matching '('
+                        if (depth <= 0)
+                            return false;
 
-                        if (i < formula.Length - 1)
-                        {
-                            char right = formula[i + 1];
-                            if (right.GetElementType() is not ElementType.Number
-                                && right is not '(')
-                                return false;
-                        }
-                        else return false;
+                        // pop
+                        byte childHasDigit = parenHasDigit[depth - 1];
+                        if (childHasDigit == 0)
+                            return false;
+
+                        depth--;
+
+                        // Propagate digit existence to parent group.
+                        // This preserves the original behavior where digits inside nested parentheses
+                        // also satisfy the "outer parentheses contains at least one digit" requirement.
+                        if (depth > 0)
+                            parenHasDigit[depth - 1] = 1;
                     }
                 }
+
+                buf[len++] = c;
+                prev = c;
+                hasPrev = true;
             }
 
-            // [Is Paragraph OK?]
-            // Check if all parentheses match and are in the correct order
-            // Check if there is at least one number inside the parentheses
-            // Check if the arrangement of ")(" does not exist
+            // Empty after compression => invalid
+            if (len == 0)
+                return false;
+
+            // Unmatched '(' remaining => invalid
+            if (depth != 0)
+                return false;
+
+            ReadOnlySpan<char> formula = buf[..len];
+
+            // Operator placement validation (same rules as the original)
+            for (int i = 0; i < len; i++)
             {
-                int n = 0;
-                foreach (char e in formula)
+                char op = formula[i];
+                if (!IsOperator(op))
+                    continue;
+
+                // Right side must exist for every operator
+                if (i >= len - 1)
+                    return false;
+
+                char right = formula[i + 1];
+
+                if (op is '+' or '-')
                 {
-                    if (e is '(') n++;
-                    else if (e is ')') n--;
-
-                    if (n < 0) return false;
-                }
-
-                if (n != 0) return false;
-
-                for (int i = 0; i < formula.Length; i++)
-                {
-                    if (formula[i] is '(')
+                    // Left side: may be absent, or must be Number / '(' / ')'
+                    if (i > 0)
                     {
-                        int j = i + 1;
-                        while (j < formula.Length)
-                        {
-                            if (formula[j] is ')') break;
-                            j++;
-                        }
-
-                        bool hasNumber = false;
-                        for (int k = i, _n = 0; _n < j - i + 1; k++, _n++)
-                        {
-                            char e = formula[k];
-                            if (e.GetElementType() is ElementType.Number)
-                            {
-                                hasNumber = true;
-                                break;
-                            }
-                        }
-
-                        if (!hasNumber) return false;
+                        char left = formula[i - 1];
+                        if (!IsDigit(left) && left != '(' && left != ')')
+                            return false;
                     }
-                }
 
-                for (int i = 0; i < formula.Length - 1; i++)
+                    // Right side: must be Number or '('
+                    if (!IsDigit(right) && right != '(')
+                        return false;
+                }
+                else
                 {
-                    char e = formula[i], f = formula[i + 1];
-                    if (e is ')' && f is '(') return false;
+                    // For *, /, ^ : left side must exist and be Number or ')'
+                    if (i == 0)
+                        return false;
+
+                    char left = formula[i - 1];
+                    if (!IsDigit(left) && left != ')')
+                        return false;
+
+                    // Right side: must be Number or '('
+                    if (!IsDigit(right) && right != '(')
+                        return false;
                 }
             }
 
