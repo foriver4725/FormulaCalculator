@@ -129,6 +129,46 @@ Key characteristics:
 - ✅ Allocation-free evaluation pipeline
 - ✅ Stable performance across varying expression complexity
 
+## Supported Scope
+
+This library intentionally focuses on **core arithmetic expression evaluation**.
+
+Functions such as:
+
+- `sqrt(x)`
+- `sin(x)`
+- `cos(x)`
+- `tan(x)`
+- other mathematical function calls
+
+are **not supported**.
+
+Adding function parsing would introduce additional branching,
+token handling, and runtime overhead that affects the performance
+of all evaluations — even when such functions are rarely used.
+
+In many practical scenarios, these operations can be handled
+outside the evaluator instead:
+
+```cs
+double value = Math.Sin(x);
+string formula = $"{value}+2*3";
+```
+
+Because this library prioritizes predictable performance and
+minimal execution cost, function evaluation was intentionally
+excluded from the design.
+
+The goal is to keep the evaluator:
+
+- fast
+- allocation-free
+- simple
+- proportional to expression length
+
+This library aims to be a fast arithmetic evaluator,
+not a full symbolic math engine.
+
 ## Design
 
 The implementation is inspired by classical expression evaluation techniques such as:
