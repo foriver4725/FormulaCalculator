@@ -24,11 +24,9 @@ make
 make benchmark
 ```
 
-## NuGet Push Commands
-
 ```bash
+# NuGet Push Commands
 dotnet pack -c Release
-
 dotnet nuget push FormulaCalculator/bin/Release/foriver4725.FormulaCalculator.(YOUR_PACKAGE_VERSION).nupkg \
   --api-key (YOUR_API_KEY) \
   --source https://api.nuget.org/v3/index.json
