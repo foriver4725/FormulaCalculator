@@ -10,7 +10,7 @@ namespace foriver4725.FormulaCalculator
             => FormulaCalculator.Calculate(formula);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsValidFormula(this ReadOnlySpan<char> formula, byte maxNumberDigit = 8)
-            => FormulaValidator.IsValidFormula(formula, maxNumberDigit);
+        public static bool IsValidFormula(this ReadOnlySpan<char> formula)
+            => FormulaValidator.IsValidFormula(formula);
     }
 }

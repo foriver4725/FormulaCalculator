@@ -5,6 +5,7 @@
         <LangVersion>10.0</LangVersion>
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
     <PropertyGroup>
         <PackageId>foriver4725.FormulaCalculator</PackageId>

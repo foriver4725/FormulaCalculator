@@ -5,199 +5,232 @@ namespace foriver4725.FormulaCalculator
 {
     public static class FormulaCalculator
     {
-        /// <summary>
-        /// Calculate the formula given as a string and return the result as a double.<br/>
-        /// - Supported characters: 0-9, +, -, *, /, (, ), and space (used for ignoring).<br/>
-        /// </summary>
-        /// <param name="formula"> The formula to be calculated.<br/></param>
-        /// <returns> The result of the calculation as a double.<br/>
-        /// If the formula is invalid or an error occurs during calculation (such as division by zero), returns double.NaN.<br/>
-        /// The result can be abnormally large or small (such as when division by a very small number occurs),<br/>
-        ///   so it is recommended to clamp the result if necessary.<br/></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double Calculate(this ReadOnlySpan<char> formula)
+        public static unsafe double Calculate(this ReadOnlySpan<char> formula)
         {
-            // Stacks for values and operators
-            Span<double> values = stackalloc double[formula.Length];
-            Span<char> ops = stackalloc char[formula.Length];
+            int len = formula.Length;
+            if (len == 0) return double.NaN;
 
-            // Tops of the stacks (the index of the next free slot = the length of the stack)
-            int vTop = 0;
-            int oTop = 0;
-
-            // Build an integer while reading consecutive digits.
-            // -1 means "not building a number now".
-            int connectedNumber = -1;
-
-            // Track the previous meaningful token to detect unary operators (+ and -)
-            // 0: start, 1: number, 2: '(', 3: ')', 4: operator
-            byte prevType = 0;
-
-            for (int i = 0; i < formula.Length; i++)
+            fixed (char* p = formula)
             {
-                char c = formula[i];
+                double* values = stackalloc double[len];
+                char* ops = stackalloc char[len];
 
-                // Ignore spaces
-                if (c is ' ')
-                    continue;
+                int vTop = 0;
+                int oTop = 0;
 
-                // If the token is a number, build it
-                if (c is (>= '0' and <= '9'))
+                byte prevType = Constants.PrevStart;
+                int parenDepth = 0;
+
+                int connectedNumber = -1;
+                int digitCount = 0;
+                bool sawMeaningful = false;
+
+                for (int i = 0; i < len; i++)
                 {
-                    int digit = c - '0';
-                    connectedNumber = (connectedNumber == -1) ? digit : (connectedNumber * 10 + digit);
-                    prevType = 1;
-                    continue;
-                }
+                    char c = p[i];
 
-                // If we were building a number, push it to the value stack now
-                if (connectedNumber != -1)
-                {
-                    values[vTop++] = connectedNumber;
-                    connectedNumber = -1;
-                }
+                    if (c == ' ')
+                        continue;
 
-                // If the token is "("
-                if (c is '(')
-                {
-                    ops[oTop++] = '(';
-                    prevType = 2;
-                    continue;
-                }
-
-                // If the token is ")"
-                if (c is ')')
-                {
-                    while (oTop > 0 && ops[oTop - 1] is not '(')
+                    // digit
+                    if ((uint)(c - '0') <= 9u)
                     {
-                        if (!ApplyTop(values, vTop, ops, oTop))
+                        if (prevType == Constants.PrevParenR)
+                            return double.NaN; // ")1" NG
+
+                        int digit = c - '0';
+
+                        digitCount++;
+                        if (digitCount > 8)
                             return double.NaN;
 
-                        vTop--;
-                        oTop--;
-                    }
+                        connectedNumber = (connectedNumber < 0)
+                            ? digit
+                            : (connectedNumber * 10 + digit);
 
-                    if (oTop == 0)
-                        return double.NaN; // unmatched
-
-                    oTop--; // remove '('
-                    prevType = 3;
-                    continue;
-                }
-
-                // Now the token must be an operator (+ - * /)
-
-                // Check for unary operators (+ and -)
-                // Unary is valid at the beginning or right after '('
-                bool isUnary =
-                    (c is '+' or '-') &&
-                    (prevType is (0 or 2));
-
-                if (isUnary)
-                {
-                    // Look ahead ignoring spaces
-                    int j = i + 1;
-                    while (j < formula.Length && formula[j] is ' ') j++;
-                    if (j >= formula.Length) return double.NaN;
-
-                    // If the next token is "(",
-                    // treat unary as multiplying by ±1
-                    if (formula[j] == '(')
-                    {
-                        values[vTop++] = (c is '-') ? -1 : 1;
-                        ops[oTop++] = '*'; // implicit multiplication
-                        prevType = 4;
+                        prevType = Constants.PrevNumber;
+                        sawMeaningful = true;
                         continue;
                     }
 
-                    // Otherwise the next token must be a number; push signed number
-                    // We do not consume the digits here; we let the main loop build them.
-                    // Push 0 and use binary op to simulate unary: 0 ± number
-                    values[vTop++] = 0;
-                    ops[oTop++] = c; // + or -
-                    prevType = 4;
-                    continue;
-                }
+                    // close current number
+                    if (connectedNumber >= 0)
+                    {
+                        values[vTop++] = connectedNumber;
+                        connectedNumber = -1;
+                        digitCount = 0;
+                    }
 
-                // Process operator (+ - * / ^)
-                while (oTop > 0 && ShouldReduce(ops[oTop - 1], c))
-                {
-                    if (!ApplyTop(values, vTop, ops, oTop))
+                    // '('
+                    if (c == '(')
+                    {
+                        if (prevType == Constants.PrevNumber || prevType == Constants.PrevParenR)
+                            return double.NaN; // "2(" or ")(" NG
+
+                        ops[oTop++] = c;
+                        parenDepth++;
+                        prevType = Constants.PrevParenL;
+                        sawMeaningful = true;
+                        continue;
+                    }
+
+                    // ')'
+                    if (c == ')')
+                    {
+                        if (parenDepth <= 0)
+                            return double.NaN;
+
+                        if (prevType == Constants.PrevStart || prevType == Constants.PrevOp ||
+                            prevType == Constants.PrevParenL)
+                            return double.NaN; // empty or operator-only NG
+
+                        while (oTop > 0 && ops[oTop - 1] != '(')
+                        {
+                            if (!ApplyTop(values, ref vTop, ops, ref oTop))
+                                return double.NaN;
+                        }
+
+                        if (oTop == 0)
+                            return double.NaN;
+
+                        oTop--; // pop '('
+                        parenDepth--;
+                        prevType = Constants.PrevParenR;
+                        sawMeaningful = true;
+                        continue;
+                    }
+
+                    // operator
+                    if (!Helpers.IsOperator(c))
                         return double.NaN;
 
-                    vTop--;
-                    oTop--;
+                    if (c == '+' || c == '-')
+                    {
+                        // unary + / - is allowed only at start or right after '('
+                        if (prevType == Constants.PrevStart || prevType == Constants.PrevParenL)
+                        {
+                            if (!Helpers.TryPeekNextNonSpace(p, len, i + 1, out char next))
+                                return double.NaN;
+
+                            if (!Helpers.IsDigit(next) && next != '(')
+                                return double.NaN;
+
+                            // simulate unary as 0 +/- x
+                            values[vTop++] = 0.0;
+                            ops[oTop++] = c;
+                            prevType = Constants.PrevOp;
+                            sawMeaningful = true;
+                            continue;
+                        }
+                    }
+
+                    // binary operator must follow number or ')'
+                    if (prevType != Constants.PrevNumber && prevType != Constants.PrevParenR)
+                        return double.NaN;
+
+                    while (oTop > 0 && Helpers.ShouldReduce(ops[oTop - 1], c))
+                    {
+                        if (!ApplyTop(values, ref vTop, ops, ref oTop))
+                            return double.NaN;
+                    }
+
+                    ops[oTop++] = c;
+                    prevType = Constants.PrevOp;
+                    sawMeaningful = true;
                 }
 
-                ops[oTop++] = c;
-                prevType = 4;
-            }
+                // close trailing number
+                if (connectedNumber >= 0)
+                {
+                    values[vTop++] = connectedNumber;
+                }
 
-            // Push the last connected number if exists
-            if (connectedNumber != -1)
-            {
-                values[vTop++] = connectedNumber;
-            }
-
-            // Final evaluation
-            while (oTop > 0)
-            {
-                if (!ApplyTop(values, vTop, ops, oTop))
+                if (!sawMeaningful)
                     return double.NaN;
 
-                vTop--;
-                oTop--;
-            }
+                if (parenDepth != 0)
+                    return double.NaN;
 
-            return (vTop == 1) ? values[0] : double.NaN;
+                if (prevType != Constants.PrevNumber && prevType != Constants.PrevParenR)
+                    return double.NaN;
+
+                while (oTop > 0)
+                {
+                    if (ops[oTop - 1] == '(')
+                        return double.NaN;
+
+                    if (!ApplyTop(values, ref vTop, ops, ref oTop))
+                        return double.NaN;
+                }
+
+                return vTop == 1 ? values[0] : double.NaN;
+            }
         }
 
-        // Apply the operator at the top of the operator stack to the top two values on the value stack
-        // Pop the operator and the two values, compute the result, and push it back to the value stack
-        // Returns false if an error occurs (such as division by zero), otherwise true.
+        // =========================================================
+        // Core
+        // =========================================================
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool ApplyTop(
-            Span<double> values, int vTop,
-            Span<char> ops, int oTop
-        )
+        private static unsafe bool ApplyTop(double* values, ref int vTop, char* ops, ref int oTop)
         {
+            if (vTop < 2 || oTop <= 0)
+                return false;
+
             char op = ops[oTop - 1];
             double b = values[vTop - 1];
             double a = values[vTop - 2];
-
             double result;
 
-            if (op is '+')
-                result = a + b;
-            else if (op is '-')
-                result = a - b;
-            else if (op is '*')
-                result = a * b;
-            else if (op is '/')
+            if (op == '+')
             {
-                if (b == 0)
+                result = a + b;
+            }
+            else if (op == '-')
+            {
+                result = a - b;
+            }
+            else if (op == '*')
+            {
+                result = a * b;
+            }
+            else if (op == '/')
+            {
+                if (b == 0.0)
                     return false;
+
                 result = a / b;
             }
-            else if (op is '^')
+            else if (op == '^')
             {
-                // 0^b : only allowed if b > 0
-                if (a == 0)
+                // 0^b
+                if (a == 0.0)
                 {
-                    if (b <= 0)
+                    if (b <= 0.0)
                         return false;
-                    result = 0;
+
+                    result = 0.0;
                 }
                 else
                 {
-                    if (IsInteger(b))
+                    if (Helpers.IsInteger(b))
                     {
-                        int e = (int)Math.Round(b);
+                        long e64 = (long)Math.Round(b);
+
+                        if (e64 < int.MinValue || e64 > int.MaxValue)
+                            return false;
+
+                        int e = (int)e64;
 
                         if (e < 0)
                         {
-                            // a != 0, so we can safely compute a^(-e) and take reciprocal
-                            result = 1.0 / PowInt(a, -e);
+                            int posE = -e;
+                            double p = PowInt(a, posE);
+                            if (p == 0.0)
+                                return false;
+
+                            result = 1.0 / p;
                         }
                         else
                         {
@@ -206,23 +239,28 @@ namespace foriver4725.FormulaCalculator
                     }
                     else
                     {
-                        // If the exponent is not an integer, we can directly use Math.Pow,
-                        // but we need to check for negative base with non-integer exponent, which is not allowed in real numbers.
-                        if (a < 0) return false;
+                        // negative base with non-integer exponent => not real
+                        if (a < 0.0)
+                            return false;
+
                         result = Math.Pow(a, b);
                     }
                 }
+
+                if (double.IsNaN(result) || double.IsInfinity(result))
+                    return false;
             }
             else
+            {
                 return false;
+            }
 
             values[vTop - 2] = result;
+            vTop--;
+            oTop--;
             return true;
         }
 
-        // Fast integer power function using exponentiation by squaring.
-        // This is used to optimize cases like x^3, x^4, etc., which are common in formulas.
-        // The exponent must be a non-negative integer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static double PowInt(double a, int e)
         {
@@ -240,40 +278,5 @@ namespace foriver4725.FormulaCalculator
 
             return result;
         }
-
-        // Return the precedence of the operator. Higher value means higher precedence.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Precedence(char op) => op switch
-        {
-            '+' or '-' => 1,
-            '*' or '/' => 2,
-            '^'        => 3,
-            _          => 0,
-        };
-
-        // Return true if the operator on the stack should be reduced before pushing the incoming operator.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool ShouldReduce(char stackOp, char incomingOp)
-        {
-            int sp = Precedence(stackOp);
-            int ip = Precedence(incomingOp);
-
-            if (sp > ip) return true;
-            if (sp < ip) return false;
-
-            // Same precedence: reduce only if the incoming operator is left-associative.
-            // '^' is right-associative.
-            return !IsRightAssociative(incomingOp);
-        }
-
-        // Return true if the operator is right-associative (such as '^'), otherwise false (such as '+', '-', '*', '/').
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsRightAssociative(char op)
-            => op is '^'; // '^'
-
-        // Return true if the double is an integer (within a small tolerance), otherwise false.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsInteger(double x)
-            => Math.Abs(x - Math.Round(x)) < 1e-12;
     }
 }
