@@ -125,7 +125,7 @@ while tracking execution time and memory allocations.
 - [Benchmark Script](./dotnet/FormulaCalculator.Benchmarks/Benchmarks.cs)
 - [Benchmark Results](./dotnet/BenchmarkResult.md)
 
-![Benchmark Graph](./dotnet/BenchmarkResultGraph.png)
+![Benchmark Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResultGraph.png)
 
 ### Characteristics
 
