@@ -15,8 +15,11 @@ namespace foriver4725.FormulaCalculator
             {
                 byte prevType = Constants.PrevStart;
                 int parenDepth = 0;
+
                 int digitCount = 0;
                 bool sawMeaningful = false;
+
+                bool currentNumberHasUnaryMinus = false;
 
                 for (int i = 0; i < len; i++)
                 {
@@ -41,7 +44,14 @@ namespace foriver4725.FormulaCalculator
                     }
 
                     // non-digit => current number is closed
-                    digitCount = 0;
+                    if (digitCount > 0)
+                    {
+                        if (currentNumberHasUnaryMinus && (c == '%' || c == '^'))
+                            return false;
+
+                        digitCount = 0;
+                        currentNumberHasUnaryMinus = false;
+                    }
 
                     // '('
                     if (c == '(')
@@ -84,6 +94,11 @@ namespace foriver4725.FormulaCalculator
 
                                 if (!Helpers.IsDigit(next) && next != '(')
                                     return false;
+
+                                if (c == '-' && Helpers.IsDigit(next))
+                                    currentNumberHasUnaryMinus = true;
+                                else
+                                    currentNumberHasUnaryMinus = false;
 
                                 prevType = Constants.PrevOp;
                                 sawMeaningful = true;

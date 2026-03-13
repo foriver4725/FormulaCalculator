@@ -11,13 +11,13 @@ namespace foriver4725.FormulaCalculator
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool IsOperator(char c)
-            => c == '+' || c == '-' || c == '*' || c == '/' || c == '^';
+            => c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '^';
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int Precedence(char op)
         {
             if (op == '+' || op == '-') return 1;
-            if (op == '*' || op == '/') return 2;
+            if (op == '*' || op == '/' || op == '%') return 2;
             if (op == '^') return 3;
             return 0;
         }

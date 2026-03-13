@@ -24,19 +24,43 @@ UNITY_DLL_DIR := $(UNITY_DIR)/Plugins
 UNITY_TEST_SCRIPT_DIR := $(UNITY_DIR)/Tests/Editor
 BENCHMARK_MD_PATH := ./BenchmarkResult.md
 
-BENCHMARK_RESULT_GRAPH_MAKER_DIR := ../GraphMaker/charCount_and_execTime_scatterPlot
-BENCHMARK_RESULT_GRAPH_MAKER_PY_PATH := $(BENCHMARK_RESULT_GRAPH_MAKER_DIR)/graph_maker.py
+UNITY_PACKAGE_JSON_PATH := $(UNITY_DIR)/package.json
+FORMULA_CALCULATOR_CSPROJ_PATH := ./FormulaCalculator/FormulaCalculator.csproj
+
+PYTHON_TOOLS_DIR := ../PythonTools
+BENCHMARK_RESULT_GRAPH_MAKER_DIR := $(PYTHON_TOOLS_DIR)/BenchmarkResultGraphMaker
+BENCHMARK_RESULT_GRAPH_MAKER_PY_PATH := $(BENCHMARK_RESULT_GRAPH_MAKER_DIR)/benchmark_result_graph_maker.py
 BENCHMARK_RESULT_GRAPH_MAKER_OUTPUT_DIR := $(BENCHMARK_RESULT_GRAPH_MAKER_DIR)/output
 BENCHMARK_RESULT_GRAPH_MAKER_OUTPUT_NAME := benchmark_result_graph
 BENCHMARK_RESULT_GRAPH_PATH := ./BenchmarkResultGraph.png
+VERSION_TEXT_APPLIER_DIR := $(PYTHON_TOOLS_DIR)/VersionTextApplier
+VERSION_TEXT_APPLIER_UNITY_PY_PATH := $(VERSION_TEXT_APPLIER_DIR)/version_text_applier_unity.py
+VERSION_TEXT_APPLIER_DOTNET_PY_PATH := $(VERSION_TEXT_APPLIER_DIR)/version_text_applier_dotnet.py
 
+VERSION_TEXT_TO_APPLY ?=NONE
 NUGET_PUSH_PACKAGE_VERSION ?= NONE
 NUGET_PUSH_API_KEY ?= NONE
 # ===================
 
-.DEFAULT_GOAL := all
+.PHONY: \
+	apply-version-text \
+	build \
+	test \
+	deploy-unity \
+	all \
+	benchmark-run \
+	benchmark-make-graph-from-result \
+	benchmark-deploy-readme \
+	benchmark \
+	push-nuget
 
-.PHONY: build test deploy-unity all benchmark
+apply-version-text:
+	@$(LOG_INFO) "Applying version text..."
+	python3 $(VERSION_TEXT_APPLIER_UNITY_PY_PATH) $(VERSION_TEXT_TO_APPLY) \
+		--file $(UNITY_PACKAGE_JSON_PATH)
+	python3 $(VERSION_TEXT_APPLIER_DOTNET_PY_PATH) $(VERSION_TEXT_TO_APPLY) \
+		--file $(FORMULA_CALCULATOR_CSPROJ_PATH)
+	@$(LOG_SUCCESS) "Version text was applied"
 
 build:
 	@$(LOG_INFO) "Build started..."

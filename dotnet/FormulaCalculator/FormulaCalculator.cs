@@ -26,6 +26,8 @@ namespace foriver4725.FormulaCalculator
                 int digitCount = 0;
                 bool sawMeaningful = false;
 
+                bool currentNumberHasUnaryMinus = false;
+
                 for (int i = 0; i < len; i++)
                 {
                     char c = p[i];
@@ -57,9 +59,14 @@ namespace foriver4725.FormulaCalculator
                     // close current number
                     if (connectedNumber >= 0)
                     {
+                        if (currentNumberHasUnaryMinus && (c == '%' || c == '^'))
+                            return double.NaN;
+
                         values[vTop++] = connectedNumber;
                         connectedNumber = -1;
                         digitCount = 0;
+
+                        currentNumberHasUnaryMinus = false;
                     }
 
                     // '('
@@ -115,6 +122,12 @@ namespace foriver4725.FormulaCalculator
 
                             if (!Helpers.IsDigit(next) && next != '(')
                                 return double.NaN;
+
+                            // unary minus directly attached to a bare number
+                            if (c == '-' && Helpers.IsDigit(next))
+                                currentNumberHasUnaryMinus = true;
+                            else
+                                currentNumberHasUnaryMinus = false;
 
                             // simulate unary as 0 +/- x
                             values[vTop++] = 0.0;
@@ -201,6 +214,16 @@ namespace foriver4725.FormulaCalculator
                     return false;
 
                 result = a / b;
+            }
+            else if (op == '%')
+            {
+                if (a <= 0.0 || b <= 0.0)
+                    return false;
+
+                if (!Helpers.IsInteger(a) || !Helpers.IsInteger(b))
+                    return false;
+
+                result = a % b;
             }
             else if (op == '^')
             {

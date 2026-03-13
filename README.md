@@ -211,15 +211,8 @@ This design keeps the evaluation cost proportional to the length of the input ex
 
 ## For Developers
 
-When updating the version, make sure to update it consistently in:
+Make commands are described in the below file.
 
-- [dotnet - FormulaCalculator.csproj](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator/FormulaCalculator.csproj)
-- [Unity - package.json](https://github.com/foriver4725/FormulaCalculator/blob/main/Unity/Assets/foriver4725/FormulaCalculator/package.json)
-
-Keep the version numbers aligned before publishing.
-
-Additional documentation for each environment:
+NOTE: When updating the version, make sure to keep the version numbers aligned before publishing.
 
 - [.NET README](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/README.md)
-
-<!--- - [Unity README]() --->
