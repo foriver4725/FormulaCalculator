@@ -8,14 +8,14 @@ Apple M3, 1 CPU, 8 logical and 8 physical cores
 
 
 ```
-| Method                        | Formula              | Char Count | Mean      | Error    | StdDev   | Allocated |
-|------------------------------ |--------------------- |-----------:|----------:|---------:|---------:|----------:|
-| Calculate                     | 2*4-12/3             |          8 |  27.47 ns | 0.307 ns | 0.272 ns |         - |
-| Calculate                     | 12^(7-3)*3/(4-5)     |         16 |  51.99 ns | 0.370 ns | 0.346 ns |         - |
-| Calculate                     | ((125(...)21)^3 [64] |         64 | 222.97 ns | 4.103 ns | 3.838 ns |         - |
-| IsValidFormula                | 2*4-12/3             |          8 |  11.46 ns | 0.098 ns | 0.091 ns |         - |
-| IsValidFormula                | 12^(7-3)*3/(4-5)     |         16 |  28.10 ns | 0.551 ns | 0.541 ns |         - |
-| IsValidFormula                | ((125(...)21)^3 [64] |         64 | 111.32 ns | 1.296 ns | 1.212 ns |         - |
-| Calculate_With_IsValidFormula | 2*4-12/3             |          8 |  38.45 ns | 0.180 ns | 0.168 ns |         - |
-| Calculate_With_IsValidFormula | 12^(7-3)*3/(4-5)     |         16 |  76.45 ns | 0.560 ns | 0.524 ns |         - |
-| Calculate_With_IsValidFormula | ((125(...)21)^3 [64] |         64 | 330.84 ns | 4.688 ns | 4.385 ns |         - |
+| Method                        | Formula              | Char Count | Mean      | Error    | StdDev    | Median    | Allocated |
+|------------------------------ |--------------------- |-----------:|----------:|---------:|----------:|----------:|----------:|
+| Calculate                     | 2*4-12/3             |          8 |  27.37 ns | 0.405 ns |  0.379 ns |  27.34 ns |         - |
+| Calculate                     | 12^(7-3)*3/(4-5)     |         16 |  53.66 ns | 1.082 ns |  1.837 ns |  53.04 ns |         - |
+| Calculate                     | ((125(...)21)^3 [64] |         64 | 234.56 ns | 4.729 ns | 11.865 ns | 230.91 ns |         - |
+| IsValidFormula                | 2*4-12/3             |          8 |  11.86 ns | 0.264 ns |  0.361 ns |  11.72 ns |         - |
+| IsValidFormula                | 12^(7-3)*3/(4-5)     |         16 |  30.51 ns | 0.620 ns |  1.398 ns |  29.79 ns |         - |
+| IsValidFormula                | ((125(...)21)^3 [64] |         64 | 119.46 ns | 1.429 ns |  1.194 ns | 119.23 ns |         - |
+| Calculate_With_IsValidFormula | 2*4-12/3             |          8 |  39.64 ns | 0.683 ns |  0.605 ns |  39.55 ns |         - |
+| Calculate_With_IsValidFormula | 12^(7-3)*3/(4-5)     |         16 |  79.48 ns | 1.455 ns |  2.838 ns |  78.91 ns |         - |
+| Calculate_With_IsValidFormula | ((125(...)21)^3 [64] |         64 | 339.23 ns | 6.803 ns | 11.915 ns | 338.08 ns |         - |

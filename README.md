@@ -87,7 +87,7 @@ public static double Calculate(this ReadOnlySpan<char> formula)
 ### IsValidFormula
 
 ```cs
-public static bool IsValidFormula(this ReadOnlySpan<char> formula, byte maxNumberDigit = 8)
+public static bool IsValidFormula(this ReadOnlySpan<char> formula)
 ```
 
 ---
@@ -124,6 +124,8 @@ while tracking execution time and memory allocations.
 
 - [Benchmark Script](./dotnet/FormulaCalculator.Benchmarks/Benchmarks.cs)
 - [Benchmark Results](./dotnet/BenchmarkResult.md)
+
+![Benchmark Graph](./dotnet/BenchmarkResultGraph.png)
 
 ### Characteristics
 

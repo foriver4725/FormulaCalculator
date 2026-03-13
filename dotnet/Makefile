@@ -16,11 +16,22 @@ OTHER_TFM := net8.0
 DLL_PATH := ./FormulaCalculator/bin/$(CONFIG)/$(DLL_TFM)/FormulaCalculator.dll
 TEST_SCRIPT_PATH := ./FormulaCalculator.Tests/Tests.cs
 BENCHMARK_RESULT_MD_PATH := ./BenchmarkDotNet.Artifacts/results/foriver4725.FormulaCalculator.Benchmarks.Benchmarks-report-github.md
+BENCHMARK_RESULT_CSV_PATH := ./BenchmarkDotNet.Artifacts/results/foriver4725.FormulaCalculator.Benchmarks.Benchmarks-report.csv
+BENCHMARK_RESULT_HTML_PATH := ./BenchmarkDotNet.Artifacts/results/foriver4725.FormulaCalculator.Benchmarks.Benchmarks-report.html
 
 UNITY_DIR := ../Unity/Assets/foriver4725/FormulaCalculator
 UNITY_DLL_DIR := $(UNITY_DIR)/Plugins
 UNITY_TEST_SCRIPT_DIR := $(UNITY_DIR)/Tests/Editor
 BENCHMARK_MD_PATH := ./BenchmarkResult.md
+
+BENCHMARK_RESULT_GRAPH_MAKER_DIR := ../GraphMaker/charCount_and_execTime_scatterPlot
+BENCHMARK_RESULT_GRAPH_MAKER_PY_PATH := $(BENCHMARK_RESULT_GRAPH_MAKER_DIR)/graph_maker.py
+BENCHMARK_RESULT_GRAPH_MAKER_OUTPUT_DIR := $(BENCHMARK_RESULT_GRAPH_MAKER_DIR)/output
+BENCHMARK_RESULT_GRAPH_MAKER_OUTPUT_NAME := benchmark_result_graph
+BENCHMARK_RESULT_GRAPH_PATH := ./BenchmarkResultGraph.png
+
+NUGET_PUSH_PACKAGE_VERSION ?= NONE
+NUGET_PUSH_API_KEY ?= NONE
 # ===================
 
 .DEFAULT_GOAL := all
@@ -50,9 +61,34 @@ deploy-unity: build
 all: build test deploy-unity
 	@$(LOG_SUCCESS) "All tasks completed"
 
-benchmark:
+benchmark-run:
 	@$(LOG_INFO) "Benchmarking started..."
-	dotnet run -c $(CONFIG) -f $(OTHER_TFM) --project ./FormulaCalculator.Benchmarks/FormulaCalculator.Benchmarks.csproj
+	dotnet run -c $(CONFIG) -f $(OTHER_TFM) \
+		--project ./FormulaCalculator.Benchmarks/FormulaCalculator.Benchmarks.csproj
+	@$(LOG_SUCCESS) "Benchmarking completed"
+
+benchmark-make-graph-from-result:
+	@$(LOG_INFO) "Making benchmark graph from result..."
+	python3 $(BENCHMARK_RESULT_GRAPH_MAKER_PY_PATH) $(BENCHMARK_RESULT_CSV_PATH) \
+		--output $(BENCHMARK_RESULT_GRAPH_MAKER_OUTPUT_DIR) \
+		--name $(BENCHMARK_RESULT_GRAPH_MAKER_OUTPUT_NAME)
+	@$(LOG_SUCCESS) "Benchmark graph creation completed"
+
+benchmark-deploy-readme: benchmark-make-graph-from-result
+	@$(LOG_INFO) "Deploying benchmark result to README.md..."
 	mkdir -p $(dir $(BENCHMARK_MD_PATH))
 	cp -f $(BENCHMARK_RESULT_MD_PATH) $(BENCHMARK_MD_PATH)
-	@$(LOG_SUCCESS) "Benchmarking completed"
+	@$(LOG_SUCCESS) "Copied result markdown"
+	mkdir -p $(dir $(BENCHMARK_RESULT_GRAPH_PATH))
+	cp -f $(BENCHMARK_RESULT_GRAPH_MAKER_OUTPUT_DIR)/$(BENCHMARK_RESULT_GRAPH_MAKER_OUTPUT_NAME).png $(BENCHMARK_RESULT_GRAPH_PATH)
+	@$(LOG_SUCCESS) "Copied result graph"
+	@$(LOG_SUCCESS) "Deployment of benchmark result to README.md completed"
+
+benchmark: benchmark-run benchmark-make-graph-from-result benchmark-deploy-readme
+	@$(LOG_SUCCESS) "All benchmark tasks completed"
+
+push-nuget:
+	dotnet pack -c Release
+	dotnet nuget push FormulaCalculator/bin/Release/foriver4725.FormulaCalculator.$(NUGET_PUSH_PACKAGE_VERSION).nupkg \
+		--api-key $(NUGET_PUSH_API_KEY) \
+		--source https://api.nuget.org/v3/index.json

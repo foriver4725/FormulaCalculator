@@ -21,13 +21,16 @@ make deploy-unity
 make
 
 # Run performance benchmarks
-make benchmark
-```
+make benchmark-run
 
-```bash
-# NuGet Push Commands
-dotnet pack -c Release
-dotnet nuget push FormulaCalculator/bin/Release/foriver4725.FormulaCalculator.(YOUR_PACKAGE_VERSION).nupkg \
-  --api-key (YOUR_API_KEY) \
-  --source https://api.nuget.org/v3/index.json
+# Generate a markdown report for the benchmarks
+# It generates a graph, then copies those results to be show in the root README.md
+make benchmark-deploy-readme
+
+# Run all benchmark commands at once
+# `make benchmark-run` and `make benchmark-deploy-readme` run automatically
+make benchmark
+
+# Push to NuGet
+make push-nuget NUGET_PUSH_PACKAGE_VERSION=(YOUR_PACKAGE_VERSION) NUGET_PUSH_API_KEY=(YOUR_API_KEY)
 ```
