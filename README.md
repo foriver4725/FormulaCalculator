@@ -103,7 +103,7 @@ This library follows standard mathematical expression rules.
 If you need precise and authoritative behavior details,  
 please refer to the test scripts in this repository:
 
-- [Test Scripts](./dotnet/FormulaCalculator.Tests/Tests.cs)
+- [Test Scripts](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator.Tests/Tests.cs)
 
 ---
 
@@ -122,8 +122,8 @@ Performance is measured using BenchmarkDotNet on .NET 8.
 The benchmarks evaluate formulas with different expression lengths
 while tracking execution time and memory allocations.
 
-- [Benchmark Script](./dotnet/FormulaCalculator.Benchmarks/Benchmarks.cs)
-- [Benchmark Results](./dotnet/BenchmarkResult.md)
+- [Benchmark Script](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator.Benchmarks/Benchmarks.cs)
+- [Benchmark Results](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResult.md)
 
 ![Benchmark Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResultGraph.png)
 
@@ -205,7 +205,7 @@ This design keeps the evaluation cost proportional to the length of the input ex
 
 ## License
 
-[MIT](./LICENSE)
+[MIT](https://github.com/foriver4725/FormulaCalculator/blob/main/LICENSE)
 
 ---
 
@@ -213,13 +213,13 @@ This design keeps the evaluation cost proportional to the length of the input ex
 
 When updating the version, make sure to update it consistently in:
 
-- [dotnet - FormulaCalculator.csproj](./dotnet/FormulaCalculator/FormulaCalculator.csproj)
-- [Unity - package.json](./Unity/Assets/foriver4725/FormulaCalculator/package.json)
+- [dotnet - FormulaCalculator.csproj](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator/FormulaCalculator.csproj)
+- [Unity - package.json](https://github.com/foriver4725/FormulaCalculator/blob/main/Unity/Assets/foriver4725/FormulaCalculator/package.json)
 
 Keep the version numbers aligned before publishing.
 
 Additional documentation for each environment:
 
-- [.NET README](./dotnet/README.md)
+- [.NET README](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/README.md)
 
 <!--- - [Unity README]() --->
