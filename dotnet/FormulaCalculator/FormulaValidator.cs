@@ -15,10 +15,11 @@ namespace foriver4725.FormulaCalculator
             {
                 byte prevType = Constants.PrevStart;
                 int parenDepth = 0;
-
-                int digitCount = 0;
                 bool sawMeaningful = false;
 
+                // Existing spec:
+                // a unary minus directly attached to a bare number is invalid
+                // when immediately followed by % or ^, e.g. "-5%2", "-2^2".
                 bool currentNumberHasUnaryMinus = false;
 
                 for (int i = 0; i < len; i++)
@@ -28,95 +29,107 @@ namespace foriver4725.FormulaCalculator
                     if (c == ' ')
                         continue;
 
-                    // digit
-                    if ((uint)(c - '0') <= 9u)
+                    // -------------------------------------------------
+                    // Number token
+                    // -------------------------------------------------
+                    if (Helpers.IsDigit(c))
                     {
-                        if (prevType == Constants.PrevParenR)
-                            return false; // ")1" adjacency NG
-
-                        digitCount++;
-                        if (digitCount > 8)
+                        // Disallow adjacency such as "1 23" or ")1".
+                        if (prevType == Constants.PrevNumber || prevType == Constants.PrevParenR)
                             return false;
 
+                        int end = Helpers.SkipNumberTokenOrMinusOne(p, len, i);
+                        if (end < 0)
+                            return false;
+
+                        // Preserve the existing restriction for unary-minus bare numbers.
+                        if (currentNumberHasUnaryMinus)
+                        {
+                            char nextAfterNumber = Helpers.PeekNextNonSpaceOrZero(p, len, end + 1);
+                            if (nextAfterNumber == '%' || nextAfterNumber == '^')
+                                return false;
+                        }
+
+                        i = end;
                         prevType = Constants.PrevNumber;
                         sawMeaningful = true;
+                        currentNumberHasUnaryMinus = false;
                         continue;
                     }
 
-                    // non-digit => current number is closed
-                    if (digitCount > 0)
-                    {
-                        if (currentNumberHasUnaryMinus && (c == '%' || c == '^'))
-                            return false;
-
-                        digitCount = 0;
-                        currentNumberHasUnaryMinus = false;
-                    }
-
-                    // '('
+                    // -------------------------------------------------
+                    // Left parenthesis
+                    // -------------------------------------------------
                     if (c == '(')
                     {
+                        // Disallow adjacency such as "2(" or ")(".
                         if (prevType == Constants.PrevNumber || prevType == Constants.PrevParenR)
-                            return false; // "2(" or ")(" NG
+                            return false;
 
                         parenDepth++;
                         prevType = Constants.PrevParenL;
                         sawMeaningful = true;
+                        currentNumberHasUnaryMinus = false;
                         continue;
                     }
 
-                    // ')'
+                    // -------------------------------------------------
+                    // Right parenthesis
+                    // -------------------------------------------------
                     if (c == ')')
                     {
                         if (parenDepth <= 0)
                             return false;
 
-                        if (prevType == Constants.PrevStart || prevType == Constants.PrevOp ||
+                        // Disallow empty parentheses or operator-only content.
+                        if (prevType == Constants.PrevStart ||
+                            prevType == Constants.PrevOp ||
                             prevType == Constants.PrevParenL)
-                            return false; // empty or operator-only NG
+                            return false;
 
                         parenDepth--;
                         prevType = Constants.PrevParenR;
                         sawMeaningful = true;
+                        currentNumberHasUnaryMinus = false;
                         continue;
                     }
 
-                    // operator
-                    if (Helpers.IsOperator(c))
+                    // -------------------------------------------------
+                    // Operator
+                    // -------------------------------------------------
+                    if (!Helpers.IsOperator(c))
+                        return false;
+
+                    if (c == '+' || c == '-')
                     {
-                        if (c == '+' || c == '-')
+                        // Unary +/- is allowed only at the start,
+                        // or right after '('.
+                        if (prevType == Constants.PrevStart || prevType == Constants.PrevParenL)
                         {
-                            // unary + / - is allowed only at start or right after '('
-                            if (prevType == Constants.PrevStart || prevType == Constants.PrevParenL)
-                            {
-                                if (!Helpers.TryPeekNextNonSpace(p, len, i + 1, out char next))
-                                    return false;
+                            char next = Helpers.PeekNextNonSpaceOrZero(p, len, i + 1);
+                            if (next == '\0')
+                                return false;
 
-                                if (!Helpers.IsDigit(next) && next != '(')
-                                    return false;
+                            // Existing spec:
+                            // unary sign can be followed only by a digit or '('.
+                            if (!Helpers.IsDigit(next) && next != '(')
+                                return false;
 
-                                if (c == '-' && Helpers.IsDigit(next))
-                                    currentNumberHasUnaryMinus = true;
-                                else
-                                    currentNumberHasUnaryMinus = false;
+                            currentNumberHasUnaryMinus = (c == '-' && Helpers.IsDigit(next));
 
-                                prevType = Constants.PrevOp;
-                                sawMeaningful = true;
-                                continue;
-                            }
+                            prevType = Constants.PrevOp;
+                            sawMeaningful = true;
+                            continue;
                         }
-
-                        // binary operator must follow number or ')'
-                        if (prevType != Constants.PrevNumber && prevType != Constants.PrevParenR)
-                            return false;
-
-                        prevType = Constants.PrevOp;
-                        sawMeaningful = true;
-                        continue;
                     }
 
-                    // invalid charset
-                    return false;
+                    // Binary operators must follow a number or ')'.
+                    if (prevType != Constants.PrevNumber && prevType != Constants.PrevParenR)
+                        return false;
+
+                    prevType = Constants.PrevOp;
+                    sawMeaningful = true;
+                    currentNumberHasUnaryMinus = false;
                 }
 
                 if (!sawMeaningful)

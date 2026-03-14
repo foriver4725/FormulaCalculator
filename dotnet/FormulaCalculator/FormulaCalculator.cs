@@ -13,6 +13,8 @@ namespace foriver4725.FormulaCalculator
 
             fixed (char* p = formula)
             {
+                // Worst case:
+                // every meaningful character becomes either a value or an operator.
                 double* values = stackalloc double[len];
                 char* ops = stackalloc char[len];
 
@@ -21,11 +23,11 @@ namespace foriver4725.FormulaCalculator
 
                 byte prevType = Constants.PrevStart;
                 int parenDepth = 0;
-
-                int connectedNumber = -1;
-                int digitCount = 0;
                 bool sawMeaningful = false;
 
+                // Existing spec:
+                // a unary minus directly attached to a bare number is invalid
+                // when immediately followed by % or ^, e.g. "-5%2", "-2^2".
                 bool currentNumberHasUnaryMinus = false;
 
                 for (int i = 0; i < len; i++)
@@ -35,62 +37,67 @@ namespace foriver4725.FormulaCalculator
                     if (c == ' ')
                         continue;
 
-                    // digit
-                    if ((uint)(c - '0') <= 9u)
+                    // -------------------------------------------------
+                    // Number token
+                    // -------------------------------------------------
+                    if (Helpers.IsDigit(c))
                     {
-                        if (prevType == Constants.PrevParenR)
-                            return double.NaN; // ")1" NG
-
-                        int digit = c - '0';
-
-                        digitCount++;
-                        if (digitCount > 8)
+                        // Disallow adjacency such as "1 23" or ")1".
+                        if (prevType == Constants.PrevNumber || prevType == Constants.PrevParenR)
                             return double.NaN;
 
-                        connectedNumber = (connectedNumber < 0)
-                            ? digit
-                            : (connectedNumber * 10 + digit);
+                        double number;
+                        int end = Helpers.ReadNumberOrMinusOne(p, len, i, &number);
+                        if (end < 0)
+                            return double.NaN;
 
+                        // Preserve the existing restriction for unary-minus bare numbers.
+                        if (currentNumberHasUnaryMinus)
+                        {
+                            char nextAfterNumber = Helpers.PeekNextNonSpaceOrZero(p, len, end + 1);
+                            if (nextAfterNumber == '%' || nextAfterNumber == '^')
+                                return double.NaN;
+                        }
+
+                        values[vTop++] = number;
+
+                        i = end;
                         prevType = Constants.PrevNumber;
                         sawMeaningful = true;
+                        currentNumberHasUnaryMinus = false;
                         continue;
                     }
 
-                    // close current number
-                    if (connectedNumber >= 0)
-                    {
-                        if (currentNumberHasUnaryMinus && (c == '%' || c == '^'))
-                            return double.NaN;
-
-                        values[vTop++] = connectedNumber;
-                        connectedNumber = -1;
-                        digitCount = 0;
-
-                        currentNumberHasUnaryMinus = false;
-                    }
-
-                    // '('
+                    // -------------------------------------------------
+                    // Left parenthesis
+                    // -------------------------------------------------
                     if (c == '(')
                     {
+                        // Disallow adjacency such as "2(" or ")(".
                         if (prevType == Constants.PrevNumber || prevType == Constants.PrevParenR)
-                            return double.NaN; // "2(" or ")(" NG
+                            return double.NaN;
 
                         ops[oTop++] = c;
                         parenDepth++;
                         prevType = Constants.PrevParenL;
                         sawMeaningful = true;
+                        currentNumberHasUnaryMinus = false;
                         continue;
                     }
 
-                    // ')'
+                    // -------------------------------------------------
+                    // Right parenthesis
+                    // -------------------------------------------------
                     if (c == ')')
                     {
                         if (parenDepth <= 0)
                             return double.NaN;
 
-                        if (prevType == Constants.PrevStart || prevType == Constants.PrevOp ||
+                        // Disallow empty parentheses or operator-only content.
+                        if (prevType == Constants.PrevStart ||
+                            prevType == Constants.PrevOp ||
                             prevType == Constants.PrevParenL)
-                            return double.NaN; // empty or operator-only NG
+                            return double.NaN;
 
                         while (oTop > 0 && ops[oTop - 1] != '(')
                         {
@@ -105,31 +112,35 @@ namespace foriver4725.FormulaCalculator
                         parenDepth--;
                         prevType = Constants.PrevParenR;
                         sawMeaningful = true;
+                        currentNumberHasUnaryMinus = false;
                         continue;
                     }
 
-                    // operator
+                    // -------------------------------------------------
+                    // Operator
+                    // -------------------------------------------------
                     if (!Helpers.IsOperator(c))
                         return double.NaN;
 
                     if (c == '+' || c == '-')
                     {
-                        // unary + / - is allowed only at start or right after '('
+                        // Unary +/- is allowed only at the start,
+                        // or right after '('.
                         if (prevType == Constants.PrevStart || prevType == Constants.PrevParenL)
                         {
-                            if (!Helpers.TryPeekNextNonSpace(p, len, i + 1, out char next))
+                            char next = Helpers.PeekNextNonSpaceOrZero(p, len, i + 1);
+                            if (next == '\0')
                                 return double.NaN;
 
+                            // Existing spec:
+                            // unary sign can be followed only by a digit or '('.
+                            // ".5" is intentionally not supported.
                             if (!Helpers.IsDigit(next) && next != '(')
                                 return double.NaN;
 
-                            // unary minus directly attached to a bare number
-                            if (c == '-' && Helpers.IsDigit(next))
-                                currentNumberHasUnaryMinus = true;
-                            else
-                                currentNumberHasUnaryMinus = false;
+                            currentNumberHasUnaryMinus = (c == '-' && Helpers.IsDigit(next));
 
-                            // simulate unary as 0 +/- x
+                            // Lower unary +/- into "0 +/- x".
                             values[vTop++] = 0.0;
                             ops[oTop++] = c;
                             prevType = Constants.PrevOp;
@@ -138,7 +149,7 @@ namespace foriver4725.FormulaCalculator
                         }
                     }
 
-                    // binary operator must follow number or ')'
+                    // Binary operators must follow a number or ')'.
                     if (prevType != Constants.PrevNumber && prevType != Constants.PrevParenR)
                         return double.NaN;
 
@@ -151,12 +162,7 @@ namespace foriver4725.FormulaCalculator
                     ops[oTop++] = c;
                     prevType = Constants.PrevOp;
                     sawMeaningful = true;
-                }
-
-                // close trailing number
-                if (connectedNumber >= 0)
-                {
-                    values[vTop++] = connectedNumber;
+                    currentNumberHasUnaryMinus = false;
                 }
 
                 if (!sawMeaningful)
@@ -182,7 +188,7 @@ namespace foriver4725.FormulaCalculator
         }
 
         // =========================================================
-        // Core
+        // Core reduction
         // =========================================================
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -217,6 +223,7 @@ namespace foriver4725.FormulaCalculator
             }
             else if (op == '%')
             {
+                // '%' is restricted to positive integer-valued operands.
                 if (a <= 0.0 || b <= 0.0)
                     return false;
 
@@ -239,30 +246,39 @@ namespace foriver4725.FormulaCalculator
                 {
                     if (Helpers.IsInteger(b))
                     {
-                        long e64 = (long)Math.Round(b);
+                        double rounded = Math.Round(b);
 
-                        if (e64 < int.MinValue || e64 > int.MaxValue)
-                            return false;
-
-                        int e = (int)e64;
-
-                        if (e < 0)
+                        // Use fast integer exponentiation only inside Int32 range.
+                        // Otherwise, fall back to Math.Pow and allow Infinity.
+                        if (rounded > int.MinValue && rounded <= int.MaxValue)
                         {
-                            int posE = -e;
-                            double p = PowInt(a, posE);
-                            if (p == 0.0)
-                                return false;
+                            int e = (int)rounded;
 
-                            result = 1.0 / p;
+                            if (e < 0)
+                            {
+                                // Note:
+                                // e cannot be int.MinValue here because the range check above excludes it
+                                // from causing overflow in negation after rounding cast logic.
+                                int posE = -e;
+                                double p = PowInt(a, posE);
+                                if (p == 0.0)
+                                    return false;
+
+                                result = 1.0 / p;
+                            }
+                            else
+                            {
+                                result = PowInt(a, e);
+                            }
                         }
                         else
                         {
-                            result = PowInt(a, e);
+                            result = Math.Pow(a, b);
                         }
                     }
                     else
                     {
-                        // negative base with non-integer exponent => not real
+                        // A negative base with a non-integer exponent is not a real number.
                         if (a < 0.0)
                             return false;
 
@@ -270,7 +286,8 @@ namespace foriver4725.FormulaCalculator
                     }
                 }
 
-                if (double.IsNaN(result) || double.IsInfinity(result))
+                // Infinity is allowed by design; NaN is not.
+                if (double.IsNaN(result))
                     return false;
             }
             else
