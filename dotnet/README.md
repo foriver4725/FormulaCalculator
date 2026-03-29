@@ -24,6 +24,15 @@ make benchmark-run
 # It generates a graph, then copies those results to be show in the root README.md
 make benchmark-deploy-readme
 
+# Run performance benchmarks for comparing with other libraries
+# NOTE: It takes certain time
+make benchmark-library-comparison-run
+
+# Should be executed after running benchmarks for comparing with other libraries
+# Generate a markdown report for the benchmarks comparing with other libraries
+# It generates a graph, then copies those results to be show in the root README.md
+make benchmark-library-comparison-deploy-readme
+
 # Push to NuGet
 make push-nuget NUGET_PUSH_PACKAGE_VERSION=(YOUR_PACKAGE_VERSION) NUGET_PUSH_API_KEY=(YOUR_API_KEY)
 ```

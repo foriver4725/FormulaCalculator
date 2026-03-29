@@ -14,27 +14,24 @@ def plot(csv_path: Path, output_dir: Path, output_name: str):
     # ---------- Load ----------
     df = pd.read_csv(csv_path)
 
-    # "27.47 ns" -> 27.47
-    df["Mean"] = df["Mean"].str.replace(" ns", "", regex=False).astype(float)
+    # "1,227.47 ns" -> 1227.47
+    df["Mean"] = (
+        df["Mean"]
+        .str.replace(",", "", regex=False)
+        .str.replace(" ns", "", regex=False)
+        .astype(float)
+    )
 
     # ---------- Plot settings ----------
-    method_order = [
-        "Calculate",
-        "IsValidFormula",
-        "Calculate_With_IsValidFormula",
-    ]
+    # Extract Method values in appearance order (no sorting)
+    method_order = list(dict.fromkeys(df["Method"].dropna().tolist()))
 
-    colors = {
-        "Calculate": "#1f77b4",  # blue
-        "IsValidFormula": "#ff7f0e",  # orange
-        "Calculate_With_IsValidFormula": "#d62728",  # red
-    }
+    # Assign colors sequentially from matplotlib colormap
+    cmap = plt.get_cmap("tab10")
+    colors = {method: cmap(i % 10) for i, method in enumerate(method_order)}
 
-    labels = {
-        "Calculate": "Calculate",
-        "IsValidFormula": "IsValidFormula",
-        "Calculate_With_IsValidFormula": "Calculate + IsValidFormula",
-    }
+    # Replace underscores with spaces for legend labels
+    labels = {method: method.replace("_", " ") for method in method_order}
 
     fig, ax = plt.subplots(figsize=(7.2, 4.6), dpi=300)
 

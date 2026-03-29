@@ -18,11 +18,15 @@ TEST_SCRIPT_PATH := ./FormulaCalculator.Tests/Tests.cs
 BENCHMARK_RESULT_MD_PATH := ./BenchmarkDotNet.Artifacts/results/foriver4725.FormulaCalculator.Benchmarks.Benchmarks-report-github.md
 BENCHMARK_RESULT_CSV_PATH := ./BenchmarkDotNet.Artifacts/results/foriver4725.FormulaCalculator.Benchmarks.Benchmarks-report.csv
 BENCHMARK_RESULT_HTML_PATH := ./BenchmarkDotNet.Artifacts/results/foriver4725.FormulaCalculator.Benchmarks.Benchmarks-report.html
+BENCHMARK_LIBRARY_COMPARISON_RESULT_MD_PATH := ./BenchmarkDotNet.Artifacts/results/foriver4725.FormulaCalculator.Benchmarks.LibraryComparison.Benchmarks-report-github.md
+BENCHMARK_LIBRARY_COMPARISON_RESULT_CSV_PATH := ./BenchmarkDotNet.Artifacts/results/foriver4725.FormulaCalculator.Benchmarks.LibraryComparison.Benchmarks-report.csv
+BENCHMARK_LIBRARY_COMPARISON_RESULT_HTML_PATH := ./BenchmarkDotNet.Artifacts/results/foriver4725.FormulaCalculator.Benchmarks.LibraryComparison.Benchmarks-report.html
 
 UNITY_DIR := ../Unity/Assets/foriver4725/FormulaCalculator
 UNITY_DLL_DIR := $(UNITY_DIR)/Plugins
 UNITY_TEST_SCRIPT_DIR := $(UNITY_DIR)/Tests/Editor
 BENCHMARK_MD_PATH := ./BenchmarkResult.md
+BENCHMARK_LIBRARY_COMPARISON_MD_PATH := ./BenchmarkLibraryComparisonResult.md
 
 UNITY_PACKAGE_JSON_PATH := $(UNITY_DIR)/package.json
 FORMULA_CALCULATOR_CSPROJ_PATH := ./FormulaCalculator/FormulaCalculator.csproj
@@ -32,7 +36,9 @@ BENCHMARK_RESULT_GRAPH_MAKER_DIR := $(PYTHON_TOOLS_DIR)/BenchmarkResultGraphMake
 BENCHMARK_RESULT_GRAPH_MAKER_PY_PATH := $(BENCHMARK_RESULT_GRAPH_MAKER_DIR)/benchmark_result_graph_maker.py
 BENCHMARK_RESULT_GRAPH_MAKER_OUTPUT_DIR := $(BENCHMARK_RESULT_GRAPH_MAKER_DIR)/output
 BENCHMARK_RESULT_GRAPH_MAKER_OUTPUT_NAME := benchmark_result_graph
+BENCHMARK_LIBRARY_COMPARISON_RESULT_GRAPH_MAKER_OUTPUT_NAME := benchmark_library_comparison_result_graph
 BENCHMARK_RESULT_GRAPH_PATH := ./BenchmarkResultGraph.png
+BENCHMARK_LIBRARY_COMPARISON_RESULT_GRAPH_PATH := ./BenchmarkLibraryComparisonResultGraph.png
 VERSION_TEXT_APPLIER_DIR := $(PYTHON_TOOLS_DIR)/VersionTextApplier
 VERSION_TEXT_APPLIER_UNITY_PY_PATH := $(VERSION_TEXT_APPLIER_DIR)/version_text_applier_unity.py
 VERSION_TEXT_APPLIER_DOTNET_PY_PATH := $(VERSION_TEXT_APPLIER_DIR)/version_text_applier_dotnet.py
@@ -52,6 +58,10 @@ NUGET_PUSH_API_KEY ?= NONE
 	benchmark-make-graph-from-result \
 	benchmark-deploy-readme \
 	benchmark \
+	benchmark-library-comparison-run \
+	benchmark-library-comparison-make-graph-from-result \
+	benchmark-library-comparison-deploy-readme \
+	benchmark-library-comparison \
 	push-nuget
 
 apply-version-text:
@@ -110,6 +120,32 @@ benchmark-deploy-readme: benchmark-make-graph-from-result
 
 benchmark: benchmark-run benchmark-make-graph-from-result benchmark-deploy-readme
 	@$(LOG_SUCCESS) "All benchmark tasks completed"
+
+benchmark-library-comparison-run:
+	@$(LOG_INFO) "Benchmarking library comparison started..."
+	dotnet run -c $(CONFIG) -f $(OTHER_TFM) \
+		--project ./FormulaCalculator.Benchmarks.LibraryComparison/FormulaCalculator.Benchmarks.LibraryComparison.csproj
+	@$(LOG_SUCCESS) "Benchmarking library comparison completed"
+
+benchmark-library-comparison-make-graph-from-result:
+	@$(LOG_INFO) "Making benchmark library comparison graph from result..."
+	python3 $(BENCHMARK_RESULT_GRAPH_MAKER_PY_PATH) $(BENCHMARK_LIBRARY_COMPARISON_RESULT_CSV_PATH) \
+		--output $(BENCHMARK_RESULT_GRAPH_MAKER_OUTPUT_DIR) \
+		--name $(BENCHMARK_LIBRARY_COMPARISON_RESULT_GRAPH_MAKER_OUTPUT_NAME)
+	@$(LOG_SUCCESS) "Benchmark library comparison graph creation completed"
+
+benchmark-library-comparison-deploy-readme: benchmark-library-comparison-make-graph-from-result
+	@$(LOG_INFO) "Deploying benchmark library comparison result to README.md..."
+	mkdir -p $(dir $(BENCHMARK_LIBRARY_COMPARISON_MD_PATH))
+	cp -f $(BENCHMARK_LIBRARY_COMPARISON_RESULT_MD_PATH) $(BENCHMARK_LIBRARY_COMPARISON_MD_PATH)
+	@$(LOG_SUCCESS) "Copied library comparison result markdown"
+	mkdir -p $(dir $(BENCHMARK_LIBRARY_COMPARISON_RESULT_GRAPH_PATH))
+	cp -f $(BENCHMARK_RESULT_GRAPH_MAKER_OUTPUT_DIR)/$(BENCHMARK_LIBRARY_COMPARISON_RESULT_GRAPH_MAKER_OUTPUT_NAME).png $(BENCHMARK_LIBRARY_COMPARISON_RESULT_GRAPH_PATH)
+	@$(LOG_SUCCESS) "Copied library comparison result graph"
+	@$(LOG_SUCCESS) "Deployment of benchmark library comparison result to README.md completed"
+
+benchmark-library-comparison: benchmark-library-comparison-run benchmark-library-comparison-make-graph-from-result benchmark-library-comparison-deploy-readme
+	@$(LOG_SUCCESS) "All benchmark library comparison tasks completed"
 
 push-nuget:
 	dotnet pack -c Release

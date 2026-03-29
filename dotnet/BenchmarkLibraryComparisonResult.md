@@ -1,0 +1,75 @@
+```
+
+BenchmarkDotNet v0.15.8, macOS Tahoe 26.3.1 (25D2128) [Darwin 25.3.0]
+Apple M3, 1 CPU, 8 logical and 8 physical cores
+.NET SDK 10.0.102
+  [Host]     : .NET 8.0.10 (8.0.10, 8.0.1024.46610), Arm64 RyuJIT armv8.0-a
+  DefaultJob : .NET 8.0.10 (8.0.10, 8.0.1024.46610), Arm64 RyuJIT armv8.0-a
+
+
+```
+| Method                      | Input   | Case    | Char Count | Mean         | Error      | StdDev     | Gen0   | Gen1   | Allocated |
+|---------------------------- |-------- |-------- |-----------:|-------------:|-----------:|-----------:|-------:|-------:|----------:|
+| Calculate_FormulaCalculator | Len08_A | Len08_A |          8 |     21.67 ns |   0.161 ns |   0.150 ns |      - |      - |         - |
+| Calculate_FormulaCalculator | Len08_B | Len08_B |          9 |     23.16 ns |   0.097 ns |   0.086 ns |      - |      - |         - |
+| Calculate_FormulaCalculator | Len08_C | Len08_C |          9 |     22.02 ns |   0.082 ns |   0.068 ns |      - |      - |         - |
+| Calculate_FormulaCalculator | Len16_A | Len16_A |         16 |     36.86 ns |   0.176 ns |   0.156 ns |      - |      - |         - |
+| Calculate_FormulaCalculator | Len16_B | Len16_B |         16 |     35.18 ns |   0.183 ns |   0.143 ns |      - |      - |         - |
+| Calculate_FormulaCalculator | Len16_C | Len16_C |         17 |     34.83 ns |   0.210 ns |   0.186 ns |      - |      - |         - |
+| Calculate_FormulaCalculator | Len64_A | Len64_A |         64 |    193.33 ns |   2.758 ns |   2.580 ns |      - |      - |         - |
+| Calculate_FormulaCalculator | Len64_B | Len64_B |         65 |    161.59 ns |   2.408 ns |   2.253 ns |      - |      - |         - |
+| Calculate_FormulaCalculator | Len64_C | Len64_C |         67 |    177.57 ns |   3.569 ns |   3.339 ns |      - |      - |         - |
+| Calculate_ClosedXml         | Len08_A | Len08_A |          8 |    835.39 ns |   6.488 ns |   6.069 ns | 0.2050 |      - |    1720 B |
+| Calculate_ClosedXml         | Len08_B | Len08_B |          9 |    847.96 ns |   5.792 ns |   5.134 ns | 0.2050 |      - |    1720 B |
+| Calculate_ClosedXml         | Len08_C | Len08_C |          9 |    843.21 ns |   4.962 ns |   4.642 ns | 0.2050 |      - |    1720 B |
+| Calculate_ClosedXml         | Len16_A | Len16_A |         16 |  1,113.56 ns |   4.290 ns |   3.803 ns | 0.2403 |      - |    2016 B |
+| Calculate_ClosedXml         | Len16_B | Len16_B |         16 |  1,119.24 ns |   2.089 ns |   1.852 ns | 0.2403 |      - |    2016 B |
+| Calculate_ClosedXml         | Len16_C | Len16_C |         17 |  1,138.00 ns |  10.711 ns |  10.019 ns | 0.2403 |      - |    2016 B |
+| Calculate_ClosedXml         | Len64_A | Len64_A |         64 |  3,826.67 ns |  11.647 ns |  10.325 ns | 0.5112 |      - |    4336 B |
+| Calculate_ClosedXml         | Len64_B | Len64_B |         65 |  3,553.96 ns |  17.985 ns |  15.019 ns | 0.4883 |      - |    4096 B |
+| Calculate_ClosedXml         | Len64_C | Len64_C |         67 |  3,637.50 ns |  14.947 ns |  13.250 ns | 0.4959 |      - |    4176 B |
+| Calculate_DataTable         | Len08_A | Len08_A |          8 |    382.54 ns |   6.775 ns |   5.289 ns | 0.3133 | 0.0005 |    2624 B |
+| Calculate_DataTable         | Len08_B | Len08_B |          9 |    419.52 ns |   6.919 ns |   6.134 ns | 0.3152 | 0.0005 |    2640 B |
+| Calculate_DataTable         | Len08_C | Len08_C |          9 |    400.51 ns |   6.673 ns |   6.242 ns | 0.3152 |      - |    2640 B |
+| Calculate_DataTable         | Len16_A | Len16_A |         16 |    574.84 ns |   2.596 ns |   2.428 ns | 0.3548 |      - |    2992 B |
+| Calculate_DataTable         | Len16_B | Len16_B |         16 |    613.33 ns |   3.158 ns |   2.954 ns | 0.3586 |      - |    3000 B |
+| Calculate_DataTable         | Len16_C | Len16_C |         17 |    627.42 ns |   3.460 ns |   3.067 ns | 0.3586 |      - |    3016 B |
+| Calculate_DataTable         | Len64_A | Len64_A |         64 |  2,448.38 ns |   8.338 ns |   7.391 ns | 0.8011 | 0.0038 |    6704 B |
+| Calculate_DataTable         | Len64_B | Len64_B |         65 |  2,309.91 ns |  15.628 ns |  14.618 ns | 0.7324 |      - |    6152 B |
+| Calculate_DataTable         | Len64_C | Len64_C |         67 |  2,352.75 ns |  10.606 ns |   9.921 ns | 0.7477 |      - |    6344 B |
+| Calculate_IronPython        | Len08_A | Len08_A |          8 | 10,207.28 ns |  57.716 ns |  53.988 ns | 5.0964 | 0.4578 |   42683 B |
+| Calculate_IronPython        | Len08_B | Len08_B |          9 |  9,953.38 ns |  68.044 ns |  60.319 ns | 5.1117 | 0.3815 |   42836 B |
+| Calculate_IronPython        | Len08_C | Len08_C |          9 | 10,447.36 ns |  73.371 ns |  61.268 ns | 5.0659 | 0.3662 |   42828 B |
+| Calculate_IronPython        | Len16_A | Len16_A |         16 | 10,665.03 ns |  93.897 ns |  78.408 ns | 5.1270 | 0.3662 |   43108 B |
+| Calculate_IronPython        | Len16_B | Len16_B |         16 | 10,135.15 ns | 103.600 ns |  80.884 ns | 5.0049 | 0.4272 |   42044 B |
+| Calculate_IronPython        | Len16_C | Len16_C |         17 | 10,494.19 ns | 106.510 ns |  88.941 ns | 5.1270 | 0.3662 |   43284 B |
+| Calculate_IronPython        | Len64_A | Len64_A |         64 | 18,796.86 ns | 307.319 ns | 256.625 ns | 6.8359 | 0.4883 |   57486 B |
+| Calculate_IronPython        | Len64_B | Len64_B |         65 | 17,165.60 ns | 161.917 ns | 135.208 ns | 6.4697 | 0.4883 |   54845 B |
+| Calculate_IronPython        | Len64_C | Len64_C |         67 | 17,294.58 ns | 138.139 ns | 115.352 ns | 6.5918 | 0.4883 |   55197 B |
+| Calculate_NCalc             | Len08_A | Len08_A |          8 |    197.97 ns |   0.774 ns |   0.686 ns | 0.1223 | 0.0002 |    1024 B |
+| Calculate_NCalc             | Len08_B | Len08_B |          9 |    190.17 ns |   0.775 ns |   0.687 ns | 0.1194 |      - |    1000 B |
+| Calculate_NCalc             | Len08_C | Len08_C |          9 |    190.28 ns |   1.063 ns |   0.994 ns | 0.1194 | 0.0002 |    1000 B |
+| Calculate_NCalc             | Len16_A | Len16_A |         16 |    267.12 ns |   1.076 ns |   1.007 ns | 0.1545 |      - |    1296 B |
+| Calculate_NCalc             | Len16_B | Len16_B |         16 |    260.93 ns |   0.883 ns |   0.737 ns | 0.1516 |      - |    1272 B |
+| Calculate_NCalc             | Len16_C | Len16_C |         17 |    248.00 ns |   1.163 ns |   1.088 ns | 0.1488 |      - |    1248 B |
+| Calculate_NCalc             | Len64_A | Len64_A |         64 |  1,378.00 ns |   2.235 ns |   1.745 ns | 0.6371 | 0.0019 |    5344 B |
+| Calculate_NCalc             | Len64_B | Len64_B |         65 |  1,149.37 ns |   1.251 ns |   1.109 ns | 0.5226 | 0.0019 |    4384 B |
+| Calculate_NCalc             | Len64_C | Len64_C |         67 |  1,185.20 ns |   2.262 ns |   2.005 ns | 0.5589 | 0.0019 |    4680 B |
+| Calculate_xFunc             | Len08_A | Len08_A |          8 |    346.66 ns |   6.298 ns |   5.891 ns | 0.0420 |      - |     352 B |
+| Calculate_xFunc             | Len08_B | Len08_B |          9 |    346.55 ns |   6.905 ns |   6.459 ns | 0.0420 | 0.0005 |     352 B |
+| Calculate_xFunc             | Len08_C | Len08_C |          9 |    352.20 ns |   6.798 ns |   6.676 ns | 0.0420 |      - |     352 B |
+| Calculate_xFunc             | Len16_A | Len16_A |         16 |    594.41 ns |  11.722 ns |  10.965 ns | 0.0572 |      - |     480 B |
+| Calculate_xFunc             | Len16_B | Len16_B |         16 |    593.97 ns |   8.729 ns |   8.165 ns | 0.0572 |      - |     480 B |
+| Calculate_xFunc             | Len16_C | Len16_C |         17 |    602.53 ns |  11.475 ns |  11.270 ns | 0.0572 |      - |     480 B |
+| Calculate_xFunc             | Len64_A | Len64_A |         64 |  3,000.94 ns |  51.652 ns |  48.316 ns | 0.2708 |      - |    2272 B |
+| Calculate_xFunc             | Len64_B | Len64_B |         65 |  2,678.76 ns |  52.636 ns |  58.505 ns | 0.2251 | 0.0038 |    1888 B |
+| Calculate_xFunc             | Len64_C | Len64_C |         67 |  2,742.38 ns |  54.208 ns |  50.706 ns | 0.2403 |      - |    2016 B |
+| Calculate_ExprTk            | Len08_A | Len08_A |          8 | 35,204.00 ns | 680.899 ns | 668.734 ns |      - |      - |      32 B |
+| Calculate_ExprTk            | Len08_B | Len08_B |          9 | 35,349.75 ns | 574.002 ns | 536.922 ns |      - |      - |      40 B |
+| Calculate_ExprTk            | Len08_C | Len08_C |          9 | 35,245.15 ns | 677.272 ns | 779.947 ns |      - |      - |      40 B |
+| Calculate_ExprTk            | Len16_A | Len16_A |         16 | 36,427.32 ns | 696.427 ns | 715.179 ns |      - |      - |      40 B |
+| Calculate_ExprTk            | Len16_B | Len16_B |         16 | 36,408.77 ns | 722.211 ns | 772.758 ns |      - |      - |      40 B |
+| Calculate_ExprTk            | Len16_C | Len16_C |         17 | 36,624.77 ns | 679.909 ns | 667.761 ns |      - |      - |      48 B |
+| Calculate_ExprTk            | Len64_A | Len64_A |         64 | 46,967.93 ns | 742.558 ns | 694.589 ns |      - |      - |      88 B |
+| Calculate_ExprTk            | Len64_B | Len64_B |         65 | 44,581.59 ns | 714.889 ns | 668.707 ns |      - |      - |      96 B |
+| Calculate_ExprTk            | Len64_C | Len64_C |         67 | 45,142.81 ns | 851.772 ns | 796.748 ns |      - |      - |      96 B |
