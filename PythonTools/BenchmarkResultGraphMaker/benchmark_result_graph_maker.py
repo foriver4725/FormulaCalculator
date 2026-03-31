@@ -8,8 +8,6 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator
 from pathlib import Path
 
-LOG_EPS = 1 + 1e-12
-
 
 def parse_ns_series(series: pd.Series) -> pd.Series:
     """Convert BenchmarkDotNet time strings like '1,227.47 ns' to float."""
@@ -100,9 +98,14 @@ def plot_metric(
         if len(x) == 0:
             continue
 
-        # For log scale, ensure the fitted line is also plottable by replacing non-positive values.
+        # If using log scale, filter out non-positive values since they cannot be plotted.
         if use_log_y:
-            y = np.where(y <= 0, LOG_EPS, y)
+            positive_mask = y > 0
+            x = x[positive_mask]
+            y = y[positive_mask]
+
+            if len(x) == 0:
+                continue
 
         # Measured points.
         ax.scatter(
@@ -122,9 +125,11 @@ def plot_metric(
             x_fit = np.linspace(x.min(), x.max(), 200)
             y_fit = poly(x_fit)
 
-            # For log scale, ensure the fitted line is also plottable by replacing non-positive values.
+            # If using log scale, filter out non-positive values since they cannot be plotted.
             if use_log_y:
-                y_fit = np.where(y_fit <= 0, LOG_EPS, y_fit)
+                valid_fit_mask = y_fit > 0
+                x_fit = x_fit[valid_fit_mask]
+                y_fit = y_fit[valid_fit_mask]
 
             if len(x_fit) > 0:
                 ax.plot(
