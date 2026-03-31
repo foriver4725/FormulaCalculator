@@ -316,13 +316,3 @@ This design keeps the evaluation cost proportional to the length of the input ex
 ## License
 
 [MIT](https://github.com/foriver4725/FormulaCalculator/blob/main/LICENSE)
-
----
-
-## For Developers
-
-Make commands are described in the below file.
-
-NOTE: When updating the version, make sure to keep the version numbers aligned before publishing.
-
-- [.NET README](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/README.md)
