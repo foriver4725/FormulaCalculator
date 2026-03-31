@@ -167,41 +167,125 @@ while `Calculate()` alone provides the fastest possible execution path.
 
 This library intentionally focuses on **core arithmetic expression evaluation**.
 
-Functions such as:
+The following kinds of function calls are **not supported**:
 
 - `sqrt(x)`
 - `sin(x)`
 - `cos(x)`
 - `tan(x)`
-- other mathematical function calls
+- other function-style mathematical extensions
 
-are **not supported**.
+This is a deliberate design choice.
 
-Adding function parsing would introduce additional branching,
-token handling, and runtime overhead that affects the performance
-of all evaluations — even when such functions are rarely used.
+Once support for function-style syntax is introduced, the evaluator starts
+shifting away from a lightweight arithmetic parser and toward a more
+general-purpose expression engine. That direction usually brings additional
+branching, token classification, parsing complexity, and runtime overhead.
 
-In many practical scenarios, these operations can be handled
-outside the evaluator instead:
+As more rarely used features accumulate, the baseline cost of evaluating
+all expressions tends to rise — including simple formulas that only need
+basic arithmetic.
+
+This library avoids that tradeoff on purpose.
+
+Another reason is that expressions such as `sin(x)` or `sqrt(x)` are
+somewhat different in character from traditional arithmetic notation built
+from operators like `+`, `-`, `*`, and `/`. They are closer to a function-
+application style of notation: extensible, expressive, and powerful, but
+also conceptually separate from the minimal arithmetic core this library
+is designed to handle.
+
+In many cases, such function-style extensions are better implemented by the
+consumer side, where they can be added selectively and only when needed.
+
+For example, projects can preprocess custom function calls before passing
+the final expression to the evaluator:
 
 ```cs
-double value = Math.Sin(x);
-string formula = $"{value}+2*3";
+using System;
+using System.Globalization;
+using foriver4725.FormulaCalculator;
+
+static string PreprocessSin(ReadOnlySpan<char> formula)
+{
+    const string functionName = "sin(";
+
+    int index = formula.IndexOf(functionName, StringComparison.OrdinalIgnoreCase);
+    if (index < 0)
+    {
+        return formula.ToString();
+    }
+
+    int argumentStart = index + functionName.Length;
+
+    int depth = 0;
+    int argumentEnd = -1;
+
+    for (int i = argumentStart; i < formula.Length; i++)
+    {
+        char c = formula[i];
+
+        if (c == '(')
+        {
+            depth++;
+        }
+        else if (c == ')')
+        {
+            if (depth == 0)
+            {
+                argumentEnd = i;
+                break;
+            }
+
+            depth--;
+        }
+    }
+
+    if (argumentEnd < 0)
+    {
+        throw new FormatException("Missing closing parenthesis for sin().");
+    }
+
+    ReadOnlySpan<char> inner = formula.Slice(argumentStart, argumentEnd - argumentStart);
+
+    // recursive preprocessing
+    string processedInner = PreprocessSin(inner);
+
+    double value = processedInner.AsSpan().Calculate();
+    string replacement = Math.Sin(value).ToString(CultureInfo.InvariantCulture);
+
+    string before = formula.Slice(0, index).ToString();
+    string after = formula.Slice(argumentEnd + 1).ToString();
+
+    string combined = before + replacement + after;
+
+    // continue processing remaining string
+    return PreprocessSin(combined.AsSpan());
+}
+
+string formula = "sin(1+sin(2*3))*2";
+string preprocessed = PreprocessSin(formula.AsSpan());
+double result = preprocessed.AsSpan().Calculate();
 ```
 
-Because this library prioritizes predictable performance and
-minimal execution cost, function evaluation was intentionally
-excluded from the design.
+This preprocessing can also be implemented using ReadOnlySpan<char>,
+keeping allocations minimal while extending the syntax outside
+the evaluator.
 
-The goal is to keep the evaluator:
+Because such calls are explicitly wrapped in parentheses, precedence is also
+easy to reason about during preprocessing. This approach keeps the evaluator
+itself fast and minimal, while allowing each project to extend the syntax
+in a way that matches its own requirements.
+
+The goal of this library is to remain:
 
 - fast
 - allocation-free
 - simple
 - proportional to expression length
 
-This library aims to be a fast arithmetic evaluator,
-not a full symbolic math engine.
+This library is intended to be a fast arithmetic evaluator,
+not a fully extensible symbolic math engine.
 
 ## Design
 
