@@ -117,15 +117,41 @@ and no GC allocations occur during calculation or validation.
 
 ### Benchmark (.NET / BenchmarkDotNet)
 
-Performance is measured using BenchmarkDotNet on .NET 8.
+Performance measurements are taken with BenchmarkDotNet on .NET 8.
 
-The benchmarks evaluate formulas with different expression lengths
-while tracking execution time and memory allocations.
+Two types of benchmarks are provided:
+
+1. **Method Benchmarks**  
+   Benchmarks for the methods provided by FormulaCalculator, measuring execution time and memory allocations for
+   formulas of different expression lengths.
+
+2. **Library Comparison Benchmarks**  
+   Benchmarks comparing FormulaCalculator with other expression evaluation libraries.  
+   Since some libraries do not perform strict validation or support the exact same syntax, this comparison focuses only
+   on simple calculation performance.  
+   Expressions that depend on syntax available in only some libraries are excluded.
+
+#### Method Benchmarks
 
 - [Benchmark Script](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator.Benchmarks/Benchmarks.cs)
-- [Benchmark Results](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResult.md)
+- [Result HTML](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkResult.html)
 
-![Benchmark Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResultGraph.png)
+**Execution Time**
+![Method Benchmark Time Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkResultMeanGraph.png)
+
+**Memory Allocations**
+![Method Benchmark Allocation Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkResultAllocatedGraph.png)
+
+#### Library Comparison Benchmarks
+
+- [Benchmark Script](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator.Benchmarks.LibraryComparison/Benchmarks.cs)
+- [Result HTML](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResult.html)
+
+**Execution Time**
+![Library Comparison Time Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResultMeanGraph.png)
+
+**Memory Allocations**
+![Library Comparison Allocation Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResultAllocatedGraph.png)
 
 ### Characteristics
 
