@@ -134,7 +134,7 @@ Two types of benchmarks are provided:
 #### Method Benchmarks
 
 - [Benchmark Script](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator.Benchmarks/Benchmarks.cs)
-- [Result HTML](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkResult.html)
+- [Result Markdown](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkResult.md)
 
 **Execution Time**
 ![Method Benchmark Time Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkResultMeanGraph.png)
@@ -145,7 +145,7 @@ Two types of benchmarks are provided:
 #### Library Comparison Benchmarks
 
 - [Benchmark Script](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator.Benchmarks.LibraryComparison/Benchmarks.cs)
-- [Result HTML](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResult.html)
+- [Result Markdown](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResult.md)
 
 **Execution Time**
 ![Library Comparison Time Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResultMeanGraph.png)
