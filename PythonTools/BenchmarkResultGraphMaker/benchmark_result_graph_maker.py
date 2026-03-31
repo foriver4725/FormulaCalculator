@@ -149,6 +149,16 @@ def plot_metric(
     if use_log_y:
         ax.set_yscale("log")
 
+    # Adjust y-axis limits for 0 or very small values.
+    ymin, ymax = ax.get_ylim()
+
+    if use_log_y:
+        ax.set_ylim(bottom=max(ymin, 1e-15), top=ymax)
+    else:
+        if ymax == ymin:
+            ymax = ymax * 1.1 + 1e-12
+        ax.set_ylim(bottom=0, top=ymax)
+
     # Reduce the number of ticks.
     ax.xaxis.set_major_locator(MaxNLocator(nbins=4, integer=True))
     if not use_log_y:
