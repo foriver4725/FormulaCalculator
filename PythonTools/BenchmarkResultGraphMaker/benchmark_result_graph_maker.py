@@ -96,6 +96,13 @@ def plot_metric(
         y = y[valid_mask]
 
         if len(x) == 0:
+            # keep legend entry even if nothing is plotted
+            ax.scatter(
+                [],
+                [],
+                color=colors[method],
+                label=labels[method],
+            )
             continue
 
         # If using log scale, filter out non-positive values since they cannot be plotted.
@@ -105,6 +112,13 @@ def plot_metric(
             y = y[positive_mask]
 
             if len(x) == 0:
+                # keep legend entry even if nothing is plotted
+                ax.scatter(
+                    [],
+                    [],
+                    color=colors[method],
+                    label=labels[method],
+                )
                 continue
 
         # Measured points.
