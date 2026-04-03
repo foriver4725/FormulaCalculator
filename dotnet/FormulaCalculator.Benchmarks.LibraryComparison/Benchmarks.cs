@@ -24,12 +24,23 @@ namespace foriver4725.FormulaCalculator.Benchmarks.LibraryComparison;
 internal static class Native_ExprTk
 {
     [DllImport("FormulaCalculator_ExprTk", CallingConvention = CallingConvention.Cdecl)]
-    private static extern double Calculate_ExprTk(byte[] expression, int length);
+    private static extern unsafe double Calculate_ExprTk(byte* expression, int length);
 
-    public static double Calculate(string expression)
+    public static unsafe double Calculate(string expression)
     {
-        byte[] bytes = Encoding.UTF8.GetBytes(expression);
-        return Calculate_ExprTk(bytes, bytes.Length);
+        ReadOnlySpan<char> formulaSpan = expression.AsSpan();
+        int length = formulaSpan.Length;
+
+        Span<byte> buffer = stackalloc byte[length];
+        for (int i = 0; i < length; i++)
+        {
+            buffer[i] = (byte)formulaSpan[i];
+        }
+
+        fixed (byte* p = buffer)
+        {
+            return Calculate_ExprTk(p, length);
+        }
     }
 }
 
