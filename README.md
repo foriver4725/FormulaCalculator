@@ -8,8 +8,8 @@ A fast, allocation-free, single-pass formula evaluator for C# and Unity.
 - **No heap allocations** in the hot path (Span-based).
 - Works in **.NET** (via NuGet) and **Unity** (via UPM).
 
-> ⚠️ This library prioritizes performance.  
-> Make sure your formula is well-formed **before** calling `Calculate()`.  
+> ⚠️ This library prioritizes performance.
+> Make sure your formula is well-formed **before** calling `Calculate()`.
 > Use `IsValidFormula()` when you need validation.
 
 ---
@@ -100,7 +100,7 @@ This library follows standard mathematical expression rules.
 - Operator precedence and associativity follow conventional math rules.
 - Spaces are ignored.
 
-If you need precise and authoritative behavior details,  
+If you need precise and authoritative behavior details,
 please refer to the test scripts in this repository:
 
 - [Test Scripts](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator.Tests/Tests.cs)
@@ -121,15 +121,26 @@ Performance measurements are taken with BenchmarkDotNet on .NET 8.
 
 Two types of benchmarks are provided:
 
-1. **Method Benchmarks**  
+1. **Method Benchmarks**
    Benchmarks for the methods provided by FormulaCalculator, measuring execution time and memory allocations for
    formulas of different expression lengths.
 
-2. **Library Comparison Benchmarks**  
-   Benchmarks comparing FormulaCalculator with other expression evaluation libraries.  
+2. **Library Comparison Benchmarks**
+   Benchmarks comparing FormulaCalculator with other expression evaluation libraries.
    Since some libraries do not perform strict validation or support the exact same syntax, this comparison focuses only
-   on simple calculation performance.  
+   on simple calculation performance.
    Expressions that depend on syntax available in only some libraries are excluded.
+
+#### Compared Libraries
+
+| Name                                                                                      | Characteristics                                                                                                                                                                                           |
+|-------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [ClosedXML](https://github.com/ClosedXML/ClosedXML)                                       | A .NET library for reading, manipulating, and writing Excel files. In this benchmark, formula evaluation is performed through Excel-style cell formulas rather than a dedicated expression-evaluator API. |
+| [DataTable.Compute](https://learn.microsoft.com/dotnet/api/system.data.datatable.compute) | A built-in .NET API that evaluates expressions through DataTable.Compute. It is convenient because it requires no extra library, but it is not specialized for expression evaluation.                     |
+| [IronPython](https://github.com/IronLanguages/ironpython3)                                | A Python implementation for .NET. Expressions are evaluated using Python eval, representing a scripting-engine-based approach.                                                                            |
+| [NCalc](https://github.com/ncalc/ncalc)                                                   | Characteristics: A lightweight expression evaluator for .NET supporting mathematical and logical expressions.                                                                                             |
+| [xFunc](https://github.com/sys27/xFunc)                                                   | A mathematical expression library that supports parsing, evaluation, simplification, and differentiation.                                                                                                 |
+| [ExprTk](https://github.com/ArashPartow/exprtk)                                           | A C++ mathematical expression toolkit known for high performance and extensibility.                                                                                                                       |
 
 #### Method Benchmarks
 
