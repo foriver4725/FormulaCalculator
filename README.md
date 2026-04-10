@@ -4,9 +4,10 @@
 
 A fast, allocation-free, single-pass formula evaluator for C# and Unity.
 
-- **Focus on speed**: calculation does **not** validate the formula by default.
-- **No heap allocations** in the hot path (Span-based).
-- Works in **.NET** (via NuGet) and **Unity** (via UPM).
+- Single-pass evaluation
+- Allocation-free (Span-based)
+- No validation overhead by default
+- Works in both .NET and Unity
 
 > ⚠️ This library prioritizes performance.
 > Make sure your formula is well-formed **before** calling `Calculate()`.
@@ -117,6 +118,9 @@ and no GC allocations occur during calculation or validation.
 
 ### Benchmark (.NET / BenchmarkDotNet)
 
+In typical arithmetic-only scenarios, FormulaCalculator achieves
+zero allocations and competitive execution time compared to other libraries.
+
 Performance measurements are taken with BenchmarkDotNet on .NET 8.
 
 Two types of benchmarks are provided:
@@ -132,6 +136,8 @@ Two types of benchmarks are provided:
    Expressions that depend on syntax available in only some libraries are excluded.
 
 #### Compared Libraries
+
+The following libraries were used for comparison in the benchmark:
 
 | Name                                                                                      | Characteristics                                                                                                                                                                                           |
 |-------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -175,6 +181,8 @@ Two types of benchmarks are provided:
 while `Calculate()` alone provides the fastest possible execution path.
 
 ## Supported Scope
+
+### Why functions are not supported
 
 This library intentionally focuses on **core arithmetic expression evaluation**.
 
@@ -321,6 +329,21 @@ The goal is to minimize overhead while preserving standard mathematical behavior
 If safety is required, validate the expression first using `IsValidFormula()`.
 
 This design keeps the evaluation cost proportional to the length of the input expression.
+
+## When to use
+
+Use FormulaCalculator when:
+
+- You need fast arithmetic evaluation
+- You want zero allocations
+- You do not need symbolic math features
+- You evaluate many expressions per frame (e.g., games)
+
+Avoid using it when:
+
+- You need symbolic math
+- You need built-in function parsing
+- You need expression trees
 
 ---
 
