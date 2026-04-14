@@ -13,6 +13,13 @@ A fast, allocation-free, single-pass formula evaluator for C# and Unity.
 > Make sure your formula is well-formed **before** calling `Calculate()`.
 > Use `IsValidFormula()` when you need validation.
 
+### Architecture
+
+This repository includes not only the core library,
+but also benchmarking tools, Unity integration, and publishing workflow.
+
+See: [Repository Architecture and Workflow](https://github.com/foriver4725/FormulaCalculator/wiki/Repository-Architecture-and-Workflow)
+
 ---
 
 ## Installation
