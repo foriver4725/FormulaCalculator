@@ -133,10 +133,12 @@ Performance measurements are taken with BenchmarkDotNet on .NET 8.
 Two types of benchmarks are provided:
 
 1. **Method Benchmarks**
+
    Benchmarks for the methods provided by FormulaCalculator, measuring execution time and memory allocations for
    formulas of different expression lengths.
 
 2. **Library Comparison Benchmarks**
+
    Benchmarks comparing FormulaCalculator with other expression evaluation libraries.
    Since some libraries do not perform strict validation or support the exact same syntax, this comparison focuses only
    on simple calculation performance.
