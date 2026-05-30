@@ -45,7 +45,6 @@ namespace foriver4725.FormulaCalculator
         internal static bool IsInteger(double x)
             => Math.Abs(x - Math.Round(x)) < 1.0e-12;
 
-        // Returns the next non-space character, or '\0' if none exists.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe char PeekNextNonSpaceOrZero(char* p, int len, int start)
         {
@@ -59,21 +58,6 @@ namespace foriver4725.FormulaCalculator
             return '\0';
         }
 
-        // Validator-only reader:
-        // validates the number token shape without constructing a double.
-        //
-        // Supported:
-        //   123
-        //   123.456
-        //
-        // Rejected:
-        //   .5
-        //   1.
-        //   1.2.3
-        //
-        // Returns:
-        //   end index of the number token on success
-        //   -1 on failure
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe int SkipNumberTokenOrMinusOne(char* p, int len, int start)
         {
@@ -82,22 +66,18 @@ namespace foriver4725.FormulaCalculator
             if (idx >= len || !IsDigit(p[idx]))
                 return -1;
 
-            // Integer part
             do
             {
                 idx++;
             } while (idx < len && IsDigit(p[idx]));
 
-            // Integer-only form
             if (idx >= len || p[idx] != '.')
                 return idx - 1;
 
-            // Decimal point requires at least one digit after it
             idx++;
             if (idx >= len || !IsDigit(p[idx]))
                 return -1;
 
-            // Fractional part
             do
             {
                 idx++;
@@ -106,21 +86,6 @@ namespace foriver4725.FormulaCalculator
             return idx - 1;
         }
 
-        // Calculator-only reader:
-        // parses the number token directly into a double without allocations.
-        //
-        // Supported:
-        //   123
-        //   123.456
-        //
-        // Rejected:
-        //   .5
-        //   1.
-        //   1.2.3
-        //
-        // Returns:
-        //   end index of the number token on success
-        //   -1 on failure
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe int ReadNumberOrMinusOne(char* p, int len, int start, double* outValue)
         {
@@ -131,21 +96,18 @@ namespace foriver4725.FormulaCalculator
 
             double integerPart = 0.0;
 
-            // Integer part
             do
             {
                 integerPart = integerPart * 10.0 + (p[idx] - '0');
                 idx++;
             } while (idx < len && IsDigit(p[idx]));
 
-            // Integer-only form
             if (idx >= len || p[idx] != '.')
             {
                 *outValue = integerPart;
                 return idx - 1;
             }
 
-            // Decimal point requires at least one digit after it
             idx++;
             if (idx >= len || !IsDigit(p[idx]))
                 return -1;
@@ -153,7 +115,6 @@ namespace foriver4725.FormulaCalculator
             double fractionalPart = 0.0;
             double scale = 1.0;
 
-            // Fractional part
             do
             {
                 fractionalPart = fractionalPart * 10.0 + (p[idx] - '0');
@@ -163,6 +124,30 @@ namespace foriver4725.FormulaCalculator
 
             *outValue = integerPart + (fractionalPart / scale);
             return idx - 1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static unsafe int ReadSignedNumberOrMinusOne(char* p, int len, int start, double* outValue)
+        {
+            if (start >= len)
+                return -1;
+
+            char sign = p[start];
+            if (sign != '+' && sign != '-')
+                return ReadNumberOrMinusOne(p, len, start, outValue);
+
+            int numberStart = start + 1;
+            if (numberStart >= len || !IsDigit(p[numberStart]))
+                return -1;
+
+            int end = ReadNumberOrMinusOne(p, len, numberStart, outValue);
+            if (end < 0)
+                return -1;
+
+            if (sign == '-')
+                *outValue = -*outValue;
+
+            return end;
         }
     }
 }

@@ -8,282 +8,229 @@ namespace foriver4725.FormulaCalculator.Tests
     public static class Tests
     {
         // =========================================================
-        // IsValidFormula : Whole / Charset
+        // IsValidFormula : Valid syntax cases
         // =========================================================
-        public static class IsValid_Whole
+        public static class IsValidFormula_ValidSyntaxCases
         {
             [TestCaseSource(nameof(Cases))]
-            public static void Run(string f, bool expectedValid)
+            public static void Run(string f)
+                => f.V();
+
+            private static IEnumerable<TestCaseData> Cases()
             {
-                if (expectedValid) f.V();
-                else f.Nv();
+                // --- basic / whitespace
+                yield return Valid("1+2*3", "Valid_Basic");
+                yield return Valid(" 1 + 2 * 3 ", "Valid_Whitespace");
+                yield return Valid(" 1 + 2.5 * 3 ", "Valid_Whitespace_WithDecimal");
+
+                // --- number literals
+                yield return Valid("0.5", "Valid_Number_Decimal_Basic");
+                yield return Valid("12.34", "Valid_Number_Decimal_MultiDigit");
+                yield return Valid("00012.340", "Valid_Number_Decimal_LeadingZeros");
+                yield return Valid("00.00", "Valid_Number_Decimal_AllZero");
+                yield return Valid("000123", "Valid_Number_LeadingZeros_Integer");
+                yield return Valid("000123+1", "Valid_Number_LeadingZeros_InExpression");
+
+                // --- operators
+                yield return Valid("1+2", "Valid_Op_BinaryPlus");
+                yield return Valid("1-2", "Valid_Op_BinaryMinus");
+                yield return Valid("1*2", "Valid_Op_BinaryMul");
+                yield return Valid("1/2", "Valid_Op_BinaryDiv");
+                yield return Valid("1%2", "Valid_Mod_Basic");
+                yield return Valid("1.5+2.5", "Valid_Op_BinaryPlus_WithDecimal");
+                yield return Valid("1.5*2", "Valid_Op_BinaryMul_WithDecimal");
+
+                // --- unary sign syntax
+                // Unary +/- is allowed only immediately after '('.
+                yield return Valid("(+7)^2.3", "Valid_UnaryPlus_AfterParenL_BeforePow");
+                yield return Valid("(+7) ^ 2.3", "Valid_UnaryPlus_AfterParenL_BeforePow_WithSpaces");
+                yield return Valid("14^(-12.3)", "Valid_UnaryMinus_AfterParenL_AsPowExp");
+                yield return Valid("14 ^ (-12.3)", "Valid_UnaryMinus_AfterParenL_AsPowExp_WithSpaces");
+
+                // --- parentheses
+                yield return Valid("(3)", "Valid_Paren_SingleNumber");
+                yield return Valid("(3.5)", "Valid_Paren_SingleDecimal");
+                yield return Valid("(+3)", "Valid_Paren_SignedNumber_Plus");
+                yield return Valid("(-3)", "Valid_Paren_SignedNumber_Minus");
+                yield return Valid("(+3.5)", "Valid_Paren_SignedDecimal_Plus");
+                yield return Valid("(-3.5)", "Valid_Paren_SignedDecimal_Minus");
+                yield return Valid("((1+2))", "Valid_Paren_NestedSimple");
+                yield return Valid("((2+3)*4)", "Valid_Paren_NestedMul");
+                yield return Valid("((2+3)*(4-1))", "Valid_Paren_NestedComplex");
+                yield return Valid("((2.5+3.5)*(4-1))", "Valid_Paren_NestedComplex_WithDecimal");
+                yield return Valid("2*(3+4)", "Valid_Paren_NumberThenParenFixedByMul");
+                yield return Valid("(1+2)*(3+4)", "Valid_Paren_ParenRThenParenLFixedByMul");
+                yield return Valid("(1)*(2)", "Valid_Paren_Adjacent_FixedByMul");
+                yield return Valid("(1.5)*(2)", "Valid_Paren_Adjacent_Decimal_FixedByMul");
+
+                // --- mod syntax
+                yield return Valid("1%(2)", "Valid_Mod_RightParenExpr");
+                yield return Valid("(5)%2", "Valid_Mod_LeftParenExpr");
+                yield return Valid("(1+4)%2", "Valid_Mod_LeftExpr");
+                yield return Valid("5%(1+1)", "Valid_Mod_RightExpr");
+                yield return Valid("(5%2)", "Valid_Paren_Mod_Basic");
+                yield return Valid("(+5)%2", "Valid_Mod_LeftUnaryPlusNumber_Paren");
+                yield return Valid("(-5)%2", "Valid_Mod_LeftUnaryMinusNumber_Paren");
+                yield return Valid("(+5.0)%2", "Valid_Mod_LeftUnaryPlusDecimalInteger_Paren");
+                yield return Valid("(-5.0)%2", "Valid_Mod_LeftUnaryMinusDecimalInteger_Paren");
+
+                // --- pow syntax
+                yield return Valid("1^2", "Valid_Pow_Basic");
+                yield return Valid("1^(2)", "Valid_Pow_ExpParen");
+                yield return Valid("(1)^2", "Valid_Pow_BaseParen");
+                yield return Valid("4^(0.5)", "Valid_Pow_DecimalExp_Paren");
+                yield return Valid("(1.5)^2", "Valid_Pow_DecimalBase_Paren");
+                yield return Valid("1^(-2)", "Valid_Pow_NegExp_Paren");
+                yield return Valid("1^(+2)", "Valid_Pow_PosExp_Paren");
+                yield return Valid("1^(-2.5)", "Valid_Pow_NegDecimalExp_Paren");
+                yield return Valid("1^(+2.5)", "Valid_Pow_PosDecimalExp_Paren");
+                yield return Valid("(+2)^2", "Valid_Pow_LeftUnaryPlusNumber_Paren");
+                yield return Valid("(-2)^2", "Valid_Pow_LeftUnaryMinusNumber_Paren");
+                yield return Valid("(+2.5)^2", "Valid_Pow_LeftUnaryPlusDecimal_Paren");
+                yield return Valid("(-2.5)^2", "Valid_Pow_LeftUnaryMinusDecimal_Paren");
             }
+        }
+
+        // =========================================================
+        // IsValidFormula : Invalid syntax cases
+        // =========================================================
+        public static class IsValidFormula_InvalidSyntaxCases
+        {
+            [TestCaseSource(nameof(Cases))]
+            public static void Run(string f)
+                => f.Nv();
 
             private static IEnumerable<TestCaseData> Cases()
             {
                 // --- empty / whitespace
-                yield return Case("", false, "Whole_Empty_NG");
-                yield return Case(" ", false, "Whole_OnlySpaces_NG");
+                yield return Invalid("", "Invalid_Whole_Empty");
+                yield return Invalid(" ", "Invalid_Whole_OnlySpaces");
 
                 // --- invalid chars
-                yield return Case("1+2a", false, "Whole_InvalidChar_Letter_NG");
-                yield return Case("1+2_3", false, "Whole_InvalidChar_Underscore_NG");
-                yield return Case("1+2?3", false, "Whole_InvalidChar_Question_NG");
-
-                // --- decimal charset / dot rules
-                yield return Case("1+2.3", true, "Whole_Decimal_Dot_OK");
-                yield return Case("1+2,3", false, "Whole_Decimal_Comma_NG");
-                yield return Case("1+2..3", false, "Whole_Decimal_DoubleDot_NG");
-                yield return Case("1+.", false, "Whole_Decimal_DotOnly_NG");
-                yield return Case("1+.5", false, "Whole_Decimal_NoIntegerPart_NG");
-                yield return Case("1+2.", false, "Whole_Decimal_NoFractionPart_NG");
-
-                // --- basic valid
-                yield return Case("1+2*3", true, "Whole_Basic_OK");
-                yield return Case(" 1 + 2 * 3 ", true, "Whole_Whitespace_OK");
-                yield return Case(" 1 + 2.5 * 3 ", true, "Whole_Whitespace_WithDecimal_OK");
-            }
-        }
-
-        // =========================================================
-        // IsValidFormula : Number
-        // =========================================================
-        public static class IsValid_Number
-        {
-            [TestCaseSource(nameof(Cases))]
-            public static void Run(string f, bool expectedValid)
-            {
-                if (expectedValid) f.V();
-                else f.Nv();
-            }
-
-            private static IEnumerable<TestCaseData> Cases()
-            {
-                // --- adjacency with parentheses
-                yield return Case("2(3+4)", false, "Number_Adjacent_NumberThenParenL_NG");
-                yield return Case("(1+2)(3+4)", false, "Number_Adjacent_ParenRThenParenL_NG");
-
-                // --- adjacency with parentheses (fixed by operator between them)
-                yield return Case("2*(3+4)", true, "Number_Adjacent_FixedByMul_OK");
-                yield return Case("(1+2)*(3+4)", true, "Number_Adjacent_FixedByMul_OK2");
-
-                // --- whitespace inside number is not allowed
-                yield return Case("1 23", false, "Number_WhitespaceInsideDigits_NG");
-                yield return Case("12 3", false, "Number_WhitespaceInsideDigits_NG2");
-                yield return Case("1 2 3", false, "Number_WhitespaceInsideDigits_NG3");
-                yield return Case("-123 4", false, "Number_Signed_WithWhitespaceInsideDigits_NG");
-
-                // --- decimal literals
-                yield return Case("0.5", true, "Number_Decimal_Basic_OK");
-                yield return Case("12.34", true, "Number_Decimal_MultiDigit_OK");
-                yield return Case("+0.5", true, "Number_Decimal_UnaryPlus_OK");
-                yield return Case("-0.5", true, "Number_Decimal_UnaryMinus_OK");
-                yield return Case("00012.340", true, "Number_Decimal_LeadingZeros_OK");
-                yield return Case("00.00", true, "Number_Decimal_AllZero_OK");
+                yield return Invalid("1+2a", "Invalid_Char_Letter");
+                yield return Invalid("1+2_3", "Invalid_Char_Underscore");
+                yield return Invalid("1+2?3", "Invalid_Char_Question");
+                yield return Invalid("1+2,3", "Invalid_Decimal_Comma");
 
                 // --- decimal format errors
-                yield return Case(".5", false, "Number_Decimal_NoIntegerPart_NG");
-                yield return Case("1.", false, "Number_Decimal_NoFractionPart_NG");
-                yield return Case(".", false, "Number_Decimal_OnlyDot_NG");
-                yield return Case("1.2.3", false, "Number_Decimal_MultipleDots_NG");
-                yield return Case("1 .2", false, "Number_Decimal_SpaceBeforeDot_NG");
-                yield return Case("1. 2", false, "Number_Decimal_SpaceAfterDot_NG");
-                yield return Case("1 2.3", false, "Number_Decimal_SpaceInsideIntegerPart_NG");
-                yield return Case("12.3 4", false, "Number_Decimal_SpaceInsideFractionPart_NG");
+                yield return Invalid("1+2..3", "Invalid_Decimal_DoubleDot");
+                yield return Invalid("1+.", "Invalid_Decimal_DotOnlyAfterOp");
+                yield return Invalid("1+.5", "Invalid_Decimal_NoIntegerPartAfterUnaryPlus");
+                yield return Invalid("1+2.", "Invalid_Decimal_NoFractionPartAfterOp");
+                yield return Invalid(".5", "Invalid_Decimal_NoIntegerPart");
+                yield return Invalid("1.", "Invalid_Decimal_NoFractionPart");
+                yield return Invalid(".", "Invalid_Decimal_OnlyDot");
+                yield return Invalid("1.2.3", "Invalid_Decimal_MultipleDots");
+                yield return Invalid("1 .2", "Invalid_Decimal_SpaceBeforeDot");
+                yield return Invalid("1. 2", "Invalid_Decimal_SpaceAfterDot");
+                yield return Invalid("1 2.3", "Invalid_Decimal_SpaceInsideIntegerPart");
+                yield return Invalid("12.3 4", "Invalid_Decimal_SpaceInsideFractionPart");
 
-                // --- leading sign sequences under the existing spec
-                yield return Case("+12-21", true, "Number_SignedSequence_OK");
-                yield return Case("+12.5-21.25", true, "Number_SignedSequence_WithDecimal_OK");
+                // --- adjacency / whitespace inside number
+                yield return Invalid("2(3+4)", "Invalid_Adjacent_NumberThenParenL");
+                yield return Invalid("(1+2)(3+4)", "Invalid_Adjacent_ParenRThenParenL");
+                yield return Invalid("(1)(2)", "Invalid_Adjacent_ParenRParenL");
+                yield return Invalid("(1.5)(2)", "Invalid_Adjacent_DecimalParenRParenL");
+                yield return Invalid("1 23", "Invalid_Number_WhitespaceInsideDigits");
+                yield return Invalid("12 3", "Invalid_Number_WhitespaceInsideDigits2");
+                yield return Invalid("1 2 3", "Invalid_Number_WhitespaceInsideDigits3");
+                yield return Invalid("(-123 4)", "Invalid_Number_Signed_WithWhitespaceInsideDigits");
 
-                // --- leading zeros are allowed
-                yield return Case("000123", true, "Number_LeadingZeros_Integer_OK");
-                yield return Case("000123+1", true, "Number_LeadingZeros_InExpression_OK");
-            }
-        }
-
-        // =========================================================
-        // IsValidFormula : Operator (+-*/%^)
-        // =========================================================
-        public static class IsValid_Operator
-        {
-            [TestCaseSource(nameof(Cases))]
-            public static void Run(string f, bool expectedValid)
-            {
-                if (expectedValid) f.V();
-                else f.Nv();
-            }
-
-            private static IEnumerable<TestCaseData> Cases()
-            {
-                // --- only operator
-                yield return Case("+", false, "Op_OnlyPlus_NG");
-                yield return Case("-", false, "Op_OnlyMinus_NG");
-                yield return Case("*", false, "Op_OnlyMul_NG");
-                yield return Case("/", false, "Op_OnlyDiv_NG");
-                yield return Case("%", false, "Mod_Only_NG");
-                yield return Case("^", false, "Pow_Only_NG");
-
-                // --- trailing operators
-                yield return Case("1+", false, "Op_TrailingPlus_NG");
-                yield return Case("1-", false, "Op_TrailingMinus_NG");
-                yield return Case("1*", false, "Op_TrailingMul_NG");
-                yield return Case("1/", false, "Op_TrailingDiv_NG");
-                yield return Case("1%", false, "Mod_Trailing_NG");
-                yield return Case("1^", false, "Pow_Trailing_NG");
-
-                // --- leading operators: unary +/- allowed, others not
-                yield return Case("+1", true, "Op_UnaryPlus_AtStart_OK");
-                yield return Case("-1", true, "Op_UnaryMinus_AtStart_OK");
-                yield return Case("+1.5", true, "Op_UnaryPlusDecimal_AtStart_OK");
-                yield return Case("-1.5", true, "Op_UnaryMinusDecimal_AtStart_OK");
-                yield return Case("*1", false, "Op_LeadingMul_NG");
-                yield return Case("/1", false, "Op_LeadingDiv_NG");
-                yield return Case("%1", false, "Mod_Leading_NG");
-                yield return Case("^1", false, "Pow_Leading_NG");
-
-                // --- binary basic
-                yield return Case("1+2", true, "Op_BinaryPlus_OK");
-                yield return Case("1-2", true, "Op_BinaryMinus_OK");
-                yield return Case("1*2", true, "Op_BinaryMul_OK");
-                yield return Case("1/2", true, "Op_BinaryDiv_OK");
-                yield return Case("1%2", true, "Mod_Basic_OK");
-                yield return Case("1.5+2.5", true, "Op_BinaryPlus_WithDecimal_OK");
-                yield return Case("1.5*2", true, "Op_BinaryMul_WithDecimal_OK");
+                // --- only / trailing / leading operators
+                yield return Invalid("+", "Invalid_Op_OnlyPlus");
+                yield return Invalid("-", "Invalid_Op_OnlyMinus");
+                yield return Invalid("*", "Invalid_Op_OnlyMul");
+                yield return Invalid("/", "Invalid_Op_OnlyDiv");
+                yield return Invalid("%", "Invalid_Mod_Only");
+                yield return Invalid("^", "Invalid_Pow_Only");
+                yield return Invalid("1+", "Invalid_Op_TrailingPlus");
+                yield return Invalid("1-", "Invalid_Op_TrailingMinus");
+                yield return Invalid("1*", "Invalid_Op_TrailingMul");
+                yield return Invalid("1/", "Invalid_Op_TrailingDiv");
+                yield return Invalid("1%", "Invalid_Mod_Trailing");
+                yield return Invalid("1^", "Invalid_Pow_Trailing");
+                yield return Invalid("+1", "Invalid_Op_UnaryPlus_AtStart");
+                yield return Invalid("-1", "Invalid_Op_UnaryMinus_AtStart");
+                yield return Invalid("+1.5", "Invalid_Op_UnaryPlusDecimal_AtStart");
+                yield return Invalid("-1.5", "Invalid_Op_UnaryMinusDecimal_AtStart");
+                yield return Invalid("*1", "Invalid_Op_LeadingMul");
+                yield return Invalid("/1", "Invalid_Op_LeadingDiv");
+                yield return Invalid("%1", "Invalid_Mod_Leading");
+                yield return Invalid("^1", "Invalid_Pow_Leading");
 
                 // --- invalid operator sequences
-                yield return Case("1++2", false, "Op_DoublePlus_NG");
-                yield return Case("1+*2", false, "Op_PlusThenMul_NG");
-                yield return Case("1*/2", false, "Op_MulThenDiv_NG");
-                yield return Case("1/*2", false, "Op_DivAfterMulStyle_NG");
-                yield return Case("1%%2", false, "Mod_Double_NG");
-                yield return Case("1+%2", false, "Mod_AfterPlus_NG");
-                yield return Case("1%*2", false, "Mod_ThenMul_NG");
-                yield return Case("1/^2", false, "Op_DivThenPowStyle_NG");
-                yield return Case("1%/2", false, "Mod_ThenDiv_NG");
-                yield return Case("1%^2", false, "Mod_ThenPow_NG");
+                yield return Invalid("1++2", "Invalid_Op_DoublePlus");
+                yield return Invalid("1+*2", "Invalid_Op_PlusThenMul");
+                yield return Invalid("1*/2", "Invalid_Op_MulThenDiv");
+                yield return Invalid("1/*2", "Invalid_Op_DivAfterMulStyle");
+                yield return Invalid("1%%2", "Invalid_Mod_Double");
+                yield return Invalid("1+%2", "Invalid_Mod_AfterPlus");
+                yield return Invalid("1%*2", "Invalid_Mod_ThenMul");
+                yield return Invalid("1/^2", "Invalid_Op_DivThenPowStyle");
+                yield return Invalid("1%/2", "Invalid_Mod_ThenDiv");
+                yield return Invalid("1%^2", "Invalid_Mod_ThenPow");
 
-                // --- mod with parentheses
-                yield return Case("1%(2)", true, "Mod_RightParenExpr_OK");
-                yield return Case("(5)%2", true, "Mod_LeftParenExpr_OK");
-                yield return Case("(1+4)%2", true, "Mod_LeftExpr_OK");
-                yield return Case("5%(1+1)", true, "Mod_RightExpr_OK");
+                // --- unary +/- is allowed only right after '('
+                yield return Invalid("-23+1.2", "Invalid_UnaryMinus_AtStart");
+                yield return Invalid("-23 + 1.2", "Invalid_UnaryMinus_AtStart_WithSpaces");
+                yield return Invalid("23+-1.2", "Invalid_UnaryMinus_AfterBinaryPlus");
+                yield return Invalid("23 + -1.2", "Invalid_UnaryMinus_AfterBinaryPlus_WithSpaces");
+                yield return Invalid("+1.23*+9.24", "Invalid_UnaryPlus_AtStart_AndAfterBinaryMul");
+                yield return Invalid("+1.23 * +9.24", "Invalid_UnaryPlus_AtStart_AndAfterBinaryMul_WithSpaces");
+                yield return Invalid("1.23*+9.24", "Invalid_UnaryPlus_AfterBinaryMul");
+                yield return Invalid("1.23 * +9.24", "Invalid_UnaryPlus_AfterBinaryMul_WithSpaces");
 
-                // --- pow basic
-                yield return Case("1^2", true, "Pow_Basic_OK");
-                yield return Case("1^)", false, "Pow_ThenParenR_NG");
-                yield return Case("(^1)", false, "Pow_InParen_Invalid_NG");
+                // --- parentheses
+                yield return Invalid(")(", "Invalid_Paren_WrongOrder");
+                yield return Invalid("(()", "Invalid_Paren_UnmatchedL");
+                yield return Invalid("())", "Invalid_Paren_UnmatchedR");
+                yield return Invalid("((()))())", "Invalid_Paren_UnmatchedR_Deep");
+                yield return Invalid("((()))(()", "Invalid_Paren_UnmatchedL_Deep");
+                yield return Invalid("()", "Invalid_Paren_Empty");
+                yield return Invalid("( )", "Invalid_Paren_Empty_WithSpace");
+                yield return Invalid("(+)", "Invalid_Paren_OnlyPlus");
+                yield return Invalid("(-)", "Invalid_Paren_OnlyMinus");
+                yield return Invalid("(*)", "Invalid_Paren_OnlyMul");
+                yield return Invalid("(/)", "Invalid_Paren_OnlyDiv");
+                yield return Invalid("(%)", "Invalid_Paren_OnlyMod");
+                yield return Invalid("(^)", "Invalid_Paren_OnlyPow");
+                yield return Invalid("(+ )", "Invalid_Paren_OnlyPlus_WithSpace");
+                yield return Invalid("(- )", "Invalid_Paren_OnlyMinus_WithSpace");
+                yield return Invalid("(* )", "Invalid_Paren_OnlyMul_WithSpace");
+                yield return Invalid("(/ )", "Invalid_Paren_OnlyDiv_WithSpace");
+                yield return Invalid("(% )", "Invalid_Paren_OnlyMod_WithSpace");
+                yield return Invalid("(^ )", "Invalid_Paren_OnlyPow_WithSpace");
+                yield return Invalid("(+3-4*)", "Invalid_Paren_TrailingMul");
+                yield return Invalid("(-3+4/)", "Invalid_Paren_TrailingDiv");
+                yield return Invalid("(*3-4+)", "Invalid_Paren_LeadingMul_TrailingPlus");
+                yield return Invalid("(/3+4-)", "Invalid_Paren_LeadingDiv_TrailingMinus");
+                yield return Invalid("(%2)", "Invalid_Paren_LeadingMod");
+                yield return Invalid("(2%)", "Invalid_Paren_TrailingMod");
 
-                // --- pow with parentheses
-                yield return Case("1^(2)", true, "Pow_ExpParen_OK");
-                yield return Case("(1)^2", true, "Pow_BaseParen_OK");
-                yield return Case("4^(0.5)", true, "Pow_DecimalExp_Paren_OK");
-                yield return Case("(1.5)^2", true, "Pow_DecimalBase_Paren_OK");
-
-                // --- pow with sign on exponent: current spec requires parentheses for signed exponent
-                yield return Case("1^-2", false, "Pow_NegExp_NoParen_NG_CurrentSpec");
-                yield return Case("1^+2", false, "Pow_PosExp_NoParen_NG_CurrentSpec");
-                yield return Case("1^(-2)", true, "Pow_NegExp_Paren_OK");
-                yield return Case("1^(+2)", true, "Pow_PosExp_Paren_OK");
-                yield return Case("1^(-2.5)", true, "Pow_NegDecimalExp_Paren_OK");
-                yield return Case("1^(+2.5)", true, "Pow_PosDecimalExp_Paren_OK");
-                yield return Case("1^-2.5", false, "Pow_NegDecimalExp_NoParen_NG_CurrentSpec");
-                yield return Case("1^+2.5", false, "Pow_PosDecimalExp_NoParen_NG_CurrentSpec");
-
-                // --- unary with mod
-                yield return Case("+5%2", true, "Mod_LeftUnaryPlusNumber_OK");
-                yield return Case("-5%2", false, "Mod_LeftUnaryMinusNumber_NG");
-                yield return Case("+5.0%2", true, "Mod_LeftUnaryPlusDecimalInteger_OK");
-                yield return Case("-5.0%2", false, "Mod_LeftUnaryMinusDecimalInteger_NG");
-
-                // --- unary with pow
-                yield return Case("+2^2", true, "Pow_LeftUnaryPlusNumber_OK");
-                yield return Case("-2^2", false, "Pow_LeftUnaryMinusNumber_NG");
-                yield return Case("+2.5^2", true, "Pow_LeftUnaryPlusDecimal_OK");
-                yield return Case("-2.5^2", false, "Pow_LeftUnaryMinusDecimal_NG");
-
-                // --- pow edge: exponent empty-ish
-                yield return Case("1^+", false, "Pow_ThenPlusOnly_NG");
-                yield return Case("1^-", false, "Pow_ThenMinusOnly_NG");
+                // --- pow syntax
+                yield return Invalid("1^)", "Invalid_Pow_ThenParenR");
+                yield return Invalid("(^1)", "Invalid_Pow_InParen");
+                yield return Invalid("1^-2", "Invalid_Pow_NegExp_NoParen");
+                yield return Invalid("1^+2", "Invalid_Pow_PosExp_NoParen");
+                yield return Invalid("1^-2.5", "Invalid_Pow_NegDecimalExp_NoParen");
+                yield return Invalid("1^+2.5", "Invalid_Pow_PosDecimalExp_NoParen");
+                yield return Invalid("1^+", "Invalid_Pow_ThenPlusOnly");
+                yield return Invalid("1^-", "Invalid_Pow_ThenMinusOnly");
+                yield return Invalid("+7^2.3", "Invalid_Pow_UnaryPlusAtStart_BeforePow");
+                yield return Invalid("+7 ^ 2.3", "Invalid_Pow_UnaryPlusAtStart_BeforePow_WithSpaces");
+                yield return Invalid("-14^(-12.3)", "Invalid_Pow_UnaryMinusAtStart_BeforePowParenExp");
+                yield return Invalid("-14 ^ (-12.3)", "Invalid_Pow_UnaryMinusAtStart_BeforePowParenExp_WithSpaces");
+                yield return Invalid("+2^2", "Invalid_Pow_LeftUnaryPlusAtStart");
+                yield return Invalid("-2^2", "Invalid_Pow_LeftUnaryMinusAtStart");
+                yield return Invalid("+2.5^2", "Invalid_Pow_LeftUnaryPlusDecimalAtStart");
+                yield return Invalid("-2.5^2", "Invalid_Pow_LeftUnaryMinusDecimalAtStart");
             }
         }
 
         // =========================================================
-        // IsValidFormula : Parentheses
+        // Calculate : Valid result cases
         // =========================================================
-        public static class IsValid_Parentheses
-        {
-            [TestCaseSource(nameof(Cases))]
-            public static void Run(string f, bool expectedValid)
-            {
-                if (expectedValid) f.V();
-                else f.Nv();
-            }
-
-            private static IEnumerable<TestCaseData> Cases()
-            {
-                // --- matching / order
-                yield return Case(")(", false, "Paren_WrongOrder_NG");
-                yield return Case("(()", false, "Paren_UnmatchedL_NG");
-                yield return Case("())", false, "Paren_UnmatchedR_NG");
-                yield return Case("((()))())", false, "Paren_UnmatchedR_Deep_NG");
-                yield return Case("((()))(()", false, "Paren_UnmatchedL_Deep_NG");
-
-                // --- empty parentheses
-                yield return Case("()", false, "Paren_Empty_NG");
-                yield return Case("( )", false, "Paren_Empty_WithSpace_NG");
-                yield return Case("(3)", true, "Paren_SingleNumber_OK");
-                yield return Case("(3.5)", true, "Paren_SingleDecimal_OK");
-
-                // --- operator-only inside parentheses
-                yield return Case("(+)", false, "Paren_OnlyPlus_NG");
-                yield return Case("(-)", false, "Paren_OnlyMinus_NG");
-                yield return Case("(*)", false, "Paren_OnlyMul_NG");
-                yield return Case("(/)", false, "Paren_OnlyDiv_NG");
-                yield return Case("(%)", false, "Paren_OnlyMod_NG");
-                yield return Case("(^)", false, "Paren_OnlyPow_NG");
-
-                // --- whitespace variants
-                yield return Case("(+ )", false, "Paren_OnlyPlus_WithSpace_NG");
-                yield return Case("(- )", false, "Paren_OnlyMinus_WithSpace_NG");
-                yield return Case("(* )", false, "Paren_OnlyMul_WithSpace_NG");
-                yield return Case("(/ )", false, "Paren_OnlyDiv_WithSpace_NG");
-                yield return Case("(% )", false, "Paren_OnlyMod_WithSpace_NG");
-                yield return Case("(^ )", false, "Paren_OnlyPow_WithSpace_NG");
-
-                // --- signed numbers in parentheses
-                yield return Case("(+3)", true, "Paren_SignedNumber_Plus_OK");
-                yield return Case("(-3)", true, "Paren_SignedNumber_Minus_OK");
-                yield return Case("(+3.5)", true, "Paren_SignedDecimal_Plus_OK");
-                yield return Case("(-3.5)", true, "Paren_SignedDecimal_Minus_OK");
-
-                // --- trailing operator inside parentheses
-                yield return Case("(+3-4*)", false, "Paren_TrailingMul_NG");
-                yield return Case("(-3+4/)", false, "Paren_TrailingDiv_NG");
-                yield return Case("(*3-4+)", false, "Paren_LeadingMul_TrailingPlus_NG");
-                yield return Case("(/3+4-)", false, "Paren_LeadingDiv_TrailingMinus_NG");
-
-                yield return Case("((1+2))", true, "Paren_NestedSimple_OK");
-                yield return Case("((2+3)*4)", true, "Paren_NestedMul_OK");
-                yield return Case("((2+3)*(4-1))", true, "Paren_NestedComplex_OK");
-                yield return Case("((2.5+3.5)*(4-1))", true, "Paren_NestedComplex_WithDecimal_OK");
-
-                // --- adjacency in parentheses context
-                yield return Case("(1)(2)", false, "Paren_Adjacent_ParenRParenL_NG");
-                yield return Case("(1)*(2)", true, "Paren_Adjacent_FixedByMul_OK");
-                yield return Case("(1.5)(2)", false, "Paren_Adjacent_DecimalParenRParenL_NG");
-                yield return Case("(1.5)*(2)", true, "Paren_Adjacent_Decimal_FixedByMul_OK");
-
-                // --- mod with parentheses
-                yield return Case("(5%2)", true, "Paren_Mod_Basic_OK");
-                yield return Case("(%2)", false, "Paren_LeadingMod_NG");
-                yield return Case("(2%)", false, "Paren_TrailingMod_NG");
-            }
-        }
-
-        // =========================================================
-        // Calculate
-        // =========================================================
-        public static class Calculate
+        public static class Calculate_ValidResultCases
         {
             [TestCaseSource(nameof(Cases))]
             public static void Run(string f, double expected)
@@ -292,130 +239,144 @@ namespace foriver4725.FormulaCalculator.Tests
             private static IEnumerable<TestCaseData> Cases()
             {
                 // --- precedence / parentheses / whitespace
-                yield return Case("1+2*3", 7.0, "Calc_Prec_MulBeforeAdd");
-                yield return Case("(1+2)*3", 9.0, "Calc_Paren_OverridesPrec");
-                yield return Case("1+2* 3-4/5", 6.2, "Calc_Whitespace_Mixed");
-                yield return Case("( +(  1+2) *3-4) /5", 1.0, "Calc_Whitespace_Heavy");
-                yield return Case("1+2*3-4/5+(6-7*8+9)/10", 2.1, "Calc_LongExpression");
+                yield return Result("1+2*3", 7.0, "Result_Prec_MulBeforeAdd");
+                yield return Result("(1+2)*3", 9.0, "Result_Paren_OverridesPrec");
+                yield return Result("1+2* 3-4/5", 6.2, "Result_Whitespace_Mixed");
+                yield return Result("( +(  1+2) *3-4) /5", 1.0, "Result_Whitespace_Heavy");
+                yield return Result("1+2*3-4/5+(6-7*8+9)/10", 2.1, "Result_LongExpression");
 
                 // --- decimal arithmetic
-                yield return Case("1.5+2.25", 3.75, "Calc_Decimal_Add");
-                yield return Case("2.5*4", 10.0, "Calc_Decimal_Mul");
-                yield return Case("(1.5+2.5)*2", 8.0, "Calc_Decimal_Paren");
-                yield return Case("-0.5+1.25", 0.75, "Calc_Decimal_Signed");
-                yield return Case("00012.340+0.660", 13.0, "Calc_Decimal_LeadingZeros");
-                yield return Case("1 + 2.5 * 3", 8.5, "Calc_Decimal_WithWhitespace");
-
-                // --- div by zero -> NaN
-                yield return Case("1/0", double.NaN, "Calc_DivZero");
-                yield return Case("1/(2-2)", double.NaN, "Calc_DivZero_InParen");
-                yield return Case("1+2*3-4/5+(6-7*8+9)/0", double.NaN, "Calc_DivZero_Late");
-                yield return Case("1.0/0", double.NaN, "Calc_DivZero_DecimalNumerator");
+                yield return Result("1.5+2.25", 3.75, "Result_Decimal_Add");
+                yield return Result("2.5*4", 10.0, "Result_Decimal_Mul");
+                yield return Result("(1.5+2.5)*2", 8.0, "Result_Decimal_Paren");
+                yield return Result("(-0.5)+1.25", 0.75, "Result_Decimal_SignedByParen");
+                yield return Result("00012.340+0.660", 13.0, "Result_Decimal_LeadingZeros");
+                yield return Result("1 + 2.5 * 3", 8.5, "Result_Decimal_WithWhitespace");
 
                 // --- large
-                yield return Case("9999*9999*9999", 9999.0 * 9999.0 * 9999.0, "Calc_Large_Positive");
-                yield return Case("-9999*9999*9999", -9999.0 * 9999.0 * 9999.0, "Calc_Large_Negative");
+                yield return Result("9999*9999*9999", 9999.0 * 9999.0 * 9999.0, "Result_Large_Positive");
+                yield return Result("(-9999)*9999*9999", -9999.0 * 9999.0 * 9999.0, "Result_Large_NegativeByParen");
 
                 // --- deep parentheses
-                yield return Case("((((((((((1+2))))))))))", 3.0, "Calc_DeepParen_Short");
-                yield return Case("((((((((((1+2)*3-4/5+(6-7*8+9)/10)))))))))", 4.1, "Calc_DeepParen_Long");
+                yield return Result("((((((((((1+2))))))))))", 3.0, "Result_DeepParen_Short");
+                yield return Result("((((((((((1+2)*3-4/5+(6-7*8+9)/10)))))))))", 4.1, "Result_DeepParen_Long");
 
                 // --- pow associativity / precedence
-                yield return Case("2^3", 8.0, "Calc_Pow_Basic");
-                yield return Case("2^3^2", 512.0, "Calc_Pow_RightAssociative");
-                yield return Case("(2^3)^2", 64.0, "Calc_Pow_ParenAssociative");
-                yield return Case("2^(3^2)", 512.0, "Calc_Pow_ExplicitRight");
+                yield return Result("2^3", 8.0, "Result_Pow_Basic");
+                yield return Result("2^3^2", 512.0, "Result_Pow_RightAssociative");
+                yield return Result("(2^3)^2", 64.0, "Result_Pow_ParenAssociative");
+                yield return Result("2^(3^2)", 512.0, "Result_Pow_ExplicitRight");
+                yield return Result("2*3^2", 18.0, "Result_Pow_BeforeMul_Left");
+                yield return Result("2^3*2", 16.0, "Result_Pow_BeforeMul_Right");
+                yield return Result("(+2)^2", 4.0, "Result_Pow_LeftUnaryPlus_Paren");
+                yield return Result("(-2)^2", 4.0, "Result_Pow_LeftUnaryMinus_Paren");
+                yield return Result("(+2.5)^2", 6.25, "Result_Pow_LeftUnaryPlusDecimal_Paren");
+                yield return Result("(-2.5)^2", 6.25, "Result_Pow_LeftUnaryMinusDecimal_IntegerExp_Paren");
 
-                yield return Case("2*3^2", 18.0, "Calc_Pow_BeforeMul_Left");
-                yield return Case("2^3*2", 16.0, "Calc_Pow_BeforeMul_Right");
+                // --- unary with mod/pow
+                yield return Result("(+5)%2", 1.0, "Result_Mod_LeftUnaryPlus_Paren");
+                yield return Result("(0-(5%2))", -1.0, "Result_Mod_NegatedByExplicitSubtraction");
+                yield return Result("(0-(2^2))", -4.0, "Result_Pow_NegatedByExplicitSubtraction");
+                yield return Result("(-2)^2", 4.0, "Result_Pow_NegativeBase_Paren");
+                yield return Result("(-2.5)^2", 6.25, "Result_Pow_NegativeDecimalBase_Paren");
+                yield return Result("3^(-2)", 1.0 / 9.0, "Result_Pow_NegExp_Paren");
+                yield return Result("3^(-2.5)", Math.Pow(3.0, -2.5), "Result_Pow_NegDecimalExp_Paren");
 
-                // --- unary with mod (plus OK, minus NG)
-                yield return Case("+5%2", 1.0, "Calc_Mod_LeftUnaryPlus_OK");
-                yield return Case("-5%2", double.NaN, "Calc_Mod_LeftNegative_NG");
+                // --- pow rule: zero base requires positive exponent
+                yield return Result("0^1", 0.0, "Result_Pow_Zero_Pos1");
+                yield return Result("0^2", 0.0, "Result_Pow_Zero_Pos2");
+                yield return Result("0^0.5", 0.0, "Result_Pow_Zero_PosFraction");
 
-                // --- unary with pow (plus OK, minus NG)
-                yield return Case("+2^2", 4.0, "Calc_Pow_LeftUnaryPlus_OK");
-                yield return Case("-2^2", double.NaN, "Calc_Pow_LeftNegative_NG");
-                yield return Case("+2.5^2", 6.25, "Calc_Pow_LeftUnaryPlusDecimal_OK");
-                yield return Case("-2.5^2", double.NaN, "Calc_Pow_LeftUnaryMinusDecimal_NG");
+                // --- pow rule: non-zero base with integer exponent accepts any base
+                yield return Result("2^3", 8.0, "Result_Pow_NonZeroBase_PosIntegerExp");
+                yield return Result("52.3^(-78)", Math.Pow(52.3, -78.0), "Result_Pow_PositiveDecimalBase_NegIntegerExp");
+                yield return Result("(-81)^0", 1.0, "Result_Pow_NegativeBase_ZeroExp");
+                yield return Result("(-2.3)^(-942)", Math.Pow(-2.3, -942.0), "Result_Pow_NegativeDecimalBase_NegIntegerExp");
 
-                // --- unary with mod/pow (with parentheses to make it valid)
-                yield return Case("-(5%2)", -1.0, "Calc_Mod_NegatedByParen_OK");
-                yield return Case("-(2^2)", -4.0, "Calc_Pow_NegatedByParen_OK");
-                yield return Case("(-2)^2", 4.0, "Calc_Pow_NegativeBase_Paren_OK");
-                yield return Case("(-2.5)^2", 6.25, "Calc_Pow_NegativeDecimalBase_Paren_OK");
-                yield return Case("3^(-2)", 1.0 / 9.0, "Calc_Pow_NegExp_Paren_OK");
-                yield return Case("3^(-2.5)", Math.Pow(3.0, -2.5), "Calc_Pow_NegDecimalExp_Paren_OK");
-
-                // --- 0^0 group
-                yield return Case("0^0", double.NaN, "Calc_Pow_0_0");
-                yield return Case("(0)^0", double.NaN, "Calc_Pow_0_0_BaseParen");
-                yield return Case("0^(0)", double.NaN, "Calc_Pow_0_0_ExpParen");
-                yield return Case("(3-3)^0", double.NaN, "Calc_Pow_0_0_ByExpr");
-                yield return Case("(4-2*2)^(3-3)", double.NaN, "Calc_Pow_0_0_ByExpr2");
-
-                // --- zero base group
-                yield return Case("0^1", 0.0, "Calc_Pow_Zero_Pos1");
-                yield return Case("0^2", 0.0, "Calc_Pow_Zero_Pos2");
-                yield return Case("0^(-1)", double.NaN, "Calc_Pow_Zero_Neg");
-                yield return Case("(0)^(1-2)", double.NaN, "Calc_Pow_Zero_Neg_ByExpr");
-
-                // --- NaN propagation group
-                yield return Case("1/(0^0)", double.NaN, "Calc_Div_By_NaN");
-                yield return Case("1/(0^1)", double.NaN, "Calc_Div_By_Zero");
+                // --- pow rule: non-zero base with real exponent requires positive base
+                yield return Result("0.1^2.3", Math.Pow(0.1, 2.3), "Result_Pow_PositiveSmallBase_PosRealExp");
+                yield return Result("3.45^(-12.34)", Math.Pow(3.45, -12.34), "Result_Pow_PositiveDecimalBase_NegRealExp");
 
                 // --- fractional exponent
-                yield return Case("4^(1/2)", 2.0, "Calc_Pow_FractionExp_PositiveBase");
-                yield return Case("2^(3/10)", Math.Pow(2.0, 0.3), "Calc_Pow_FractionExp");
-                yield return Case("(73/23)^(11/3)", Math.Pow(73.0 / 23.0, 11.0 / 3.0), "Calc_Pow_FractionExp2");
-                yield return Case("4^0.5", 2.0, "Calc_Pow_DecimalExp_PositiveBase");
-                yield return Case("2^1.5", Math.Pow(2.0, 1.5), "Calc_Pow_DecimalExp");
-                yield return Case("(73/23)^3.5", Math.Pow(73.0 / 23.0, 3.5), "Calc_Pow_DecimalExp2");
+                yield return Result("4^(1/2)", 2.0, "Result_Pow_FractionExp_PositiveBase");
+                yield return Result("2^(3/10)", Math.Pow(2.0, 0.3), "Result_Pow_FractionExp");
+                yield return Result("(73/23)^(11/3)", Math.Pow(73.0 / 23.0, 11.0 / 3.0), "Result_Pow_FractionExp2");
+                yield return Result("4^0.5", 2.0, "Result_Pow_DecimalExp_PositiveBase");
+                yield return Result("2^1.5", Math.Pow(2.0, 1.5), "Result_Pow_DecimalExp");
+                yield return Result("(73/23)^3.5", Math.Pow(73.0 / 23.0, 3.5), "Result_Pow_DecimalExp2");
+                yield return Result("4^( 1 / 2 )", 2.0, "Result_Pow_FractionExp_WithWhitespace");
 
-                // --- fractional exponent with whitespace inside the exponent expression
-                yield return Case("4^( 1 / 2 )", 2.0, "Calc_Pow_FractionExp_WithWhitespace");
-
-                // --- mod basic
-                yield return Case("5%2", 1.0, "Calc_Mod_Basic");
-                yield return Case("10%6%4", 0.0, "Calc_Mod_LeftAssociative");
-
-                // --- mod with other operators
-                yield return Case("1+5%2*3", 4.0, "Calc_Mod_Precedence_WithMulAdd");
-                yield return Case("2^3%3", 2.0, "Calc_Mod_AfterPow");
-                yield return Case("2%3^2", 2.0, "Calc_Mod_BeforePowResult");
-
-                // --- mod with parentheses
-                yield return Case("(1+4)%2", 1.0, "Calc_Mod_LeftExpr");
-                yield return Case("8%(1+2)", 2.0, "Calc_Mod_RightExpr");
-                yield return Case("(2^3)%3", 2.0, "Calc_Mod_LeftPowExpr");
-
-                // --- mod - numbers should be positive integers (0: NG)
-                yield return Case("0%2", double.NaN, "Calc_Mod_LeftZero_NG");
-                yield return Case("5%0", double.NaN, "Calc_Mod_RightZero_NG");
-                yield return Case("1%(2-2)", double.NaN, "Calc_Mod_RightZero_ByExpr_NG");
-                yield return Case("5%0.0", double.NaN, "Calc_Mod_RightZeroDecimal_NG");
-
-                // --- mod - numbers should be positive integers (minus: NG)
-                yield return Case("-5%2", double.NaN, "Calc_Mod_LeftNegative_NG");
-                yield return Case("5%(-2)", double.NaN, "Calc_Mod_RightNegative_NG");
-                yield return Case("(-5)%2", double.NaN, "Calc_Mod_LeftNegative_Paren_NG");
-                yield return Case("5%(-2.0)", double.NaN, "Calc_Mod_RightNegativeDecimal_NG");
-
-                // --- mod - numbers should be positive integers (non-integer: NG)
-                yield return Case("(5/2)%2", double.NaN, "Calc_Mod_LeftFraction_NG");
-                yield return Case("5%(3/2)", double.NaN, "Calc_Mod_RightFraction_NG");
-                yield return Case("5.5%2", double.NaN, "Calc_Mod_LeftDecimalFraction_NG");
-                yield return Case("5%2.5", double.NaN, "Calc_Mod_RightDecimalFraction_NG");
+                // --- mod basic / precedence
+                yield return Result("5%2", 1.0, "Result_Mod_Basic");
+                yield return Result("10%6%4", 0.0, "Result_Mod_LeftAssociative");
+                yield return Result("1+5%2*3", 4.0, "Result_Mod_Precedence_WithMulAdd");
+                yield return Result("2^3%3", 2.0, "Result_Mod_AfterPow");
+                yield return Result("2%3^2", 2.0, "Result_Mod_BeforePowResult");
+                yield return Result("(1+4)%2", 1.0, "Result_Mod_LeftExpr");
+                yield return Result("8%(1+2)", 2.0, "Result_Mod_RightExpr");
+                yield return Result("(2^3)%3", 2.0, "Result_Mod_LeftPowExpr");
 
                 // --- mod - values that evaluate to integers are allowed
-                yield return Case("(8/4)%2", 0.0, "Calc_Mod_LeftExpr_Integer_OK");
-                yield return Case("8%(6/2)", 2.0, "Calc_Mod_RightExpr_Integer_OK");
-                yield return Case("6%3", 0.0, "Calc_Mod_ExactDivision");
-                yield return Case("1%2+3", 4.0, "Calc_Mod_BeforeAdd");
-                yield return Case("6%(1+2)", 0.0, "Calc_Mod_RightExpr_ExactDivision");
-                yield return Case("(1+5)%(1+2)", 0.0, "Calc_Mod_BothExpr_ExactDivision");
-                yield return Case("5%2.0", 1.0, "Calc_Mod_RightDecimalTextButInteger_OK");
-                yield return Case("5.0%2", 1.0, "Calc_Mod_LeftDecimalTextButInteger_OK");
+                yield return Result("(8/4)%2", 0.0, "Result_Mod_LeftExpr_Integer");
+                yield return Result("8%(6/2)", 2.0, "Result_Mod_RightExpr_Integer");
+                yield return Result("6%3", 0.0, "Result_Mod_ExactDivision");
+                yield return Result("1%2+3", 4.0, "Result_Mod_BeforeAdd");
+                yield return Result("6%(1+2)", 0.0, "Result_Mod_RightExpr_ExactDivision");
+                yield return Result("(1+5)%(1+2)", 0.0, "Result_Mod_BothExpr_ExactDivision");
+                yield return Result("5%2.0", 1.0, "Result_Mod_RightDecimalTextButInteger");
+                yield return Result("5.0%2", 1.0, "Result_Mod_LeftDecimalTextButInteger");
+            }
+        }
+
+        // =========================================================
+        // Calculate : Valid syntax, but runtime NaN cases
+        // =========================================================
+        public static class Calculate_ValidButRuntimeNaNCases
+        {
+            [TestCaseSource(nameof(Cases))]
+            public static void Run(string f)
+                => f.Eq(double.NaN);
+
+            private static IEnumerable<TestCaseData> Cases()
+            {
+                // --- div by zero
+                yield return RuntimeNaN("1/0", "RuntimeNaN_DivZero");
+                yield return RuntimeNaN("1/(2-2)", "RuntimeNaN_DivZero_InParen");
+                yield return RuntimeNaN("1+2*3-4/5+(6-7*8+9)/0", "RuntimeNaN_DivZero_Late");
+                yield return RuntimeNaN("1.0/0", "RuntimeNaN_DivZero_DecimalNumerator");
+                yield return RuntimeNaN("1/(0^1)", "RuntimeNaN_Div_By_Zero");
+
+                // --- 0^0 group
+                yield return RuntimeNaN("0^0", "RuntimeNaN_Pow_0_0");
+                yield return RuntimeNaN("(0)^0", "RuntimeNaN_Pow_0_0_BaseParen");
+                yield return RuntimeNaN("0^(0)", "RuntimeNaN_Pow_0_0_ExpParen");
+                yield return RuntimeNaN("(3-3)^0", "RuntimeNaN_Pow_0_0_ByExpr");
+                yield return RuntimeNaN("(4-2*2)^(3-3)", "RuntimeNaN_Pow_0_0_ByExpr2");
+                yield return RuntimeNaN("1/(0^0)", "RuntimeNaN_Div_By_NaN");
+
+                // --- zero base with negative exponent
+                yield return RuntimeNaN("0^(-1)", "RuntimeNaN_Pow_Zero_Neg");
+                yield return RuntimeNaN("(0)^(1-2)", "RuntimeNaN_Pow_Zero_Neg_ByExpr");
+
+                // --- pow rule: negative base with real exponent is not a real number
+                yield return RuntimeNaN("(-1)^0.5", "RuntimeNaN_Pow_NegativeBase_FractionExp");
+                yield return RuntimeNaN("(-8)^(1/3)", "RuntimeNaN_Pow_NegativeBase_FractionExpressionExp_CurrentSpec");
+                yield return RuntimeNaN("(-0.3)^71.2", "RuntimeNaN_Pow_NegativeDecimalBase_PosRealExp");
+                yield return RuntimeNaN("(-27.431)^(-931.4)", "RuntimeNaN_Pow_NegativeDecimalBase_NegRealExp");
+
+                // --- mod - operands should be positive integer values
+                yield return RuntimeNaN("0%2", "RuntimeNaN_Mod_LeftZero");
+                yield return RuntimeNaN("5%0", "RuntimeNaN_Mod_RightZero");
+                yield return RuntimeNaN("1%(2-2)", "RuntimeNaN_Mod_RightZero_ByExpr");
+                yield return RuntimeNaN("5%0.0", "RuntimeNaN_Mod_RightZeroDecimal");
+                yield return RuntimeNaN("(-5)%2", "RuntimeNaN_Mod_LeftNegative_Paren");
+                yield return RuntimeNaN("(-5.0)%2", "RuntimeNaN_Mod_LeftNegativeDecimalInteger_Paren");
+                yield return RuntimeNaN("5%(-2)", "RuntimeNaN_Mod_RightNegative");
+                yield return RuntimeNaN("5%(-2.0)", "RuntimeNaN_Mod_RightNegativeDecimal");
+                yield return RuntimeNaN("(5/2)%2", "RuntimeNaN_Mod_LeftFraction");
+                yield return RuntimeNaN("5%(3/2)", "RuntimeNaN_Mod_RightFraction");
+                yield return RuntimeNaN("5.5%2", "RuntimeNaN_Mod_LeftDecimalFraction");
+                yield return RuntimeNaN("5%2.5", "RuntimeNaN_Mod_RightDecimalFraction");
             }
         }
 
@@ -433,6 +394,12 @@ namespace foriver4725.FormulaCalculator.Tests
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Eq(this string formula, double expected)
         {
+            Assert.That(
+                formula.AsSpan().IsValidFormula(),
+                Is.True,
+                $"Calculate test formula must be valid syntax: {formula}"
+            );
+
             var actual = formula.AsSpan().Calculate();
 
             if (double.IsNaN(expected))
@@ -444,10 +411,16 @@ namespace foriver4725.FormulaCalculator.Tests
             Assert.That(actual, Is.EqualTo(expected).Within(1.0e-8), formula);
         }
 
-        private static TestCaseData Case(string f, bool expectedValid, string name)
-            => new TestCaseData(f, expectedValid).SetName(name);
+        private static TestCaseData Valid(string f, string name)
+            => new TestCaseData(f).SetName(name);
 
-        private static TestCaseData Case(string f, double expected, string name)
+        private static TestCaseData Invalid(string f, string name)
+            => new TestCaseData(f).SetName(name);
+
+        private static TestCaseData Result(string f, double expected, string name)
             => new TestCaseData(f, expected).SetName(name);
+
+        private static TestCaseData RuntimeNaN(string f, string name)
+            => new TestCaseData(f).SetName(name);
     }
 }

@@ -15,12 +15,6 @@ namespace foriver4725.FormulaCalculator
             {
                 byte prevType = Constants.PrevStart;
                 int parenDepth = 0;
-                bool sawMeaningful = false;
-
-                // Existing spec:
-                // a unary minus directly attached to a bare number is invalid
-                // when immediately followed by % or ^, e.g. "-5%2", "-2^2".
-                bool currentNumberHasUnaryMinus = false;
 
                 for (int i = 0; i < len; i++)
                 {
@@ -42,18 +36,8 @@ namespace foriver4725.FormulaCalculator
                         if (end < 0)
                             return false;
 
-                        // Preserve the existing restriction for unary-minus bare numbers.
-                        if (currentNumberHasUnaryMinus)
-                        {
-                            char nextAfterNumber = Helpers.PeekNextNonSpaceOrZero(p, len, end + 1);
-                            if (nextAfterNumber == '%' || nextAfterNumber == '^')
-                                return false;
-                        }
-
                         i = end;
                         prevType = Constants.PrevNumber;
-                        sawMeaningful = true;
-                        currentNumberHasUnaryMinus = false;
                         continue;
                     }
 
@@ -68,8 +52,6 @@ namespace foriver4725.FormulaCalculator
 
                         parenDepth++;
                         prevType = Constants.PrevParenL;
-                        sawMeaningful = true;
-                        currentNumberHasUnaryMinus = false;
                         continue;
                     }
 
@@ -81,7 +63,7 @@ namespace foriver4725.FormulaCalculator
                         if (parenDepth <= 0)
                             return false;
 
-                        // Disallow empty parentheses or operator-only content.
+                        // Disallow empty parentheses and operator-only content.
                         if (prevType == Constants.PrevStart ||
                             prevType == Constants.PrevOp ||
                             prevType == Constants.PrevParenL)
@@ -89,8 +71,6 @@ namespace foriver4725.FormulaCalculator
 
                         parenDepth--;
                         prevType = Constants.PrevParenR;
-                        sawMeaningful = true;
-                        currentNumberHasUnaryMinus = false;
                         continue;
                     }
 
@@ -102,23 +82,27 @@ namespace foriver4725.FormulaCalculator
 
                     if (c == '+' || c == '-')
                     {
-                        // Unary +/- is allowed only at the start,
-                        // or right after '('.
-                        if (prevType == Constants.PrevStart || prevType == Constants.PrevParenL)
+                        // Unary +/- is allowed only immediately after '('.
+                        //
+                        // Valid:
+                        //   (+7)
+                        //   (-12.3)
+                        //   (+(1+2))
+                        //
+                        // Invalid:
+                        //   -23+1
+                        //   1+-2
+                        //   1^+2
+                        if (prevType == Constants.PrevParenL)
                         {
                             char next = Helpers.PeekNextNonSpaceOrZero(p, len, i + 1);
                             if (next == '\0')
                                 return false;
 
-                            // Existing spec:
-                            // unary sign can be followed only by a digit or '('.
                             if (!Helpers.IsDigit(next) && next != '(')
                                 return false;
 
-                            currentNumberHasUnaryMinus = (c == '-' && Helpers.IsDigit(next));
-
                             prevType = Constants.PrevOp;
-                            sawMeaningful = true;
                             continue;
                         }
                     }
@@ -128,17 +112,10 @@ namespace foriver4725.FormulaCalculator
                         return false;
 
                     prevType = Constants.PrevOp;
-                    sawMeaningful = true;
-                    currentNumberHasUnaryMinus = false;
                 }
 
-                if (!sawMeaningful)
-                    return false;
-
-                if (parenDepth != 0)
-                    return false;
-
-                return prevType == Constants.PrevNumber || prevType == Constants.PrevParenR;
+                return parenDepth == 0 &&
+                       (prevType == Constants.PrevNumber || prevType == Constants.PrevParenR);
             }
         }
     }

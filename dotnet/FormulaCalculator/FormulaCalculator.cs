@@ -21,14 +21,9 @@ namespace foriver4725.FormulaCalculator
                 int vTop = 0;
                 int oTop = 0;
 
-                byte prevType = Constants.PrevStart;
-                int parenDepth = 0;
-                bool sawMeaningful = false;
-
-                // Existing spec:
-                // a unary minus directly attached to a bare number is invalid
-                // when immediately followed by % or ^, e.g. "-5%2", "-2^2".
-                bool currentNumberHasUnaryMinus = false;
+                // Calculate() assumes IsValidFormula() has already accepted the syntax.
+                // This flag is only needed to distinguish unary +/- after '(' from binary +/-.
+                bool previousWasLeftParen = false;
 
                 for (int i = 0; i < len; i++)
                 {
@@ -37,122 +32,75 @@ namespace foriver4725.FormulaCalculator
                     if (c == ' ')
                         continue;
 
-                    // -------------------------------------------------
                     // Number token
-                    // -------------------------------------------------
                     if (Helpers.IsDigit(c))
                     {
-                        // Disallow adjacency such as "1 23" or ")1".
-                        if (prevType == Constants.PrevNumber || prevType == Constants.PrevParenR)
-                            return double.NaN;
-
                         double number;
                         int end = Helpers.ReadNumberOrMinusOne(p, len, i, &number);
                         if (end < 0)
                             return double.NaN;
 
-                        // Preserve the existing restriction for unary-minus bare numbers.
-                        if (currentNumberHasUnaryMinus)
-                        {
-                            char nextAfterNumber = Helpers.PeekNextNonSpaceOrZero(p, len, end + 1);
-                            if (nextAfterNumber == '%' || nextAfterNumber == '^')
-                                return double.NaN;
-                        }
-
                         values[vTop++] = number;
-
                         i = end;
-                        prevType = Constants.PrevNumber;
-                        sawMeaningful = true;
-                        currentNumberHasUnaryMinus = false;
+                        previousWasLeftParen = false;
                         continue;
                     }
 
-                    // -------------------------------------------------
                     // Left parenthesis
-                    // -------------------------------------------------
                     if (c == '(')
                     {
-                        // Disallow adjacency such as "2(" or ")(".
-                        if (prevType == Constants.PrevNumber || prevType == Constants.PrevParenR)
-                            return double.NaN;
-
                         ops[oTop++] = c;
-                        parenDepth++;
-                        prevType = Constants.PrevParenL;
-                        sawMeaningful = true;
-                        currentNumberHasUnaryMinus = false;
+                        previousWasLeftParen = true;
                         continue;
                     }
 
-                    // -------------------------------------------------
                     // Right parenthesis
-                    // -------------------------------------------------
                     if (c == ')')
                     {
-                        if (parenDepth <= 0)
-                            return double.NaN;
-
-                        // Disallow empty parentheses or operator-only content.
-                        if (prevType == Constants.PrevStart ||
-                            prevType == Constants.PrevOp ||
-                            prevType == Constants.PrevParenL)
-                            return double.NaN;
-
                         while (oTop > 0 && ops[oTop - 1] != '(')
                         {
                             if (!ApplyTop(values, ref vTop, ops, ref oTop))
                                 return double.NaN;
                         }
 
+                        // Internal safety:
+                        // valid syntax should always have a matching '(' here.
                         if (oTop == 0)
                             return double.NaN;
 
                         oTop--; // pop '('
-                        parenDepth--;
-                        prevType = Constants.PrevParenR;
-                        sawMeaningful = true;
-                        currentNumberHasUnaryMinus = false;
+                        previousWasLeftParen = false;
                         continue;
                     }
 
-                    // -------------------------------------------------
-                    // Operator
-                    // -------------------------------------------------
-                    if (!Helpers.IsOperator(c))
-                        return double.NaN;
-
-                    if (c == '+' || c == '-')
+                    // Unary +/- is valid only immediately after '('.
+                    // If it is attached to a number, read it as one signed numeric token.
+                    if ((c == '+' || c == '-') && previousWasLeftParen)
                     {
-                        // Unary +/- is allowed only at the start,
-                        // or right after '('.
-                        if (prevType == Constants.PrevStart || prevType == Constants.PrevParenL)
+                        char next = Helpers.PeekNextNonSpaceOrZero(p, len, i + 1);
+
+                        if (Helpers.IsDigit(next))
                         {
-                            char next = Helpers.PeekNextNonSpaceOrZero(p, len, i + 1);
-                            if (next == '\0')
+                            double number;
+                            int end = Helpers.ReadSignedNumberOrMinusOne(p, len, i, &number);
+                            if (end < 0)
                                 return double.NaN;
 
-                            // Existing spec:
-                            // unary sign can be followed only by a digit or '('.
-                            // ".5" is intentionally not supported.
-                            if (!Helpers.IsDigit(next) && next != '(')
-                                return double.NaN;
-
-                            currentNumberHasUnaryMinus = (c == '-' && Helpers.IsDigit(next));
-
-                            // Lower unary +/- into "0 +/- x".
-                            values[vTop++] = 0.0;
-                            ops[oTop++] = c;
-                            prevType = Constants.PrevOp;
-                            sawMeaningful = true;
+                            values[vTop++] = number;
+                            i = end;
+                            previousWasLeftParen = false;
                             continue;
                         }
+
+                        // Unary +/- before a parenthesized expression:
+                        //   (+(...)) -> (0 + (...))
+                        //   (-(...)) -> (0 - (...))
+                        //
+                        // IsValidFormula() guarantees that the next meaningful char is '('.
+                        values[vTop++] = 0.0;
                     }
 
-                    // Binary operators must follow a number or ')'.
-                    if (prevType != Constants.PrevNumber && prevType != Constants.PrevParenR)
-                        return double.NaN;
-
+                    // Binary operator, or lowered unary +/- before a parenthesized expression.
                     while (oTop > 0 && Helpers.ShouldReduce(ops[oTop - 1], c))
                     {
                         if (!ApplyTop(values, ref vTop, ops, ref oTop))
@@ -160,22 +108,14 @@ namespace foriver4725.FormulaCalculator
                     }
 
                     ops[oTop++] = c;
-                    prevType = Constants.PrevOp;
-                    sawMeaningful = true;
-                    currentNumberHasUnaryMinus = false;
+                    previousWasLeftParen = false;
                 }
 
-                if (!sawMeaningful)
-                    return double.NaN;
-
-                if (parenDepth != 0)
-                    return double.NaN;
-
-                if (prevType != Constants.PrevNumber && prevType != Constants.PrevParenR)
-                    return double.NaN;
-
+                // Evaluate remaining operators.
                 while (oTop > 0)
                 {
+                    // Internal safety:
+                    // valid syntax should not leave '(' on the operator stack.
                     if (ops[oTop - 1] == '(')
                         return double.NaN;
 
@@ -183,17 +123,16 @@ namespace foriver4725.FormulaCalculator
                         return double.NaN;
                 }
 
+                // Internal safety:
+                // a valid expression should reduce to exactly one value.
                 return vTop == 1 ? values[0] : double.NaN;
             }
         }
 
-        // =========================================================
-        // Core reduction
-        // =========================================================
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe bool ApplyTop(double* values, ref int vTop, char* ops, ref int oTop)
         {
+            // Internal safety against stack underflow.
             if (vTop < 2 || oTop <= 0)
                 return false;
 
@@ -234,56 +173,50 @@ namespace foriver4725.FormulaCalculator
             }
             else if (op == '^')
             {
-                // 0^b
                 if (a == 0.0)
                 {
+                    // 0^b is valid only when b is positive.
                     if (b <= 0.0)
                         return false;
 
                     result = 0.0;
                 }
-                else
+                else if (Helpers.IsInteger(b))
                 {
-                    if (Helpers.IsInteger(b))
+                    double rounded = Math.Round(b);
+
+                    // Use fast integer exponentiation only inside Int32 range.
+                    // Otherwise, fall back to Math.Pow and allow Infinity.
+                    if (rounded > int.MinValue && rounded <= int.MaxValue)
                     {
-                        double rounded = Math.Round(b);
+                        int e = (int)rounded;
 
-                        // Use fast integer exponentiation only inside Int32 range.
-                        // Otherwise, fall back to Math.Pow and allow Infinity.
-                        if (rounded > int.MinValue && rounded <= int.MaxValue)
+                        if (e < 0)
                         {
-                            int e = (int)rounded;
+                            int posE = -e;
+                            double p = PowInt(a, posE);
+                            if (p == 0.0)
+                                return false;
 
-                            if (e < 0)
-                            {
-                                // Note:
-                                // e cannot be int.MinValue here because the range check above excludes it
-                                // from causing overflow in negation after rounding cast logic.
-                                int posE = -e;
-                                double p = PowInt(a, posE);
-                                if (p == 0.0)
-                                    return false;
-
-                                result = 1.0 / p;
-                            }
-                            else
-                            {
-                                result = PowInt(a, e);
-                            }
+                            result = 1.0 / p;
                         }
                         else
                         {
-                            result = Math.Pow(a, b);
+                            result = PowInt(a, e);
                         }
                     }
                     else
                     {
-                        // A negative base with a non-integer exponent is not a real number.
-                        if (a < 0.0)
-                            return false;
-
                         result = Math.Pow(a, b);
                     }
+                }
+                else
+                {
+                    // A negative base with a non-integer exponent is not a real number.
+                    if (a < 0.0)
+                        return false;
+
+                    result = Math.Pow(a, b);
                 }
 
                 // Infinity is allowed by design; NaN is not.
