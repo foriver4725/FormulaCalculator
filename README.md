@@ -176,8 +176,38 @@ The following libraries were used for comparison in the benchmark:
 **Execution Time**
 ![Library Comparison Time Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResultMeanGraph.png)
 
-**Memory Allocations**
+**Managed Memory Allocations**
+
 ![Library Comparison Allocation Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResultAllocatedGraph.png)
+
+BenchmarkDotNet's MemoryDiagnoser reports managed allocations.
+It does not include native allocations made internally by ExprTk.
+Therefore, a zero managed allocation result does not imply that
+ExprTk performs no native allocations.
+
+**ExprTk Native Allocation Requests**
+
+ExprTk was measured separately using a standalone C++ measurement tool
+that counts successful allocation requests through global
+`operator new` and `operator new[]`.
+
+![ExprTk Native Allocation Graph](https://github.com/user-attachments/assets/15bbac7a-dcd5-4b15-9d18-3fa165f31f44)
+
+Each evaluation includes input string construction, symbol table and
+parser initialization, expression compilation, evaluation, and destruction.
+The parser and compiled expression are recreated for every evaluation.
+
+Results are reported as requested bytes per evaluation, averaged over
+1,000 evaluations after 10 warmup calls per input case.
+The values include allocations freed during evaluation; they do not
+represent peak memory usage or memory retained after evaluation.
+
+Direct `malloc`/`calloc`/`realloc` calls and allocation paths that bypass
+global `new` are not counted. C# interop and string marshaling are also
+outside the measurement scope.
+
+These results are shown separately because their measurement scope
+differs from the managed allocation results above.
 
 ### Characteristics
 
