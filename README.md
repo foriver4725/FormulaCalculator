@@ -185,7 +185,7 @@ It does not include native allocations made internally by ExprTk.
 Therefore, a zero managed allocation result does not imply that
 ExprTk performs no native allocations.
 
-**ExprTk Native Allocation Requests**
+**ExprTk Native Memory Allocations**
 
 ExprTk was measured separately using a standalone C++ measurement tool
 that counts successful allocation requests through global
