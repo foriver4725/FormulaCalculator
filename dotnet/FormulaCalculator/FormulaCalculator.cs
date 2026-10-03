@@ -126,7 +126,7 @@ namespace foriver4725.FormulaCalculator
                 }
 
                 // Unary +/- is valid only immediately after '('.
-                // If it is attached to a number, read it as one signed numeric token.
+                // Read a following number as a signed token, ignoring spaces after the sign.
                 if ((c == '+' || c == '-') && previousWasLeftParen)
                 {
                     char next = Helpers.PeekNextNonSpaceOrZero(p, len, i + 1);

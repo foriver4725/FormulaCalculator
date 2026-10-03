@@ -91,8 +91,8 @@ For the buffer overload:
 | Precedence | `^`, then `*` / `/` / `%`, then `+` / `-` |
 | Associativity | `^` is right-associative; other operators are left-associative |
 | Parentheses | `(1+2)*3` |
-| Unary signs | Immediately after `(`: `(-3)`, `(+3)`, `(-(1+2))` |
-| Spaces | ASCII spaces between tokens; keep unary signs attached to number literals |
+| Unary signs | After `(`, with optional spaces: `(-3)`, `(+ 3)`, `(-(1+2))` |
+| Spaces | ASCII spaces between tokens; none within number literals |
 
 `%` requires positive integer-valued operands. A zero base requires a positive
 exponent; negative bases require integer exponents.

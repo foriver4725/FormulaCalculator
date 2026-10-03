@@ -137,6 +137,9 @@ namespace foriver4725.FormulaCalculator
                 return ReadNumberOrMinusOne(p, len, start, outValue);
 
             int numberStart = start + 1;
+            while (numberStart < len && p[numberStart] == ' ')
+                numberStart++;
+
             if (numberStart >= len || !IsDigit(p[numberStart]))
                 return -1;
 

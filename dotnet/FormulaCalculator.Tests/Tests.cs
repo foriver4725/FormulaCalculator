@@ -135,6 +135,10 @@ namespace foriver4725.FormulaCalculator.Tests
                 yield return Invalid("12 3", "Invalid_Number_WhitespaceInsideDigits2");
                 yield return Invalid("1 2 3", "Invalid_Number_WhitespaceInsideDigits3");
                 yield return Invalid("(-123 4)", "Invalid_Number_Signed_WithWhitespaceInsideDigits");
+                yield return Invalid("(- 1 2)", "Invalid_Number_SpacedUnary_WithWhitespaceInsideDigits");
+                yield return Invalid("(+ 1. 5)", "Invalid_Number_SpacedUnary_WithWhitespaceInsideDecimal");
+                yield return Invalid("(-\t3)", "Invalid_UnaryMinus_TabAfterSign");
+                yield return Invalid("(+\n3)", "Invalid_UnaryPlus_NewlineAfterSign");
 
                 // --- only / trailing / leading operators
                 yield return Invalid("+", "Invalid_Op_OnlyPlus");
@@ -244,6 +248,16 @@ namespace foriver4725.FormulaCalculator.Tests
                 yield return Result("1+2* 3-4/5", 6.2, "Result_Whitespace_Mixed");
                 yield return Result("( +(  1+2) *3-4) /5", 1.0, "Result_Whitespace_Heavy");
                 yield return Result("1+2*3-4/5+(6-7*8+9)/10", 2.1, "Result_LongExpression");
+
+                // --- whitespace after unary signs
+                yield return Result("(- 3)", -3.0, "Result_UnaryWhitespace_Minus");
+                yield return Result("(+ 3)", 3.0, "Result_UnaryWhitespace_Plus");
+                yield return Result("( -   12.5 )", -12.5, "Result_UnaryWhitespace_MinusDecimal");
+                yield return Result("( +   12.5 )", 12.5, "Result_UnaryWhitespace_PlusDecimal");
+                yield return Result("2*(- 3)+(+ 4)", -2.0, "Result_UnaryWhitespace_InExpression");
+                yield return Result("2^(- 3)", 0.125, "Result_UnaryWhitespace_NegativeExponent");
+                yield return Result("(- (1+(+ 2)))", -3.0, "Result_UnaryWhitespace_NegatedExpression");
+                yield return Result("(+ (1+(- 2)))", -1.0, "Result_UnaryWhitespace_PositiveExpression");
 
                 // --- decimal arithmetic
                 yield return Result("1.5+2.25", 3.75, "Result_Decimal_Add");
