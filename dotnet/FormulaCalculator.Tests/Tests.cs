@@ -380,6 +380,59 @@ namespace foriver4725.FormulaCalculator.Tests
             }
         }
 
+        public static class Calculate_BufferCases
+        {
+            [TestCase(2, 3)]
+            [TestCase(3, 2)]
+            [TestCase(2, 2)]
+            [TestCase(0, 3)]
+            [TestCase(3, 0)]
+            public static void ShortBuffers_ReturnNaN(int valuesLength, int operatorsLength)
+            {
+                var values = new double[valuesLength];
+                var operators = new char[operatorsLength];
+
+                Assert.That("1+2".AsSpan().Calculate(values, operators), Is.NaN);
+                Assert.That("1+2".AsSpan().Calculate(values, operators, false), Is.NaN);
+            }
+
+            [TestCase(2, 3)]
+            [TestCase(3, 2)]
+            [TestCase(2, 2)]
+            [TestCase(0, 3)]
+            [TestCase(3, 0)]
+            public static void ShortBuffers_ThrowWhenRequested(int valuesLength, int operatorsLength)
+            {
+                var values = new double[valuesLength];
+                var operators = new char[operatorsLength];
+
+                Assert.Throws<ArgumentException>(() =>
+                    "1+2".AsSpan().Calculate(values, operators, true));
+            }
+
+            [TestCase(false)]
+            [TestCase(true)]
+            public static void SufficientBuffers_Calculate(bool throwsOnBufferShortage)
+            {
+                Assert.That("1+2".AsSpan().Calculate(
+                    new double[3], new char[3], throwsOnBufferShortage), Is.EqualTo(3.0));
+            }
+
+            [Test]
+            public static void DirtyBuffers_CanBeReusedAfterSuccessAndNaN()
+            {
+                var values = new double[32];
+                var operators = new char[32];
+                Array.Fill(values, double.NaN);
+                Array.Fill(operators, '?');
+
+                Assert.That("2^(3^2)".AsSpan().Calculate(values, operators), Is.EqualTo(512.0));
+                Assert.That("1+(2/(3-3))".AsSpan().Calculate(values, operators), Is.NaN);
+                Assert.That("(1+2)*3".AsSpan().Calculate(values, operators), Is.EqualTo(9.0));
+                Assert.That("4".AsSpan().Calculate(values, operators), Is.EqualTo(4.0));
+            }
+        }
+
         // =========================================================
         // Helpers
         // =========================================================
@@ -400,15 +453,21 @@ namespace foriver4725.FormulaCalculator.Tests
                 $"Calculate test formula must be valid syntax: {formula}"
             );
 
-            var actual = formula.AsSpan().Calculate();
+            AssertResult(formula.AsSpan().Calculate(), expected, $"Default overload: {formula}");
+            AssertResult(formula.AsSpan().Calculate(
+                new double[formula.Length], new char[formula.Length]), expected,
+                $"Caller-provided buffers overload: {formula}");
+        }
 
+        private static void AssertResult(double actual, double expected, string context)
+        {
             if (double.IsNaN(expected))
             {
-                Assert.That(actual, Is.NaN, $"Expected NaN but was {actual}: {formula}");
+                Assert.That(actual, Is.NaN, context);
                 return;
             }
 
-            Assert.That(actual, Is.EqualTo(expected).Within(1.0e-8), formula);
+            Assert.That(actual, Is.EqualTo(expected).Within(1.0e-8), context);
         }
 
         private static TestCaseData Valid(string f, string name)
