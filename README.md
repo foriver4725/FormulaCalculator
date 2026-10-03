@@ -1,390 +1,180 @@
 # FormulaCalculator
 
-## Overview
-
-A fast, allocation-free, single-pass formula evaluator for C# and Unity.
-
-- Single-pass evaluation
-- Allocation-free (Span-based)
-- No validation overhead by default
-- Works in both .NET and Unity
-
-> ⚠️ This library prioritizes performance.
-> Make sure your formula is well-formed **before** calling `Calculate()`.
-> Use `IsValidFormula()` when you need validation.
-
-### Architecture
-
-This repository includes not only the core library,
-but also benchmarking tools, Unity integration, and publishing workflow.
-
-See: [Repository Architecture and Workflow](https://github.com/foriver4725/FormulaCalculator/wiki/Repository-Architecture-and-Workflow)
-
----
+A fast, allocation-free arithmetic evaluator for C# and Unity.
+Single-pass evaluation with `ReadOnlySpan<char>`, optional validation, and reusable buffers.
 
 ## Installation
 
-### NuGet (.NET / C#)
+### NuGet
 
-Install from NuGet:
-
-```
+```bash
 dotnet add package foriver4725.FormulaCalculator
 ```
 
-### Unity (UPM)
+### Unity 6+ (UPM)
 
-Install via UPM (Git URL):
+Git URL:
 
-```
+```text
 https://github.com/foriver4725/FormulaCalculator.git?path=Unity/Assets/foriver4725/FormulaCalculator
 ```
 
----
-
-## Usage Notes
-
-For both .NET and Unity, use the following namespace:
-
-```cs
-using foriver4725.FormulaCalculator;
-```
-
-If you are using Assembly Definition Files (`.asmdef`) in Unity,
-make sure to add a reference to the `foriver4725.FormulaCalculator` assembly.
-
----
-
-## Quick Start
-
-### Calculate
-
-```cs
-using foriver4725.FormulaCalculator;
-
-double result = "1+2*3/(4-5)".AsSpan().Calculate();
-
-// Output: -5
-```
-
-### Validate (recommended when input is user-generated)
-
-```cs
-using foriver4725.FormulaCalculator;
-
-ReadOnlySpan<char> formula = "1+2*3/(4-5)".AsSpan();
-
-if (!formula.IsValidFormula())
-{
-    return;
-}
-
-double result = formula.Calculate();
-```
-
----
-
-## API
-
-### Calculate
-
-```cs
-public static double Calculate(this ReadOnlySpan<char> formula)
-```
-
-### IsValidFormula
-
-```cs
-public static bool IsValidFormula(this ReadOnlySpan<char> formula)
-```
-
----
-
-## Syntax
-
-This library follows standard mathematical expression rules.
-
-- Supports common arithmetic operators and parentheses.
-- Operator precedence and associativity follow conventional math rules.
-- Spaces are ignored.
-
-If you need precise and authoritative behavior details,
-please refer to the test scripts in this repository:
-
-- [Test Scripts](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator.Tests/Tests.cs)
-
----
-
-## Performance
-
-This library is designed for high performance and **zero heap allocations**
-in the hot path.
-
-All evaluations are performed using `Span`-based processing,
-and no GC allocations occur during calculation or validation.
-
-### Benchmark (.NET / BenchmarkDotNet)
-
-In typical arithmetic-only scenarios, FormulaCalculator achieves
-zero allocations and competitive execution time compared to other libraries.
-
-Performance measurements are taken with BenchmarkDotNet on .NET 8.
-
-Two types of benchmarks are provided:
-
-1. **Method Benchmarks**
-
-   Benchmarks for the methods provided by FormulaCalculator, measuring execution time and memory allocations for
-   formulas of different expression lengths.
-
-2. **Library Comparison Benchmarks**
-
-   Benchmarks comparing FormulaCalculator with other expression evaluation libraries.
-   Since some libraries do not perform strict validation or support the exact same syntax, this comparison focuses only
-   on simple calculation performance.
-   Expressions that depend on syntax available in only some libraries are excluded.
-
-#### Compared Libraries
-
-The following libraries were used for comparison in the benchmark:
-
-| Name                                                                                      | Characteristics                                                                                                                                                                                           |
-|-------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [ClosedXML](https://github.com/ClosedXML/ClosedXML)                                       | A .NET library for reading, manipulating, and writing Excel files. In this benchmark, formula evaluation is performed through Excel-style cell formulas rather than a dedicated expression-evaluator API. |
-| [DataTable.Compute](https://learn.microsoft.com/dotnet/api/system.data.datatable.compute) | A built-in .NET API that evaluates expressions through DataTable.Compute. It is convenient because it requires no extra library, but it is not specialized for expression evaluation.                     |
-| [IronPython](https://github.com/IronLanguages/ironpython3)                                | A Python implementation for .NET. Expressions are evaluated using Python eval, representing a scripting-engine-based approach.                                                                            |
-| [NCalc](https://github.com/ncalc/ncalc)                                                   | A lightweight expression evaluator for .NET supporting mathematical and logical expressions.                                                                                                              |
-| [xFunc](https://github.com/sys27/xFunc)                                                   | A mathematical expression library that supports parsing, evaluation, simplification, and differentiation.                                                                                                 |
-| [ExprTk](https://github.com/ArashPartow/exprtk)                                           | A C++ mathematical expression toolkit known for high performance and extensibility.                                                                                                                       |
-
-#### Method Benchmarks
-
-- [Benchmark Script](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator.Benchmarks/Benchmarks.cs)
-- [Result Markdown](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkResult.md)
-
-**Execution Time**
-![Method Benchmark Time Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkResultMeanGraph.png)
-
-**Memory Allocations**
-![Method Benchmark Allocation Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkResultAllocatedGraph.png)
-
-#### Library Comparison Benchmarks
-
-- [Benchmark Script](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator.Benchmarks.LibraryComparison/Benchmarks.cs)
-- [Result Markdown](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResult.md)
-
-**Execution Time**
-![Library Comparison Time Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResultMeanGraph.png)
-
-**Managed Memory Allocations**
-
-![Library Comparison Allocation Graph](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResultAllocatedGraph.png)
-
-BenchmarkDotNet's MemoryDiagnoser reports managed allocations.
-It does not include native allocations made internally by ExprTk.
-Therefore, a zero managed allocation result does not imply that
-ExprTk performs no native allocations.
-
-**ExprTk Native Memory Allocations**
-
-ExprTk was measured separately using a standalone C++ measurement tool
-that counts successful allocation requests through global
-`operator new` and `operator new[]`.
-
-![ExprTk Native Allocation Graph](https://github.com/user-attachments/assets/15bbac7a-dcd5-4b15-9d18-3fa165f31f44)
-
-Each evaluation includes input string construction, symbol table and
-parser initialization, expression compilation, evaluation, and destruction.
-The parser and compiled expression are recreated for every evaluation.
-
-Results are reported as requested bytes per evaluation, averaged over
-1,000 evaluations after 10 warmup calls per input case.
-The values include allocations freed during evaluation; they do not
-represent peak memory usage or memory retained after evaluation.
-
-Direct `malloc`/`calloc`/`realloc` calls and allocation paths that bypass
-global `new` are not counted. C# interop and string marshaling are also
-outside the measurement scope.
-
-These results are shown separately because their measurement scope
-differs from the managed allocation results above.
-
-### Characteristics
-
-- ✅ **0 B GC allocations**
-- ✅ Allocation-free evaluation pipeline
-- ✅ Execution time scales roughly with expression length
-- ✅ Validation remains lightweight compared to evaluation
-
-`IsValidFormula()` can be used when safety is required,
-while `Calculate()` alone provides the fastest possible execution path.
-
-## Supported Scope
-
-### Why functions are not supported
-
-This library intentionally focuses on **core arithmetic expression evaluation**.
-
-The following kinds of function calls are **not supported**:
-
-- `sqrt(x)`
-- `sin(x)`
-- `cos(x)`
-- `tan(x)`
-- other function-style mathematical extensions
-
-This is a deliberate design choice.
-
-Once support for function-style syntax is introduced, the evaluator starts
-shifting away from a lightweight arithmetic parser and toward a more
-general-purpose expression engine. That direction usually brings additional
-branching, token classification, parsing complexity, and runtime overhead.
-
-As more rarely used features accumulate, the baseline cost of evaluating
-all expressions tends to rise — including simple formulas that only need
-basic arithmetic.
-
-This library avoids that tradeoff on purpose.
-
-Another reason is that expressions such as `sin(x)` or `sqrt(x)` are
-somewhat different in character from traditional arithmetic notation built
-from operators like `+`, `-`, `*`, and `/`. They are closer to a function-
-application style of notation: extensible, expressive, and powerful, but
-also conceptually separate from the minimal arithmetic core this library
-is designed to handle.
-
-In many cases, such function-style extensions are better implemented by the
-consumer side, where they can be added selectively and only when needed.
-
-For example, projects can preprocess custom function calls before passing
-the final expression to the evaluator:
+The package includes a .NET Standard 2.1 DLL with **Auto Reference** enabled.
+If your `.asmdef` uses **Override References**, add `FormulaCalculator.dll`
+to **Assembly References**.
+
+## Usage
 
 ```cs
 using System;
-using System.Globalization;
 using foriver4725.FormulaCalculator;
 
-static string PreprocessSin(ReadOnlySpan<char> formula)
-{
-    const string functionName = "sin(";
-
-    int index = formula.IndexOf(functionName, StringComparison.OrdinalIgnoreCase);
-    if (index < 0)
-    {
-        return formula.ToString();
-    }
-
-    int argumentStart = index + functionName.Length;
-
-    int depth = 0;
-    int argumentEnd = -1;
-
-    for (int i = argumentStart; i < formula.Length; i++)
-    {
-        char c = formula[i];
-
-        if (c == '(')
-        {
-            depth++;
-        }
-        else if (c == ')')
-        {
-            if (depth == 0)
-            {
-                argumentEnd = i;
-                break;
-            }
-
-            depth--;
-        }
-    }
-
-    if (argumentEnd < 0)
-    {
-        throw new FormatException("Missing closing parenthesis for sin().");
-    }
-
-    ReadOnlySpan<char> inner = formula.Slice(argumentStart, argumentEnd - argumentStart);
-
-    // recursive preprocessing
-    string processedInner = PreprocessSin(inner);
-
-    double value = processedInner.AsSpan().Calculate();
-    string replacement = Math.Sin(value).ToString(CultureInfo.InvariantCulture);
-
-    string before = formula.Slice(0, index).ToString();
-    string after = formula.Slice(argumentEnd + 1).ToString();
-
-    string combined = before + replacement + after;
-
-    // continue processing remaining string
-    return PreprocessSin(combined.AsSpan());
-}
-
-string formula = "sin(1+sin(2*3))*2";
-string preprocessed = PreprocessSin(formula.AsSpan());
-double result = preprocessed.AsSpan().Calculate();
+double result = "1+2*3/(4-5)".AsSpan().Calculate(); // -5
 ```
 
-This preprocessing can also be implemented using ReadOnlySpan<char>,
-keeping allocations minimal while extending the syntax outside
-the evaluator.
+`Calculate()` expects valid syntax. Validate user input before evaluating it:
 
-Because such calls are explicitly wrapped in parentheses, precedence is also
-easy to reason about during preprocessing. This approach keeps the evaluator
-itself fast and minimal, while allowing each project to extend the syntax
-in a way that matches its own requirements.
+```cs
+ReadOnlySpan<char> formula = "1+2*3/(4-5)".AsSpan();
 
-The goal of this library is to remain:
+if (formula.IsValidFormula())
+{
+    double validatedResult = formula.Calculate();
+}
+```
 
-- fast
-- allocation-free
-- simple
-- proportional to expression length
+### Reusable buffers
 
-This library is intended to be a fast arithmetic evaluator,
-not a fully extensible symbolic math engine.
+The default overload uses stack storage. For long formulas or repeated calls,
+supply your own buffers:
+
+```cs
+// Allocate once for formulas up to 256 characters long.
+double[] valuesBuffer = new double[256];
+char[] operatorsBuffer = new char[256];
+
+double first = "1+2*3".AsSpan().Calculate(valuesBuffer, operatorsBuffer); // 7
+double second = "(1+2)*3".AsSpan().Calculate(
+    valuesBuffer, operatorsBuffer, throwsOnBufferShortage: true); // 9
+```
+
+## API
+
+```cs
+public static double Calculate(this ReadOnlySpan<char> formula);
+
+public static double Calculate(
+    this ReadOnlySpan<char> formula,
+    Span<double> valuesBuffer,
+    Span<char> operatorsBuffer,
+    bool throwsOnBufferShortage = false);
+
+public static bool IsValidFormula(this ReadOnlySpan<char> formula);
+```
+
+`Calculate()` returns `double.NaN` for empty input or invalid arithmetic operations.
+`IsValidFormula()` checks syntax only.
+
+For the buffer overload:
+
+- Each buffer must have at least `formula.Length` elements.
+- Insufficient capacity returns `double.NaN`; `throwsOnBufferShortage: true` throws `ArgumentException`.
+- Buffers are scratch storage and need no clearing before reuse, including after `double.NaN`.
+- Input and buffers must not overlap; overlap is not checked. Use separate buffers for concurrent calls.
+
+## Syntax
+
+| Feature | Syntax |
+| --- | --- |
+| Numbers | Integers and decimals, such as `12` and `0.5` |
+| Operators | `+`, `-`, `*`, `/`, `%`, `^` |
+| Precedence | `^`, then `*` / `/` / `%`, then `+` / `-` |
+| Associativity | `^` is right-associative; other operators are left-associative |
+| Parentheses | `(1+2)*3` |
+| Unary signs | Immediately after `(`: `(-3)`, `(+3)`, `(-(1+2))` |
+| Spaces | ASCII spaces between tokens; keep unary signs attached to number literals |
+
+`%` requires positive integer-valued operands. A zero base requires a positive
+exponent; negative bases require integer exponents.
+
+Arithmetic only: functions such as `sin()` and `sqrt()`, variables, symbolic math,
+and expression trees are outside the API. Handle custom syntax before evaluation.
+
+[Test cases](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator.Tests/Tests.cs)
+
+## Benchmarks
+
+Measured with BenchmarkDotNet on .NET 8.
+
+### Methods
+
+[Source](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator.Benchmarks/Benchmarks.cs)
+· [Results](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkResult.md)
+
+**Execution time**
+
+![Method execution time](https://raw.githubusercontent.com/foriver4725/FormulaCalculator/main/dotnet/BenchmarkResults/BenchmarkResultMeanGraph.png)
+
+**Managed allocations**
+
+![Method managed allocations](https://raw.githubusercontent.com/foriver4725/FormulaCalculator/main/dotnet/BenchmarkResults/BenchmarkResultAllocatedGraph.png)
+
+### Library comparison
+
+Comparisons use basic arithmetic shared by all evaluators. FormulaCalculator
+runs `Calculate()` without a separate validation pass.
+
+| Library | Evaluation path |
+| --- | --- |
+| [ClosedXML](https://github.com/ClosedXML/ClosedXML) | Excel cell formulas |
+| [DataTable.Compute](https://learn.microsoft.com/dotnet/api/system.data.datatable.compute) | Built-in .NET expression evaluation |
+| [IronPython](https://github.com/IronLanguages/ironpython3) | Python `eval` |
+| [NCalc](https://github.com/ncalc/ncalc) | .NET expression evaluator |
+| [xFunc](https://github.com/sys27/xFunc) | Mathematical expression evaluator |
+| [ExprTk](https://github.com/ArashPartow/exprtk) | Native C++ expression evaluator |
+
+[Source](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/FormulaCalculator.Benchmarks.LibraryComparison/Benchmarks.cs)
+· [Results](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResult.md)
+
+**Execution time**
+
+![Library comparison execution time](https://raw.githubusercontent.com/foriver4725/FormulaCalculator/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResultMeanGraph.png)
+
+**Managed allocations**
+
+![Library comparison managed allocations](https://raw.githubusercontent.com/foriver4725/FormulaCalculator/main/dotnet/BenchmarkResults/BenchmarkLibraryComparisonResultAllocatedGraph.png)
+
+BenchmarkDotNet measures managed allocations only. ExprTk's native allocations
+are measured separately below.
+
+### ExprTk native allocations
+
+[Native allocation chart](https://github.com/user-attachments/assets/15bbac7a-dcd5-4b15-9d18-3fa165f31f44)
+
+<details>
+<summary>Measurement scope</summary>
+
+A standalone C++ tool counts requested bytes from successful global `new` and
+`new[]` allocations, averaged over 1,000 evaluations after 10 warmup calls.
+Each evaluation constructs the input string, symbol table, parser, and compiled
+expression, evaluates it, and destroys them.
+
+Totals include allocations freed during evaluation; they are not peak or retained
+memory. Direct `malloc` / `calloc` / `realloc`, other paths that bypass global
+`new`, C# interop, and string marshaling are excluded. These figures are not
+directly comparable to managed allocation totals.
+
+</details>
 
 ## Design
 
-The implementation is inspired by classical expression evaluation techniques such as:
+A two-stack operator-precedence evaluator scans the input once and reduces
+operators as it goes. No intermediate token list, RPN buffer, or AST is built.
 
-- Dijkstra’s **Shunting Yard algorithm**
-- Two-stack operator-precedence evaluation
+## Development
 
-Many traditional implementations tokenize the input first and then perform
-a second pass (e.g., converting to Reverse Polish Notation before evaluation).
-
-This library takes a more direct approach:
-
-- Single-pass scanning
-- Immediate reduction using value/operator stacks
-- No intermediate token list
-- No AST construction
-- No heap allocations
-
-The goal is to minimize overhead while preserving standard mathematical behavior.
-
-If safety is required, validate the expression first using `IsValidFormula()`.
-
-This design keeps the evaluation cost proportional to the length of the input expression.
-
-## When to use
-
-Use FormulaCalculator when:
-
-- You need fast arithmetic evaluation
-- You want zero allocations
-- You do not need symbolic math features
-- You evaluate many expressions per frame (e.g., games)
-
-Avoid using it when:
-
-- You need symbolic math
-- You need built-in function parsing
-- You need expression trees
-
----
+- [Build, test, and release commands](https://github.com/foriver4725/FormulaCalculator/blob/main/dotnet/README.md)
+- [Repository architecture and workflow](https://github.com/foriver4725/FormulaCalculator/wiki/Repository-Architecture-and-Workflow)
 
 ## License
 
