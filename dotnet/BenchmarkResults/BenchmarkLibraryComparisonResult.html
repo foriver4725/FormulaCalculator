@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
 <meta charset='utf-8' />
-<title>foriver4725.FormulaCalculator.Benchmarks.LibraryComparison.Benchmarks-20260531-015016</title>
+<title>foriver4725.FormulaCalculator.Benchmarks.LibraryComparison.Benchmarks-20261004-001432</title>
 
 <style type="text/css">
 	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
@@ -13,7 +13,7 @@
 </head>
 <body>
 <pre><code>
-BenchmarkDotNet v0.15.8, macOS Tahoe 26.5 (25F71) [Darwin 25.5.0]
+BenchmarkDotNet v0.15.8, macOS 27.0.1 (26A434) [Darwin 27.0.0]
 Apple M3, 1 CPU, 8 logical and 8 physical cores
 .NET SDK 10.0.102
   [Host]     : .NET 8.0.10 (8.0.10, 8.0.1024.46610), Arm64 RyuJIT armv8.0-a
@@ -22,71 +22,71 @@ Apple M3, 1 CPU, 8 logical and 8 physical cores
 <pre><code></code></pre>
 
 <table>
-<thead><tr><th>Method               </th><th>Input</th><th>Case</th><th>Char Count</th><th>Mean  </th><th>Error</th><th>StdDev</th><th>Median</th><th>Gen0</th><th>Gen1</th><th>Gen2</th><th>Allocated</th>
+<thead><tr><th>Method               </th><th>Input</th><th>Case</th><th>Char Count</th><th>Mean  </th><th>Error</th><th>StdDev</th><th>Gen0</th><th>Gen1</th><th>Allocated</th>
 </tr>
-</thead><tbody><tr><td>Calculate_FormulaCalculator</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>17.62 ns</td><td>0.197 ns</td><td>0.164 ns</td><td>17.62 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_FormulaCalculator</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>19.29 ns</td><td>0.344 ns</td><td>0.269 ns</td><td>19.26 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_FormulaCalculator</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>18.02 ns</td><td>0.190 ns</td><td>0.158 ns</td><td>18.03 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_FormulaCalculator</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>32.44 ns</td><td>0.341 ns</td><td>0.319 ns</td><td>32.50 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_FormulaCalculator</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>32.10 ns</td><td>0.232 ns</td><td>0.206 ns</td><td>32.07 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_FormulaCalculator</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>28.95 ns</td><td>0.196 ns</td><td>0.184 ns</td><td>28.99 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_FormulaCalculator</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>175.10 ns</td><td>3.243 ns</td><td>5.594 ns</td><td>172.80 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_FormulaCalculator</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>150.10 ns</td><td>2.902 ns</td><td>4.518 ns</td><td>149.80 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_FormulaCalculator</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>151.32 ns</td><td>2.041 ns</td><td>1.809 ns</td><td>151.20 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_ClosedXml</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>834.98 ns</td><td>5.720 ns</td><td>5.071 ns</td><td>835.87 ns</td><td>0.2050</td><td>-</td><td>-</td><td>1720 B</td>
-</tr><tr><td>Calculate_ClosedXml</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>860.63 ns</td><td>6.193 ns</td><td>5.490 ns</td><td>859.76 ns</td><td>0.2050</td><td>-</td><td>-</td><td>1720 B</td>
-</tr><tr><td>Calculate_ClosedXml</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>863.51 ns</td><td>5.640 ns</td><td>4.710 ns</td><td>864.65 ns</td><td>0.2050</td><td>-</td><td>-</td><td>1720 B</td>
-</tr><tr><td>Calculate_ClosedXml</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>1,116.80 ns</td><td>4.443 ns</td><td>3.938 ns</td><td>1,116.93 ns</td><td>0.2403</td><td>-</td><td>-</td><td>2016 B</td>
-</tr><tr><td>Calculate_ClosedXml</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>1,148.55 ns</td><td>22.826 ns</td><td>23.441 ns</td><td>1,147.54 ns</td><td>0.2403</td><td>-</td><td>-</td><td>2016 B</td>
-</tr><tr><td>Calculate_ClosedXml</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>1,134.37 ns</td><td>7.150 ns</td><td>5.970 ns</td><td>1,133.44 ns</td><td>0.2403</td><td>-</td><td>-</td><td>2016 B</td>
-</tr><tr><td>Calculate_ClosedXml</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>4,121.01 ns</td><td>21.952 ns</td><td>20.534 ns</td><td>4,122.80 ns</td><td>0.5112</td><td>-</td><td>-</td><td>4336 B</td>
-</tr><tr><td>Calculate_ClosedXml</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>3,495.64 ns</td><td>17.729 ns</td><td>14.804 ns</td><td>3,495.31 ns</td><td>0.4883</td><td>-</td><td>-</td><td>4096 B</td>
-</tr><tr><td>Calculate_ClosedXml</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>3,650.43 ns</td><td>19.874 ns</td><td>16.596 ns</td><td>3,646.53 ns</td><td>0.4959</td><td>-</td><td>-</td><td>4176 B</td>
-</tr><tr><td>Calculate_DataTable</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>396.30 ns</td><td>2.948 ns</td><td>2.758 ns</td><td>395.71 ns</td><td>0.3128</td><td>0.0010</td><td>-</td><td>2624 B</td>
-</tr><tr><td>Calculate_DataTable</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>408.33 ns</td><td>7.857 ns</td><td>7.350 ns</td><td>413.13 ns</td><td>0.3152</td><td>0.0010</td><td>-</td><td>2640 B</td>
-</tr><tr><td>Calculate_DataTable</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>405.52 ns</td><td>6.647 ns</td><td>5.892 ns</td><td>407.00 ns</td><td>0.3152</td><td>0.0005</td><td>-</td><td>2640 B</td>
-</tr><tr><td>Calculate_DataTable</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>579.38 ns</td><td>4.139 ns</td><td>3.871 ns</td><td>580.33 ns</td><td>0.3548</td><td>-</td><td>-</td><td>2992 B</td>
-</tr><tr><td>Calculate_DataTable</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>639.61 ns</td><td>12.176 ns</td><td>13.028 ns</td><td>636.84 ns</td><td>0.3586</td><td>-</td><td>-</td><td>3000 B</td>
-</tr><tr><td>Calculate_DataTable</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>634.17 ns</td><td>3.639 ns</td><td>3.404 ns</td><td>634.30 ns</td><td>0.3605</td><td>0.0029</td><td>0.0010</td><td>3016 B</td>
-</tr><tr><td>Calculate_DataTable</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>2,505.90 ns</td><td>10.084 ns</td><td>9.433 ns</td><td>2,506.21 ns</td><td>0.7935</td><td>-</td><td>-</td><td>6704 B</td>
-</tr><tr><td>Calculate_DataTable</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>2,302.53 ns</td><td>24.041 ns</td><td>21.311 ns</td><td>2,295.68 ns</td><td>0.7324</td><td>-</td><td>-</td><td>6152 B</td>
-</tr><tr><td>Calculate_DataTable</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>2,415.20 ns</td><td>47.837 ns</td><td>75.875 ns</td><td>2,390.75 ns</td><td>0.7477</td><td>-</td><td>-</td><td>6344 B</td>
-</tr><tr><td>Calculate_IronPython</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>10,341.19 ns</td><td>199.222 ns</td><td>514.256 ns</td><td>10,160.29 ns</td><td>5.1117</td><td>0.3815</td><td>-</td><td>42859 B</td>
-</tr><tr><td>Calculate_IronPython</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>10,252.75 ns</td><td>202.175 ns</td><td>399.073 ns</td><td>10,119.56 ns</td><td>5.1117</td><td>-</td><td>-</td><td>42836 B</td>
-</tr><tr><td>Calculate_IronPython</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>10,534.07 ns</td><td>206.232 ns</td><td>571.468 ns</td><td>10,363.84 ns</td><td>5.1117</td><td>0.3967</td><td>-</td><td>42828 B</td>
-</tr><tr><td>Calculate_IronPython</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>11,448.83 ns</td><td>228.319 ns</td><td>375.135 ns</td><td>11,505.00 ns</td><td>5.1270</td><td>0.3662</td><td>-</td><td>43108 B</td>
-</tr><tr><td>Calculate_IronPython</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>10,489.40 ns</td><td>208.629 ns</td><td>426.174 ns</td><td>10,320.22 ns</td><td>5.0049</td><td>0.3662</td><td>-</td><td>42044 B</td>
-</tr><tr><td>Calculate_IronPython</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>10,542.27 ns</td><td>92.446 ns</td><td>81.951 ns</td><td>10,560.20 ns</td><td>5.1270</td><td>0.3662</td><td>-</td><td>43284 B</td>
-</tr><tr><td>Calculate_IronPython</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>18,833.95 ns</td><td>301.469 ns</td><td>451.225 ns</td><td>18,737.87 ns</td><td>6.8359</td><td>0.4883</td><td>-</td><td>57486 B</td>
-</tr><tr><td>Calculate_IronPython</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>16,587.76 ns</td><td>220.517 ns</td><td>195.482 ns</td><td>16,587.53 ns</td><td>6.5308</td><td>0.4883</td><td>-</td><td>54845 B</td>
-</tr><tr><td>Calculate_IronPython</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>17,000.88 ns</td><td>138.847 ns</td><td>115.943 ns</td><td>17,009.05 ns</td><td>6.5918</td><td>0.4883</td><td>-</td><td>55197 B</td>
-</tr><tr><td>Calculate_NCalc</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>200.94 ns</td><td>3.913 ns</td><td>5.485 ns</td><td>198.64 ns</td><td>0.1223</td><td>-</td><td>-</td><td>1024 B</td>
-</tr><tr><td>Calculate_NCalc</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>193.52 ns</td><td>0.685 ns</td><td>0.572 ns</td><td>193.41 ns</td><td>0.1194</td><td>-</td><td>-</td><td>1000 B</td>
-</tr><tr><td>Calculate_NCalc</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>194.62 ns</td><td>3.778 ns</td><td>4.199 ns</td><td>193.28 ns</td><td>0.1194</td><td>-</td><td>-</td><td>1000 B</td>
-</tr><tr><td>Calculate_NCalc</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>299.58 ns</td><td>5.858 ns</td><td>7.409 ns</td><td>298.66 ns</td><td>0.1545</td><td>-</td><td>-</td><td>1296 B</td>
-</tr><tr><td>Calculate_NCalc</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>270.12 ns</td><td>5.357 ns</td><td>7.509 ns</td><td>268.33 ns</td><td>0.1516</td><td>-</td><td>-</td><td>1272 B</td>
-</tr><tr><td>Calculate_NCalc</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>262.62 ns</td><td>5.033 ns</td><td>4.203 ns</td><td>263.09 ns</td><td>0.1488</td><td>-</td><td>-</td><td>1248 B</td>
-</tr><tr><td>Calculate_NCalc</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>1,311.52 ns</td><td>25.096 ns</td><td>24.648 ns</td><td>1,298.38 ns</td><td>0.6371</td><td>0.0019</td><td>-</td><td>5344 B</td>
-</tr><tr><td>Calculate_NCalc</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>1,050.06 ns</td><td>18.754 ns</td><td>16.625 ns</td><td>1,042.97 ns</td><td>0.5226</td><td>0.0019</td><td>-</td><td>4384 B</td>
-</tr><tr><td>Calculate_NCalc</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>1,134.95 ns</td><td>19.046 ns</td><td>17.816 ns</td><td>1,132.92 ns</td><td>0.5589</td><td>0.0019</td><td>-</td><td>4680 B</td>
-</tr><tr><td>Calculate_xFunc</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>350.66 ns</td><td>6.628 ns</td><td>6.200 ns</td><td>347.36 ns</td><td>0.0420</td><td>-</td><td>-</td><td>352 B</td>
-</tr><tr><td>Calculate_xFunc</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>350.91 ns</td><td>6.735 ns</td><td>7.486 ns</td><td>349.13 ns</td><td>0.0420</td><td>-</td><td>-</td><td>352 B</td>
-</tr><tr><td>Calculate_xFunc</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>352.38 ns</td><td>5.982 ns</td><td>5.303 ns</td><td>352.56 ns</td><td>0.0420</td><td>-</td><td>-</td><td>352 B</td>
-</tr><tr><td>Calculate_xFunc</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>590.97 ns</td><td>11.341 ns</td><td>11.139 ns</td><td>593.99 ns</td><td>0.0572</td><td>-</td><td>-</td><td>480 B</td>
-</tr><tr><td>Calculate_xFunc</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>568.56 ns</td><td>5.382 ns</td><td>4.494 ns</td><td>568.31 ns</td><td>0.0572</td><td>-</td><td>-</td><td>480 B</td>
-</tr><tr><td>Calculate_xFunc</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>573.69 ns</td><td>10.313 ns</td><td>8.051 ns</td><td>577.00 ns</td><td>0.0572</td><td>-</td><td>-</td><td>480 B</td>
-</tr><tr><td>Calculate_xFunc</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>3,029.21 ns</td><td>44.387 ns</td><td>37.065 ns</td><td>3,040.08 ns</td><td>0.2708</td><td>-</td><td>-</td><td>2272 B</td>
-</tr><tr><td>Calculate_xFunc</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>2,542.58 ns</td><td>50.810 ns</td><td>49.902 ns</td><td>2,526.11 ns</td><td>0.2251</td><td>-</td><td>-</td><td>1888 B</td>
-</tr><tr><td>Calculate_xFunc</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>2,701.08 ns</td><td>49.944 ns</td><td>44.274 ns</td><td>2,694.07 ns</td><td>0.2403</td><td>-</td><td>-</td><td>2016 B</td>
-</tr><tr><td>Calculate_ExprTk</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>34,532.84 ns</td><td>545.643 ns</td><td>510.395 ns</td><td>34,723.01 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_ExprTk</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>34,398.14 ns</td><td>640.262 ns</td><td>711.649 ns</td><td>34,315.12 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_ExprTk</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>34,116.07 ns</td><td>552.838 ns</td><td>517.125 ns</td><td>33,923.76 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_ExprTk</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>34,710.02 ns</td><td>213.337 ns</td><td>189.117 ns</td><td>34,782.14 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_ExprTk</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>34,841.45 ns</td><td>528.165 ns</td><td>518.729 ns</td><td>34,610.28 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_ExprTk</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>34,847.98 ns</td><td>334.533 ns</td><td>296.555 ns</td><td>34,813.16 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_ExprTk</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>45,242.95 ns</td><td>205.607 ns</td><td>182.266 ns</td><td>45,311.04 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_ExprTk</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>43,314.55 ns</td><td>309.746 ns</td><td>274.582 ns</td><td>43,300.88 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
-</tr><tr><td>Calculate_ExprTk</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>44,266.54 ns</td><td>345.993 ns</td><td>306.714 ns</td><td>44,361.03 ns</td><td>-</td><td>-</td><td>-</td><td>-</td>
+</thead><tbody><tr><td>Calculate_FormulaCalculator</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>14.21 ns</td><td>0.294 ns</td><td>0.260 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_FormulaCalculator</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>14.27 ns</td><td>0.072 ns</td><td>0.067 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_FormulaCalculator</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>14.29 ns</td><td>0.310 ns</td><td>0.319 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_FormulaCalculator</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>29.21 ns</td><td>0.480 ns</td><td>0.449 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_FormulaCalculator</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>28.18 ns</td><td>0.302 ns</td><td>0.268 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_FormulaCalculator</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>25.65 ns</td><td>0.506 ns</td><td>0.497 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_FormulaCalculator</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>159.21 ns</td><td>3.113 ns</td><td>3.937 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_FormulaCalculator</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>125.71 ns</td><td>1.785 ns</td><td>1.582 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_FormulaCalculator</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>141.49 ns</td><td>2.693 ns</td><td>2.645 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_ClosedXml</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>840.02 ns</td><td>10.464 ns</td><td>9.788 ns</td><td>0.2050</td><td>-</td><td>1720 B</td>
+</tr><tr><td>Calculate_ClosedXml</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>876.03 ns</td><td>12.693 ns</td><td>11.873 ns</td><td>0.2041</td><td>-</td><td>1720 B</td>
+</tr><tr><td>Calculate_ClosedXml</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>853.12 ns</td><td>16.397 ns</td><td>13.693 ns</td><td>0.2050</td><td>-</td><td>1720 B</td>
+</tr><tr><td>Calculate_ClosedXml</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>1,114.07 ns</td><td>5.264 ns</td><td>4.924 ns</td><td>0.2403</td><td>-</td><td>2016 B</td>
+</tr><tr><td>Calculate_ClosedXml</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>1,119.17 ns</td><td>3.837 ns</td><td>3.589 ns</td><td>0.2403</td><td>0.0019</td><td>2016 B</td>
+</tr><tr><td>Calculate_ClosedXml</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>1,124.61 ns</td><td>6.029 ns</td><td>5.345 ns</td><td>0.2403</td><td>-</td><td>2016 B</td>
+</tr><tr><td>Calculate_ClosedXml</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>3,885.53 ns</td><td>6.675 ns</td><td>5.917 ns</td><td>0.5112</td><td>-</td><td>4336 B</td>
+</tr><tr><td>Calculate_ClosedXml</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>3,514.76 ns</td><td>22.778 ns</td><td>21.306 ns</td><td>0.4883</td><td>-</td><td>4096 B</td>
+</tr><tr><td>Calculate_ClosedXml</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>3,721.01 ns</td><td>14.763 ns</td><td>13.087 ns</td><td>0.4959</td><td>-</td><td>4176 B</td>
+</tr><tr><td>Calculate_DataTable</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>390.18 ns</td><td>4.570 ns</td><td>4.275 ns</td><td>0.3133</td><td>0.0005</td><td>2624 B</td>
+</tr><tr><td>Calculate_DataTable</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>419.08 ns</td><td>4.351 ns</td><td>3.857 ns</td><td>0.3152</td><td>0.0005</td><td>2640 B</td>
+</tr><tr><td>Calculate_DataTable</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>396.95 ns</td><td>6.490 ns</td><td>6.071 ns</td><td>0.3152</td><td>0.0005</td><td>2640 B</td>
+</tr><tr><td>Calculate_DataTable</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>577.48 ns</td><td>4.733 ns</td><td>4.427 ns</td><td>0.3548</td><td>-</td><td>2992 B</td>
+</tr><tr><td>Calculate_DataTable</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>606.75 ns</td><td>3.901 ns</td><td>3.649 ns</td><td>0.3586</td><td>-</td><td>3000 B</td>
+</tr><tr><td>Calculate_DataTable</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>642.07 ns</td><td>3.529 ns</td><td>3.301 ns</td><td>0.3586</td><td>-</td><td>3016 B</td>
+</tr><tr><td>Calculate_DataTable</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>2,444.56 ns</td><td>14.479 ns</td><td>13.544 ns</td><td>0.8011</td><td>0.0038</td><td>6704 B</td>
+</tr><tr><td>Calculate_DataTable</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>2,304.38 ns</td><td>18.936 ns</td><td>17.713 ns</td><td>0.7324</td><td>-</td><td>6152 B</td>
+</tr><tr><td>Calculate_DataTable</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>2,394.17 ns</td><td>13.074 ns</td><td>12.229 ns</td><td>0.7477</td><td>-</td><td>6344 B</td>
+</tr><tr><td>Calculate_IronPython</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>10,419.76 ns</td><td>179.299 ns</td><td>167.716 ns</td><td>5.0964</td><td>0.4578</td><td>42683 B</td>
+</tr><tr><td>Calculate_IronPython</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>10,165.54 ns</td><td>117.421 ns</td><td>104.090 ns</td><td>5.1117</td><td>0.3815</td><td>42836 B</td>
+</tr><tr><td>Calculate_IronPython</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>10,040.54 ns</td><td>90.909 ns</td><td>80.588 ns</td><td>5.1117</td><td>0.3967</td><td>42828 B</td>
+</tr><tr><td>Calculate_IronPython</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>10,629.35 ns</td><td>69.152 ns</td><td>61.301 ns</td><td>5.1270</td><td>0.3662</td><td>43108 B</td>
+</tr><tr><td>Calculate_IronPython</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>10,064.47 ns</td><td>107.696 ns</td><td>100.739 ns</td><td>5.0049</td><td>0.4272</td><td>42044 B</td>
+</tr><tr><td>Calculate_IronPython</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>10,549.71 ns</td><td>84.904 ns</td><td>79.420 ns</td><td>5.1727</td><td>0.3815</td><td>43284 B</td>
+</tr><tr><td>Calculate_IronPython</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>18,736.42 ns</td><td>125.046 ns</td><td>110.850 ns</td><td>6.8359</td><td>0.4883</td><td>57486 B</td>
+</tr><tr><td>Calculate_IronPython</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>17,140.62 ns</td><td>130.215 ns</td><td>101.663 ns</td><td>6.4697</td><td>0.4883</td><td>54845 B</td>
+</tr><tr><td>Calculate_IronPython</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>17,525.94 ns</td><td>106.950 ns</td><td>100.041 ns</td><td>6.5918</td><td>0.4883</td><td>55197 B</td>
+</tr><tr><td>Calculate_NCalc</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>201.49 ns</td><td>2.103 ns</td><td>1.967 ns</td><td>0.1223</td><td>-</td><td>1024 B</td>
+</tr><tr><td>Calculate_NCalc</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>190.76 ns</td><td>0.801 ns</td><td>0.749 ns</td><td>0.1194</td><td>-</td><td>1000 B</td>
+</tr><tr><td>Calculate_NCalc</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>189.57 ns</td><td>0.825 ns</td><td>0.731 ns</td><td>0.1194</td><td>-</td><td>1000 B</td>
+</tr><tr><td>Calculate_NCalc</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>270.29 ns</td><td>1.379 ns</td><td>1.290 ns</td><td>0.1545</td><td>-</td><td>1296 B</td>
+</tr><tr><td>Calculate_NCalc</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>260.37 ns</td><td>1.138 ns</td><td>1.065 ns</td><td>0.1516</td><td>-</td><td>1272 B</td>
+</tr><tr><td>Calculate_NCalc</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>245.89 ns</td><td>0.841 ns</td><td>0.746 ns</td><td>0.1488</td><td>-</td><td>1248 B</td>
+</tr><tr><td>Calculate_NCalc</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>1,286.80 ns</td><td>4.075 ns</td><td>3.612 ns</td><td>0.6371</td><td>0.0019</td><td>5344 B</td>
+</tr><tr><td>Calculate_NCalc</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>1,137.75 ns</td><td>1.263 ns</td><td>1.120 ns</td><td>0.5226</td><td>0.0019</td><td>4384 B</td>
+</tr><tr><td>Calculate_NCalc</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>1,095.91 ns</td><td>1.877 ns</td><td>1.756 ns</td><td>0.5589</td><td>0.0019</td><td>4680 B</td>
+</tr><tr><td>Calculate_xFunc</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>341.39 ns</td><td>1.310 ns</td><td>1.226 ns</td><td>0.0420</td><td>-</td><td>352 B</td>
+</tr><tr><td>Calculate_xFunc</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>341.81 ns</td><td>1.557 ns</td><td>1.456 ns</td><td>0.0420</td><td>-</td><td>352 B</td>
+</tr><tr><td>Calculate_xFunc</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>342.83 ns</td><td>0.801 ns</td><td>0.710 ns</td><td>0.0420</td><td>-</td><td>352 B</td>
+</tr><tr><td>Calculate_xFunc</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>568.09 ns</td><td>2.037 ns</td><td>1.805 ns</td><td>0.0572</td><td>-</td><td>480 B</td>
+</tr><tr><td>Calculate_xFunc</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>575.56 ns</td><td>3.808 ns</td><td>3.375 ns</td><td>0.0572</td><td>-</td><td>480 B</td>
+</tr><tr><td>Calculate_xFunc</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>558.64 ns</td><td>1.087 ns</td><td>0.908 ns</td><td>0.0572</td><td>-</td><td>480 B</td>
+</tr><tr><td>Calculate_xFunc</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>2,932.22 ns</td><td>6.443 ns</td><td>6.027 ns</td><td>0.2708</td><td>-</td><td>2272 B</td>
+</tr><tr><td>Calculate_xFunc</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>2,509.77 ns</td><td>5.845 ns</td><td>4.881 ns</td><td>0.2251</td><td>-</td><td>1888 B</td>
+</tr><tr><td>Calculate_xFunc</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>2,653.66 ns</td><td>8.056 ns</td><td>7.535 ns</td><td>0.2403</td><td>-</td><td>2016 B</td>
+</tr><tr><td>Calculate_ExprTk</td><td>Len08_A</td><td>Len08_A</td><td>8</td><td>41,457.57 ns</td><td>584.448 ns</td><td>546.693 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_ExprTk</td><td>Len08_B</td><td>Len08_B</td><td>9</td><td>42,847.31 ns</td><td>833.751 ns</td><td>779.891 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_ExprTk</td><td>Len08_C</td><td>Len08_C</td><td>9</td><td>45,267.98 ns</td><td>191.078 ns</td><td>178.734 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_ExprTk</td><td>Len16_A</td><td>Len16_A</td><td>16</td><td>42,323.03 ns</td><td>773.344 ns</td><td>723.386 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_ExprTk</td><td>Len16_B</td><td>Len16_B</td><td>16</td><td>45,434.93 ns</td><td>274.418 ns</td><td>243.264 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_ExprTk</td><td>Len16_C</td><td>Len16_C</td><td>17</td><td>49,734.07 ns</td><td>202.675 ns</td><td>179.666 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_ExprTk</td><td>Len64_A</td><td>Len64_A</td><td>64</td><td>69,381.37 ns</td><td>478.763 ns</td><td>447.835 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_ExprTk</td><td>Len64_B</td><td>Len64_B</td><td>65</td><td>64,574.17 ns</td><td>786.426 ns</td><td>656.701 ns</td><td>-</td><td>-</td><td>-</td>
+</tr><tr><td>Calculate_ExprTk</td><td>Len64_C</td><td>Len64_C</td><td>67</td><td>66,630.75 ns</td><td>823.367 ns</td><td>770.178 ns</td><td>-</td><td>-</td><td>-</td>
 </tr></tbody></table>
 </body>
 </html>
