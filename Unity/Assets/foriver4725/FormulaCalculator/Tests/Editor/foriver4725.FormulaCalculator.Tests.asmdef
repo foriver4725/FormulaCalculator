@@ -1,9 +1,7 @@
 {
     "name": "foriver4725.FormulaCalculator.Tests",
     "rootNamespace": "foriver4725.FormulaCalculator.Tests",
-    "references": [
-        "GUID:a4cb212d1f51149a3ab023f4971b7e0a"
-    ],
+    "references": [],
     "includePlatforms": [
         "Editor"
     ],
@@ -11,6 +9,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
+        "FormulaCalculator.dll",
         "nunit.framework.dll"
     ],
     "autoReferenced": false,
