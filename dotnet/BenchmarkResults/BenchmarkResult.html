@@ -2,7 +2,7 @@
 <html lang='en'>
 <head>
 <meta charset='utf-8' />
-<title>foriver4725.FormulaCalculator.Benchmarks.Benchmarks-20260531-012159</title>
+<title>foriver4725.FormulaCalculator.Benchmarks.Benchmarks-20261004-000212</title>
 
 <style type="text/css">
 	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
@@ -13,7 +13,7 @@
 </head>
 <body>
 <pre><code>
-BenchmarkDotNet v0.15.8, macOS Tahoe 26.5 (25F71) [Darwin 25.5.0]
+BenchmarkDotNet v0.15.8, macOS 27.0.1 (26A434) [Darwin 27.0.0]
 Apple M3, 1 CPU, 8 logical and 8 physical cores
 .NET SDK 10.0.102
   [Host]     : .NET 8.0.10 (8.0.10, 8.0.1024.46610), Arm64 RyuJIT armv8.0-a
@@ -24,33 +24,33 @@ Apple M3, 1 CPU, 8 logical and 8 physical cores
 <table>
 <thead><tr><th>Method                 </th><th>Input         </th><th>Case          </th><th>Char Count</th><th>Mean</th><th>Error</th><th>StdDev</th><th>Allocated</th>
 </tr>
-</thead><tbody><tr><td>Calculate</td><td>Len08_Mod_Pow</td><td>Len08_Mod_Pow</td><td>7</td><td>33.252 ns</td><td>0.5347 ns</td><td>0.4465 ns</td><td>-</td>
-</tr><tr><td>Calculate</td><td>Len08_Decimal_AddMul</td><td>Len08_Decimal_AddMul</td><td>8</td><td>17.841 ns</td><td>0.3593 ns</td><td>0.3689 ns</td><td>-</td>
-</tr><tr><td>Calculate</td><td>Len08_Whitespace</td><td>Len08_Whitespace</td><td>8</td><td>19.005 ns</td><td>0.0526 ns</td><td>0.0439 ns</td><td>-</td>
-</tr><tr><td>Calculate</td><td>Len16_Mod_Decimal</td><td>Len16_Mod_Decimal</td><td>14</td><td>40.973 ns</td><td>0.2759 ns</td><td>0.2446 ns</td><td>-</td>
-</tr><tr><td>Calculate</td><td>Len16_Pow_Decimal</td><td>Len16_Pow_Decimal</td><td>15</td><td>38.453 ns</td><td>0.2866 ns</td><td>0.2681 ns</td><td>-</td>
-</tr><tr><td>Calculate</td><td>Len16_Whitespace</td><td>Len16_Whitespace</td><td>15</td><td>39.978 ns</td><td>0.6000 ns</td><td>0.4685 ns</td><td>-</td>
-</tr><tr><td>Calculate</td><td>Len64_Mixed_02</td><td>Len64_Mixed_02</td><td>57</td><td>170.588 ns</td><td>1.7754 ns</td><td>1.5738 ns</td><td>-</td>
-</tr><tr><td>Calculate</td><td>Len64_Mixed_03</td><td>Len64_Mixed_03</td><td>57</td><td>145.722 ns</td><td>2.0217 ns</td><td>1.7922 ns</td><td>-</td>
-</tr><tr><td>Calculate</td><td>Len64_Mixed_01</td><td>Len64_Mixed_01</td><td>64</td><td>200.181 ns</td><td>3.7449 ns</td><td>3.5029 ns</td><td>-</td>
-</tr><tr><td>IsValidFormula</td><td>Len08_Mod_Pow</td><td>Len08_Mod_Pow</td><td>7</td><td>11.820 ns</td><td>0.1849 ns</td><td>0.1639 ns</td><td>-</td>
-</tr><tr><td>IsValidFormula</td><td>Len08_Decimal_AddMul</td><td>Len08_Decimal_AddMul</td><td>8</td><td>7.236 ns</td><td>0.0219 ns</td><td>0.0194 ns</td><td>-</td>
-</tr><tr><td>IsValidFormula</td><td>Len08_Whitespace</td><td>Len08_Whitespace</td><td>8</td><td>9.399 ns</td><td>0.0280 ns</td><td>0.0249 ns</td><td>-</td>
-</tr><tr><td>IsValidFormula</td><td>Len16_Mod_Decimal</td><td>Len16_Mod_Decimal</td><td>14</td><td>19.864 ns</td><td>0.0496 ns</td><td>0.0387 ns</td><td>-</td>
-</tr><tr><td>IsValidFormula</td><td>Len16_Pow_Decimal</td><td>Len16_Pow_Decimal</td><td>15</td><td>18.550 ns</td><td>0.0692 ns</td><td>0.0647 ns</td><td>-</td>
-</tr><tr><td>IsValidFormula</td><td>Len16_Whitespace</td><td>Len16_Whitespace</td><td>15</td><td>20.157 ns</td><td>0.0860 ns</td><td>0.0763 ns</td><td>-</td>
-</tr><tr><td>IsValidFormula</td><td>Len64_Mixed_02</td><td>Len64_Mixed_02</td><td>57</td><td>84.507 ns</td><td>0.7267 ns</td><td>0.6068 ns</td><td>-</td>
-</tr><tr><td>IsValidFormula</td><td>Len64_Mixed_03</td><td>Len64_Mixed_03</td><td>57</td><td>81.659 ns</td><td>0.9581 ns</td><td>0.8962 ns</td><td>-</td>
-</tr><tr><td>IsValidFormula</td><td>Len64_Mixed_01</td><td>Len64_Mixed_01</td><td>64</td><td>98.666 ns</td><td>0.5266 ns</td><td>0.4668 ns</td><td>-</td>
-</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len08_Mod_Pow</td><td>Len08_Mod_Pow</td><td>7</td><td>44.732 ns</td><td>0.1811 ns</td><td>0.1694 ns</td><td>-</td>
-</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len08_Decimal_AddMul</td><td>Len08_Decimal_AddMul</td><td>8</td><td>25.210 ns</td><td>0.1623 ns</td><td>0.1439 ns</td><td>-</td>
-</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len08_Whitespace</td><td>Len08_Whitespace</td><td>8</td><td>29.158 ns</td><td>0.5911 ns</td><td>0.7037 ns</td><td>-</td>
-</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len16_Mod_Decimal</td><td>Len16_Mod_Decimal</td><td>14</td><td>62.350 ns</td><td>1.2767 ns</td><td>2.3979 ns</td><td>-</td>
-</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len16_Pow_Decimal</td><td>Len16_Pow_Decimal</td><td>15</td><td>57.650 ns</td><td>0.7354 ns</td><td>0.6519 ns</td><td>-</td>
-</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len16_Whitespace</td><td>Len16_Whitespace</td><td>15</td><td>59.610 ns</td><td>0.6384 ns</td><td>0.5331 ns</td><td>-</td>
-</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len64_Mixed_02</td><td>Len64_Mixed_02</td><td>57</td><td>262.686 ns</td><td>5.1942 ns</td><td>7.4494 ns</td><td>-</td>
-</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len64_Mixed_03</td><td>Len64_Mixed_03</td><td>57</td><td>234.512 ns</td><td>4.6677 ns</td><td>4.5843 ns</td><td>-</td>
-</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len64_Mixed_01</td><td>Len64_Mixed_01</td><td>64</td><td>313.203 ns</td><td>6.0734 ns</td><td>6.9942 ns</td><td>-</td>
+</thead><tbody><tr><td>Calculate</td><td>Len08_Mod_Pow</td><td>Len08_Mod_Pow</td><td>7</td><td>25.671 ns</td><td>0.3219 ns</td><td>0.2853 ns</td><td>-</td>
+</tr><tr><td>Calculate</td><td>Len08_Decimal_AddMul</td><td>Len08_Decimal_AddMul</td><td>8</td><td>14.917 ns</td><td>0.1458 ns</td><td>0.1292 ns</td><td>-</td>
+</tr><tr><td>Calculate</td><td>Len08_Whitespace</td><td>Len08_Whitespace</td><td>8</td><td>16.053 ns</td><td>0.0249 ns</td><td>0.0221 ns</td><td>-</td>
+</tr><tr><td>Calculate</td><td>Len16_Mod_Decimal</td><td>Len16_Mod_Decimal</td><td>14</td><td>40.061 ns</td><td>0.1629 ns</td><td>0.1524 ns</td><td>-</td>
+</tr><tr><td>Calculate</td><td>Len16_Pow_Decimal</td><td>Len16_Pow_Decimal</td><td>15</td><td>31.930 ns</td><td>0.3934 ns</td><td>0.3285 ns</td><td>-</td>
+</tr><tr><td>Calculate</td><td>Len16_Whitespace</td><td>Len16_Whitespace</td><td>15</td><td>35.275 ns</td><td>0.5241 ns</td><td>0.4646 ns</td><td>-</td>
+</tr><tr><td>Calculate</td><td>Len64_Mixed_02</td><td>Len64_Mixed_02</td><td>57</td><td>164.178 ns</td><td>3.2034 ns</td><td>3.6890 ns</td><td>-</td>
+</tr><tr><td>Calculate</td><td>Len64_Mixed_03</td><td>Len64_Mixed_03</td><td>57</td><td>132.367 ns</td><td>0.8327 ns</td><td>0.7789 ns</td><td>-</td>
+</tr><tr><td>Calculate</td><td>Len64_Mixed_01</td><td>Len64_Mixed_01</td><td>64</td><td>181.325 ns</td><td>3.5479 ns</td><td>3.1451 ns</td><td>-</td>
+</tr><tr><td>IsValidFormula</td><td>Len08_Mod_Pow</td><td>Len08_Mod_Pow</td><td>7</td><td>11.670 ns</td><td>0.0525 ns</td><td>0.0491 ns</td><td>-</td>
+</tr><tr><td>IsValidFormula</td><td>Len08_Decimal_AddMul</td><td>Len08_Decimal_AddMul</td><td>8</td><td>7.214 ns</td><td>0.0315 ns</td><td>0.0263 ns</td><td>-</td>
+</tr><tr><td>IsValidFormula</td><td>Len08_Whitespace</td><td>Len08_Whitespace</td><td>8</td><td>9.445 ns</td><td>0.0956 ns</td><td>0.0847 ns</td><td>-</td>
+</tr><tr><td>IsValidFormula</td><td>Len16_Mod_Decimal</td><td>Len16_Mod_Decimal</td><td>14</td><td>20.376 ns</td><td>0.3388 ns</td><td>0.2829 ns</td><td>-</td>
+</tr><tr><td>IsValidFormula</td><td>Len16_Pow_Decimal</td><td>Len16_Pow_Decimal</td><td>15</td><td>19.144 ns</td><td>0.3879 ns</td><td>0.3629 ns</td><td>-</td>
+</tr><tr><td>IsValidFormula</td><td>Len16_Whitespace</td><td>Len16_Whitespace</td><td>15</td><td>20.390 ns</td><td>0.3468 ns</td><td>0.3074 ns</td><td>-</td>
+</tr><tr><td>IsValidFormula</td><td>Len64_Mixed_02</td><td>Len64_Mixed_02</td><td>57</td><td>86.924 ns</td><td>1.5002 ns</td><td>2.2454 ns</td><td>-</td>
+</tr><tr><td>IsValidFormula</td><td>Len64_Mixed_03</td><td>Len64_Mixed_03</td><td>57</td><td>81.124 ns</td><td>0.7950 ns</td><td>0.7047 ns</td><td>-</td>
+</tr><tr><td>IsValidFormula</td><td>Len64_Mixed_01</td><td>Len64_Mixed_01</td><td>64</td><td>98.536 ns</td><td>0.2344 ns</td><td>0.1830 ns</td><td>-</td>
+</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len08_Mod_Pow</td><td>Len08_Mod_Pow</td><td>7</td><td>38.090 ns</td><td>0.2295 ns</td><td>0.2034 ns</td><td>-</td>
+</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len08_Decimal_AddMul</td><td>Len08_Decimal_AddMul</td><td>8</td><td>21.836 ns</td><td>0.1106 ns</td><td>0.0924 ns</td><td>-</td>
+</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len08_Whitespace</td><td>Len08_Whitespace</td><td>8</td><td>26.082 ns</td><td>0.4000 ns</td><td>0.3546 ns</td><td>-</td>
+</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len16_Mod_Decimal</td><td>Len16_Mod_Decimal</td><td>14</td><td>57.646 ns</td><td>0.4676 ns</td><td>0.4145 ns</td><td>-</td>
+</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len16_Pow_Decimal</td><td>Len16_Pow_Decimal</td><td>15</td><td>52.581 ns</td><td>1.0335 ns</td><td>0.8630 ns</td><td>-</td>
+</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len16_Whitespace</td><td>Len16_Whitespace</td><td>15</td><td>56.113 ns</td><td>0.7693 ns</td><td>0.6424 ns</td><td>-</td>
+</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len64_Mixed_02</td><td>Len64_Mixed_02</td><td>57</td><td>247.505 ns</td><td>3.4558 ns</td><td>3.2325 ns</td><td>-</td>
+</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len64_Mixed_03</td><td>Len64_Mixed_03</td><td>57</td><td>215.421 ns</td><td>4.1510 ns</td><td>5.0978 ns</td><td>-</td>
+</tr><tr><td>Calculate_With_IsValidFormula</td><td>Len64_Mixed_01</td><td>Len64_Mixed_01</td><td>64</td><td>288.428 ns</td><td>5.7067 ns</td><td>7.2172 ns</td><td>-</td>
 </tr></tbody></table>
 </body>
 </html>
